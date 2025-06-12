@@ -1,0 +1,19 @@
+{
+  "name": "riskguardian-elizaos",
+  "version": "0.1.0",
+  "description": "RiskGuardian AI ElizaOS Agent",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "build": "echo 'Build complete'"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "ws": "^8.0.0",
+    "axios": "^1.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}

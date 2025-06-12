@@ -1,0 +1,438 @@
+# =============================================================================
+# .gitignore - RiskGuardian AI
+# =============================================================================
+
+# =============================================================================
+# ENVIRONMENT & SECRETS
+# =============================================================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# API Keys & Secrets
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+.secrets/
+
+# Wallets & Private Keys
+wallets/
+*.wallet
+mnemonic.txt
+seed.txt
+
+# =============================================================================
+# OPERATING SYSTEMS
+# =============================================================================
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.dmg
+*.pkg
+*.app
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.tmp
+*.temp
+~$*
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# NODE.JS & NPM
+# =============================================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Package managers
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# npm cache
+.npm
+.eslintcache
+.stylelintcache
+
+# Optional npm cache directory
+.npm/
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# =============================================================================
+# NEXT.JS
+# =============================================================================
+.next/
+out/
+build/
+dist/
+
+# Next.js build output
+.next
+
+# Vercel
+.vercel
+
+# =============================================================================
+# REACT & FRONTEND
+# =============================================================================
+/build
+/dist
+/public/build
+
+# Storybook build outputs
+storybook-static/
+
+# Bundle analyzer
+.bundlestats.html
+.bundlestats.json
+
+# =============================================================================
+# DOCKER
+# =============================================================================
+# Docker volumes
+**/docker-volumes/
+docker-compose.override.yml
+docker-compose.override.yaml
+
+# Docker build cache
+.dockerignore.bak
+
+# =============================================================================
+# BLOCKCHAIN & WEB3
+# =============================================================================
+
+# Foundry
+out/
+cache/
+broadcast/
+deployments/
+
+# Hardhat
+cache/
+artifacts/
+typechain/
+typechain-types/
+
+# Smart contract compilation
+contracts/artifacts/
+contracts/cache/
+contracts/typechain/
+
+# Chromia
+chromia/data/
+chromia/logs/
+chromia/.postchain/
+
+# Local blockchain data
+blockchain-data/
+geth/
+anvil-data/
+
+# =============================================================================
+# DATABASES
+# =============================================================================
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# PostgreSQL
+*.psql
+pg_log/
+
+# Redis dumps
+dump.rdb
+*.rdb
+
+# Database backups
+*.sql
+*.dump
+backups/
+
+# =============================================================================
+# LOGS
+# =============================================================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+.nyc_output
+
+# =============================================================================
+# IDEs & EDITORS
+# =============================================================================
+
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# WebStorm
+.idea/
+*.swp
+*.swo
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*~
+*.swp
+*.swo
+.vimrc.local
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Eclipse
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
+
+# =============================================================================
+# TESTING
+# =============================================================================
+coverage/
+.nyc_output/
+test-results/
+test-reports/
+junit.xml
+
+# Jest
+jest-coverage/
+
+# Playwright
+test-results/
+playwright-report/
+playwright/.cache/
+
+# =============================================================================
+# BUILD TOOLS & DEPENDENCIES
+# =============================================================================
+
+# Webpack
+.webpack/
+
+# Rollup
+.rollup.cache/
+
+# Parcel
+.cache/
+.parcel-cache/
+
+# Turbo
+.turbo/
+
+# =============================================================================
+# TEMPORARY FILES
+# =============================================================================
+*.tmp
+*.temp
+temp/
+tmp/
+
+# =============================================================================
+# AI & ML
+# =============================================================================
+
+# Model files
+*.model
+*.pkl
+*.h5
+*.onnx
+models/
+checkpoints/
+
+# Training data
+training-data/
+datasets/
+
+# =============================================================================
+# DOCUMENTATION
+# =============================================================================
+
+# Generated docs
+docs/build/
+docs/dist/
+
+# =============================================================================
+# MONITORING & ANALYTICS
+# =============================================================================
+
+# Sentry
+.sentryclirc
+
+# =============================================================================
+# CERTIFICATES & SSL
+# =============================================================================
+*.crt
+*.csr
+*.key
+*.pem
+*.p7b
+*.p7c
+*.pfx
+ssl/
+certs/
+
+# =============================================================================
+# BACKUP FILES
+# =============================================================================
+*.bak
+*.backup
+*.old
+*.orig
+*~
+
+# =============================================================================
+# COMPRESSED FILES
+# =============================================================================
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# =============================================================================
+# PROJECT SPECIFIC
+# =============================================================================
+
+# Risk analysis data
+risk-data/
+portfolio-snapshots/
+analysis-results/
+
+# ElizaOS specific
+elizaos-agent/data/
+elizaos-agent/logs/
+elizaos-agent/.cache/
+
+# Local development overrides
+docker-compose.local.yml
+.env.override
+
+# Build artifacts
+artifacts/
+releases/
+
+# Temporary scripts
+scripts/temp/
+temp-scripts/
+
+# Local config overrides
+config.local.json
+settings.local.json
+
+# =============================================================================
+# OPTIONAL: COMMENTS FOR TEAM
+# =============================================================================
+
+# Uncomment below if you want to ignore specific files
+# config/production.json
+# scripts/deploy-prod.sh
+
+# Add your custom ignores below this line
+# =============================================================================
+# CUSTOM IGNORES
+# =============================================================================
+
+# Adicionar ao final do .gitignore:
+
+# === DOCKER SPECIFIC ===
+docker-compose.override.yml
+docker-compose.local.yml
+.docker/
+**/Dockerfile.local
+
+# === BUILD ARTIFACTS ===
+**/dist/
+**/build/
+**/.next/
+**/out/
+
+# === VOLUMES DATA (if local) ===
+postgres_data/
+chromia_data/
+redis_data/
+pgadmin_data/
+
+# === IDE SPECIFIC ===
+.vscode/settings.json
+.idea/
+
+# === OS SPECIFIC ===
+**/.DS_Store
+**/Thumbs.db

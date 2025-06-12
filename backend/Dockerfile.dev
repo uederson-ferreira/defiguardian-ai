@@ -1,0 +1,23 @@
+# backend/Dockerfile.dev
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apk add --no-cache python3 make g++
+
+# Install dependencies
+COPY package*.json ./
+RUN npm ci
+
+# Install development tools
+RUN npm install -g nodemon
+
+# Copy source code
+COPY . .
+
+# Expose port
+EXPOSE 8000
+
+# Development command with hot reload
+CMD ["npm", "run", "dev"] 
