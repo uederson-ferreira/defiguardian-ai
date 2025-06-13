@@ -1,0 +1,44 @@
+# Labels e Milestones da Fase 2 (Sprints 9–13)
+
+# Sprint 9 – Epic: Deploy e Operação em Produção
+gh label create "Epic: Deploy e Operação em Produção" --color c2e0c6 --description "Epic para Infra e CI/CD produção"
+gh label create "Sprint 9"                          --color 5319e7 --description "Sprint 9 tasks"
+gh label create terraform                          --color 623ce4 --description "Infra as Code com Terraform"
+gh label create cicd                               --color 0a0a0a --description "Pipeline de CI/CD"
+gh label create monitoring                         --color 1e8feb --description "Monitoramento e dashboards"
+gh label create alertas                            --color f9d0c4 --description "Alertas e notificações"
+
+# Sprint 10 – Epic: Segurança & Governança
+gh label create "Epic: Segurança & Governança"     --color c2e0c6 --description "Epic para segurança e governança"
+gh label create "Sprint 10"                        --color 5319e7 --description "Sprint 10 tasks"
+gh label create security                           --color d73a4a --description "Tarefas de segurança e auditoria"
+gh label create smart-contracts                    --color 0e8a16 --description "Tarefas de smart contracts"
+
+# Sprint 11 – Epic: Multi-Chain & Oráculos Avançados
+gh label create "Epic: Multi-Chain & Oráculos Avançados" --color c2e0c6 --description "Epic para multi-chain e oráculos avançados"
+gh label create "Sprint 11"                              --color 5319e7 --description "Sprint 11 tasks"
+gh label create multi-chain                              --color 1d76db --description "Integração com múltiplas blockchains"
+gh label create flux-monitor                             --color 0e76a8 --description "Configuração de Flux Monitor da Chainlink"
+gh label create any-api                                  --color 229dff --description "Uso de Chainlink Any API"
+
+# Sprint 12 – Epic: Estratégias de Hedge Avançadas
+gh label create "Epic: Estratégias de Hedge Avançadas"  --color c2e0c6 --description "Epic para estratégias de hedge avançadas"
+gh label create "Sprint 12"                             --color 5319e7 --description "Sprint 12 tasks"
+gh label create hedging                                 --color f9d0c4 --description "Tarefas de estratégias de hedge"
+gh label create backtesting                             --color 0e8a16 --description "Tarefas de simulações e backtests"
+gh label create dashboard                               --color 1f8ceb --description "Tarefas de UI de dashboard"
+
+# Sprint 13 – Epic: Experiência do Usuário & Mobile
+gh label create "Epic: Experiência do Usuário & Mobile" --color c2e0c6 --description "Epic para UX e mobile"
+gh label create "Sprint 13"                             --color 5319e7 --description "Sprint 13 tasks"
+gh label create notifications                           --color 0e76a8 --description "Notificações em tempo real"
+gh label create pwa                                     --color 0db7ed --description "Configuração PWA/Service Worker"
+gh label create dark-mode                               --color 0d3b66 --description "Tema escuro"
+gh label create i18n                                    --color 229dff --description "Internacionalização"
+
+# Milestones Sprints 9–13
+gh api repos/uederson-ferreira/riskguardian-ai/milestones -f title="Sprint 9"  -f due_on="2025-07-02T00:00:00Z"
+gh api repos/uederson-ferreira/riskguardian-ai/milestones -f title="Sprint 10" -f due_on="2025-07-04T00:00:00Z"
+gh api repos/uederson-ferreira/riskguardian-ai/milestones -f title="Sprint 11" -f due_on="2025-07-06T00:00:00Z"
+gh api repos/uederson-ferreira/riskguardian-ai/milestones -f title="Sprint 12" -f due_on="2025-07-08T00:00:00Z"
+gh api repos/uederson-ferreira/riskguardian-ai/milestones -f title="Sprint 13" -f due_on="2025-07-10T00:00:00Z"

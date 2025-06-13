@@ -1,0 +1,57 @@
+# Labels da Fase 1 (Sprints 1–8)
+gh label create devops                          --color d73a4a --description "Infra DevOps tasks"
+gh label create docker                          --color 0db7ed --description "Docker containerization"
+gh label create docker-compose                  --color 384d54 --description "Docker Compose configuration"
+gh label create automation                      --color 006b75 --description "Automation scripts"
+gh label create "Epic: Configuração Inicial"    --color bfe5bf --description "Epic para configuração inicial"
+gh label create "Sprint 1"                      --color 5319e7 --description "Sprint 1 tasks"
+
+gh label create blockchain                      --color 0052cc --description "Tarefas de blockchain"
+gh label create solidity                        --color bfdadc --description "Tarefas de desenvolvimento em Solidity"
+gh label create QA                              --color fbca04 --description "Testes e Quality Assurance"
+gh label create "Epic: Smart Contracts Core"     --color c2e0c6 --description "Epic para Core de Smart Contracts"
+gh label create "Sprint 2"                      --color 5319e7 --description "Sprint 2 tasks"
+
+gh label create backend                         --color 006b75 --description "Tarefas de backend"
+gh label create api                             --color 0075ca --description "Tarefas de API"
+gh label create documentation                   --color fdca4a --description "Tarefas de documentação"
+gh label create "Epic: Backend & APIs"          --color c2e0c6 --description "Epic para Backend & APIs"
+gh label create "Sprint 3"                      --color 5319e7 --description "Sprint 3 tasks"
+
+gh label create chainlink                       --color 2a2a72 --description "Tarefas envolvendo Chainlink"
+gh label create oracles                         --color 0db7ed --description "Tarefas de oráculos"
+gh label create "Epic: Chainlink Oracles"       --color c2e0c6 --description "Epic para Oráculos Chainlink"
+gh label create "Sprint 4"                      --color 5319e7 --description "Sprint 4 tasks"
+
+gh label create "AI/ML"                         --color 0e8a16 --description "Tarefas de IA/ML"
+gh label create machine-learning                --color d876e3 --description "Desenvolvimento de modelos ML"
+gh label create lambda                          --color f9d0c4 --description "Deploy em AWS Lambda"
+gh label create "Epic: IA/ML"                   --color c2e0c6 --description "Epic para IA/ML"
+gh label create "Sprint 5"                      --color 5319e7 --description "Sprint 5 tasks"
+
+gh label create frontend                        --color 1d76db --description "Tarefas de frontend"
+gh label create web3                            --color 229dff --description "Integração Web3"
+gh label create "Epic: Frontend MVP"            --color bfe5bf --description "Epic para Frontend MVP"
+gh label create "Sprint 6"                      --color 5319e7 --description "Sprint 6 tasks"
+
+gh label create performance                     --color efe1c2 --description "Tarefas de performance"
+gh label create ux                              --color 1f8ceb --description "Tarefas de UX/UI"
+gh label create "Epic: Testes & Ajustes"        --color c2e0c6 --description "Epic para Testes & Ajustes"
+gh label create "Sprint 7"                      --color 5319e7 --description "Sprint 7 tasks"
+
+gh label create cicd                            --color 0a0a0a --description "Pipeline de CI/CD"
+gh label create presentation                    --color f3950d --description "Roteiro e apresentação"
+gh label create deliverable                     --color 0e8a16 --description "Artefatos de entrega"
+gh label create release                         --color 5319e7 --description "Tarefas de release"
+gh label create "Epic: Demo & Polimento"        --color c2e0c6 --description "Epic para Demo & Polimento"
+gh label create "Sprint 8"                      --color 5319e7 --description "Sprint 8 tasks"
+
+# Milestones da Fase 1
+gh api repos/uederson-ferreira/riskguardian-ai/milestones -f title="Sprint 1"  -f due_on="2025-06-14T00:00:00Z"
+gh api repos/uederson-ferreira/riskguardian-ai/milestones -f title="Sprint 2"  -f due_on="2025-06-16T00:00:00Z"
+gh api repos/uederson-ferreira/riskguardian-ai/milestones -f title="Sprint 3"  -f due_on="2025-06-18T00:00:00Z"
+gh api repos/uederson-ferreira/riskguardian-ai/milestones -f title="Sprint 4"  -f due_on="2025-06-20T00:00:00Z"
+gh api repos/uederson-ferreira/riskguardian-ai/milestones -f title="Sprint 5"  -f due_on="2025-06-22T00:00:00Z"
+gh api repos/uederson-ferreira/riskguardian-ai/milestones -f title="Sprint 6"  -f due_on="2025-06-24T00:00:00Z"
+gh api repos/uederson-ferreira/riskguardian-ai/milestones -f title="Sprint 7"  -f due_on="2025-06-26T00:00:00Z"
+gh api repos/uederson-ferreira/riskguardian-ai/milestones -f title="Sprint 8"  -f due_on="2025-06-28T00:00:00Z"
