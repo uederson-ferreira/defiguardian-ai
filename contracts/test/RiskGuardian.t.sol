@@ -3,7 +3,9 @@ pragma solidity ^0.8.19;
 
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
-import "../src/RiskGuardian.sol";
+import "../src/core/RiskRegistry.sol";
+import "../src/core/PortfolioRiskAnalyzer.sol";
+import "../src/core/RiskInsurance.sol";
 
 /**
  * @title MockAggregator
