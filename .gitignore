@@ -1,10 +1,12 @@
-<<<<<<< HEAD
 # =============================================================================
-# .gitignore - RiskGuardian AI
+# 🚀 RiskGuardian AI - Complete .gitignore
+# =============================================================================
+# Comprehensive ignore rules for the entire project
+# Frontend + Backend + Smart Contracts + ElizaOS + Docker
 # =============================================================================
 
 # =============================================================================
-# ENVIRONMENT & SECRETS
+# 🔐 ENVIRONMENT & SECRETS
 # =============================================================================
 .env
 .env.local
@@ -12,6 +14,7 @@
 .env.test.local
 .env.production.local
 .env.*.local
+.env.override
 
 # API Keys & Secrets
 *.key
@@ -20,6 +23,8 @@
 *.pfx
 secrets/
 .secrets/
+config/secrets.json
+private.json
 
 # Wallets & Private Keys
 wallets/
@@ -28,7 +33,7 @@ mnemonic.txt
 seed.txt
 
 # =============================================================================
-# OPERATING SYSTEMS
+# 🗂️ OPERATING SYSTEMS
 # =============================================================================
 
 # macOS
@@ -37,11 +42,8 @@ seed.txt
 ._*
 .Spotlight-V100
 .Trashes
-ehthumbs.db
-Thumbs.db
 *.dmg
 *.pkg
-*.app
 
 # Windows
 Thumbs.db
@@ -57,8 +59,6 @@ $RECYCLE.BIN/
 *.cab
 *.msi
 *.msix
-*.msm
-*.msp
 *.lnk
 
 # Linux
@@ -69,7 +69,7 @@ $RECYCLE.BIN/
 .nfs*
 
 # =============================================================================
-# NODE.JS & NPM
+# 📦 NODE.JS & PACKAGE MANAGERS
 # =============================================================================
 node_modules/
 npm-debug.log*
@@ -78,174 +78,215 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
-# Package managers
+# Lock files (keep one per project)
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
-# npm cache
+# npm cache & logs
 .npm
 .eslintcache
 .stylelintcache
-
-# Optional npm cache directory
-.npm/
-
-# Yarn Integrity file
 .yarn-integrity
+.node_repl_history
 
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
+# Package outputs
+*.tgz
+
+# TypeScript cache
+*.tsbuildinfo
 
 # =============================================================================
-# NEXT.JS
+# ⚛️ FRONTEND (NEXT.JS)
 # =============================================================================
+# Next.js build outputs
 .next/
 out/
 build/
 dist/
 
-# Next.js build output
-.next
+# Static exports
+next-export/
 
-# Vercel
-.vercel
+# Vercel deployment
+.vercel/
 
-# =============================================================================
-# REACT & FRONTEND
-# =============================================================================
-/build
-/dist
-/public/build
-
-# Storybook build outputs
+# Storybook
 storybook-static/
 
-# Bundle analyzer
+# Bundle analysis
 .bundlestats.html
 .bundlestats.json
 
 # =============================================================================
-# DOCKER
+# 🔧 BACKEND (NODE.JS)
 # =============================================================================
-# Docker volumes
-**/docker-volumes/
+# Build outputs
+dist/
+build/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage & testing
+coverage/
+*.lcov
+.nyc_output/
+test-results/
+test-reports/
+junit.xml
+
+# Diagnostic reports
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# =============================================================================
+# ⛓️ SMART CONTRACTS (FOUNDRY)
+# =============================================================================
+# Foundry/Forge outputs
+out/
+cache/
+broadcast/
+
+# Dependencies (install via forge install)
+lib/
+
+# Build artifacts
+forge-cache/
+.forge-cache/
+
+# Test & analysis results
+test_results.log
+gas_report.log
+coverage_report.log
+validation_status.txt
+slither_results.log
+fuzz_results.log
+benchmark_results.log
+coverage_html/
+
+# Gas snapshots (optional - can be committed)
+# .gas-snapshot
+
+# Deployment artifacts (be careful with mainnet)
+deployments/mainnet/
+deployments/polygon/
+deployments/arbitrum/
+deployments/optimism/
+
+# Keep local/test deployments for reference
+# deployments/localhost/
+# deployments/anvil/
+# deployments/goerli/
+
+# Contract verification
+verify/
+etherscan/
+
+# =============================================================================
+# 🤖 ELIZAOS AGENT
+# =============================================================================
+elizaos-agent/data/
+elizaos-agent/logs/
+elizaos-agent/.cache/
+elizaos-agent/models/
+elizaos-agent/checkpoints/
+
+# AI/ML artifacts
+*.model
+*.pkl
+*.h5
+*.onnx
+training-data/
+datasets/
+
+# =============================================================================
+# 🐳 DOCKER
+# =============================================================================
+# Override files
 docker-compose.override.yml
-docker-compose.override.yaml
+docker-compose.local.yml
 
 # Docker build cache
 .dockerignore.bak
 
-# =============================================================================
-# BLOCKCHAIN & WEB3
-# =============================================================================
-
-# Foundry
-out/
-cache/
-broadcast/
-deployments/
-
-# Hardhat
-cache/
-artifacts/
-typechain/
-typechain-types/
-
-# Smart contract compilation
-contracts/artifacts/
-contracts/cache/
-contracts/typechain/
-
-# Chromia
-chromia/data/
-chromia/logs/
-chromia/.postchain/
-
-# Local blockchain data
-blockchain-data/
-geth/
-anvil-data/
+# Volume data (if stored locally)
+postgres_data/
+chromia_data/
+redis_data/
+pgadmin_data/
 
 # =============================================================================
-# DATABASES
+# 🗄️ DATABASES
 # =============================================================================
+# SQLite
 *.db
 *.sqlite
 *.sqlite3
 *.db-journal
 
-# PostgreSQL
-*.psql
-pg_log/
+# Database dumps & backups
+*.sql
+*.dump
+backups/
 
 # Redis dumps
 dump.rdb
 *.rdb
 
-# Database backups
-*.sql
-*.dump
-backups/
+# PostgreSQL
+pg_log/
 
 # =============================================================================
-# LOGS
+# 🔗 CHROMIA
+# =============================================================================
+chromia/data/
+chromia/logs/
+chromia/.postchain/
+chromia/blockchain-data/
+
+# =============================================================================
+# 📝 LOGS & MONITORING
 # =============================================================================
 logs/
-=======
-# Logs
-logs
->>>>>>> 19f601dc4cd9111fe6d3ccdf010fecff13fcbd1c
 *.log
+
+# Specific log types
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-.pnpm-debug.log*
+debug.log
+error.log
+access.log
+combined.log
 
-<<<<<<< HEAD
-# Runtime data
-pids/
-=======
-# Diagnostic reports (https://nodejs.org/api/report.html)
-report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
-
-# Runtime data
-pids
->>>>>>> 19f601dc4cd9111fe6d3ccdf010fecff13fcbd1c
-*.pid
-*.seed
-*.pid.lock
-
-<<<<<<< HEAD
-# Coverage directory used by tools like istanbul
-coverage/
-*.lcov
-.nyc_output
+# Application logs
+app.log
+server.log
+api.log
 
 # =============================================================================
-# IDEs & EDITORS
+# 💻 IDEs & EDITORS
 # =============================================================================
 
 # VSCode
 .vscode/
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
 *.code-workspace
+# Keep these if you want to share settings:
+# !.vscode/settings.json
+# !.vscode/tasks.json
+# !.vscode/launch.json
+# !.vscode/extensions.json
 
-# WebStorm
+# WebStorm/IntelliJ
 .idea/
-*.swp
-*.swo
 
 # Sublime Text
 *.sublime-project
 *.sublime-workspace
 
 # Vim
-*~
 *.swp
 *.swo
 .vimrc.local
@@ -260,40 +301,9 @@ auto-save-list
 tramp
 .\#*
 
-# Eclipse
-.metadata
-bin/
-tmp/
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-.settings/
-.loadpath
-.recommenders
-
 # =============================================================================
-# TESTING
+# 🔨 BUILD TOOLS
 # =============================================================================
-coverage/
-.nyc_output/
-test-results/
-test-reports/
-junit.xml
-
-# Jest
-jest-coverage/
-
-# Playwright
-test-results/
-playwright-report/
-playwright/.cache/
-
-# =============================================================================
-# BUILD TOOLS & DEPENDENCIES
-# =============================================================================
-
 # Webpack
 .webpack/
 
@@ -307,51 +317,37 @@ playwright/.cache/
 # Turbo
 .turbo/
 
-# =============================================================================
-# TEMPORARY FILES
-# =============================================================================
-*.tmp
-*.temp
-temp/
-tmp/
+# Vite
+.vite/
 
 # =============================================================================
-# AI & ML
+# 🧪 TESTING
 # =============================================================================
+# Jest
+jest-coverage/
 
-# Model files
-*.model
-*.pkl
-*.h5
-*.onnx
-models/
-checkpoints/
+# Playwright
+playwright-report/
+playwright/.cache/
 
-# Training data
-training-data/
-datasets/
+# Cypress
+cypress/videos/
+cypress/screenshots/
 
 # =============================================================================
-# DOCUMENTATION
+# 📊 ANALYTICS & MONITORING
 # =============================================================================
-
-# Generated docs
-docs/build/
-docs/dist/
-
-# =============================================================================
-# MONITORING & ANALYTICS
-# =============================================================================
-
 # Sentry
 .sentryclirc
 
+# New Relic
+newrelic_agent.log
+
 # =============================================================================
-# CERTIFICATES & SSL
+# 🔒 CERTIFICATES & SSL
 # =============================================================================
 *.crt
 *.csr
-*.key
 *.pem
 *.p7b
 *.p7c
@@ -360,16 +356,7 @@ ssl/
 certs/
 
 # =============================================================================
-# BACKUP FILES
-# =============================================================================
-*.bak
-*.backup
-*.old
-*.orig
-*~
-
-# =============================================================================
-# COMPRESSED FILES
+# 🗜️ ARCHIVES & BACKUPS
 # =============================================================================
 *.7z
 *.dmg
@@ -379,194 +366,77 @@ certs/
 *.rar
 *.tar
 *.zip
+*.bak
+*.backup
+*.old
+*.orig
 
 # =============================================================================
-# PROJECT SPECIFIC
+# 📈 PROJECT SPECIFIC - RISKGUARDIAN AI
 # =============================================================================
 
 # Risk analysis data
 risk-data/
 portfolio-snapshots/
 analysis-results/
+market-data/
 
-# ElizaOS specific
-elizaos-agent/data/
-elizaos-agent/logs/
-elizaos-agent/.cache/
+# Temporary development files
+temp/
+tmp/
+temporary/
 
-# Local development overrides
-docker-compose.local.yml
-.env.override
+# Local configuration overrides
+config.local.json
+settings.local.json
+
+# Development scripts
+scripts/temp/
+temp-scripts/
 
 # Build artifacts
 artifacts/
 releases/
 
-# Temporary scripts
-scripts/temp/
-temp-scripts/
-
-# Local config overrides
-config.local.json
-settings.local.json
+# Documentation builds
+docs/build/
+mkdocs-site/
 
 # =============================================================================
-# OPTIONAL: COMMENTS FOR TEAM
+# 🚫 OPTIONAL IGNORES (UNCOMMENT IF NEEDED)
 # =============================================================================
 
-# Uncomment below if you want to ignore specific files
+# Production configs (uncomment if you don't want to track these)
 # config/production.json
 # scripts/deploy-prod.sh
 
-# Add your custom ignores below this line
+# Large data files
+# *.csv
+# *.json (be careful - might ignore package.json)
+# data/
+
+# OS-specific ignores for teams
+# **/.DS_Store
+# **/Thumbs.db
+
 # =============================================================================
-# CUSTOM IGNORES
+# ✅ CUSTOM IGNORES (ADD YOUR SPECIFIC NEEDS BELOW)
 # =============================================================================
 
-# Adicionar ao final do .gitignore:
+# Add project-specific ignores here
+# example: ignore specific API response files
+# api-responses/
+# mock-data/
 
-# === DOCKER SPECIFIC ===
-docker-compose.override.yml
-docker-compose.local.yml
-.docker/
-**/Dockerfile.local
+# Development utilities
+dev-utils/
+.dev/
 
-# === BUILD ARTIFACTS ===
-**/dist/
-**/build/
-**/.next/
-**/out/
+# Personal notes (for developers)
+TODO.md
+NOTES.md
+.personal/
 
-# === VOLUMES DATA (if local) ===
-postgres_data/
-chromia_data/
-redis_data/
-pgadmin_data/
-
-# === IDE SPECIFIC ===
-.vscode/settings.json
-.idea/
-
-# === OS SPECIFIC ===
-**/.DS_Store
-**/Thumbs.db
-=======
-# Directory for instrumented libs generated by jscoverage/JSCover
-lib-cov
-
-# Coverage directory used by tools like istanbul
-coverage
-*.lcov
-
-# nyc test coverage
-.nyc_output
-
-# Grunt intermediate storage (https://gruntjs.com/creating-plugins#storing-task-files)
-.grunt
-
-# Bower dependency directory (https://bower.io/)
-bower_components
-
-# node-waf configuration
-.lock-wscript
-
-# Compiled binary addons (https://nodejs.org/api/addons.html)
-build/Release
-
-# Dependency directories
-node_modules/
-jspm_packages/
-
-# Snowpack dependency directory (https://snowpack.dev/)
-web_modules/
-
-# TypeScript cache
-*.tsbuildinfo
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Optional stylelint cache
-.stylelintcache
-
-# Microbundle cache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variable files
-.env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
-
-# parcel-bundler cache (https://parceljs.org/)
-.cache
-.parcel-cache
-
-# Next.js build output
-.next
-out
-
-# Nuxt.js build / generate output
-.nuxt
-dist
-
-# Gatsby files
-.cache/
-# Comment in the public line in if your project uses Gatsby and not Next.js
-# https://nextjs.org/blog/next-9-1#public-directory-support
-# public
-
-# vuepress build output
-.vuepress/dist
-
-# vuepress v2.x temp and cache directory
-.temp
-.cache
-
-# vitepress build output
-**/.vitepress/dist
-
-# vitepress cache directory
-**/.vitepress/cache
-
-# Docusaurus cache and generated files
-.docusaurus
-
-# Serverless directories
-.serverless/
-
-# FuseBox cache
-.fusebox/
-
-# DynamoDB Local files
-.dynamodb/
-
-# TernJS port file
-.tern-port
-
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
-
-# yarn v2
-.yarn/cache
-.yarn/unplugged
-.yarn/build-state.yml
-.yarn/install-state.gz
-.pnp.*
->>>>>>> 19f601dc4cd9111fe6d3ccdf010fecff13fcbd1c
+# =============================================================================
+# END OF .gitignore
+# =============================================================================
