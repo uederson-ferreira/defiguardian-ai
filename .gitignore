@@ -152,6 +152,7 @@ broadcast/
 
 # Dependencies (install via forge install)
 lib/
+contracts/script/extras
 
 # Build artifacts
 forge-cache/
