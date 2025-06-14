@@ -1,5 +1,16 @@
-# contracts/Dockerfile
 FROM ghcr.io/foundry-rs/foundry:latest
+
+# Create entrypoint script
+RUN mkdir -p /tmp/scripts && \
+    echo '#!/bin/sh' > /tmp/scripts/entrypoint.sh && \
+    echo 'cd /app' >> /tmp/scripts/entrypoint.sh && \
+    echo 'git config --global user.email "docker@example.com"' >> /tmp/scripts/entrypoint.sh && \
+    echo 'git config --global user.name "Docker"' >> /tmp/scripts/entrypoint.sh && \
+    echo 'git init' >> /tmp/scripts/entrypoint.sh && \
+    echo 'mkdir -p /app/out && chmod -R 777 /app/out' >> /tmp/scripts/entrypoint.sh && \
+    echo 'forge install' >> /tmp/scripts/entrypoint.sh && \
+    echo 'tail -f /dev/null' >> /tmp/scripts/entrypoint.sh && \
+    chmod +x /tmp/scripts/entrypoint.sh
 
 WORKDIR /app
 
@@ -9,8 +20,7 @@ COPY foundry.toml ./
 # Copy source code
 COPY . .
 
-# Simple health check
-EXPOSE 8080
+# Set root user
+USER root
 
-# Default command shows forge version
-CMD ["forge", "--version"]
+ENTRYPOINT ["/bin/sh", "-c", "/tmp/scripts/entrypoint.sh"]
