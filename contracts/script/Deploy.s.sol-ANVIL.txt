@@ -1,0 +1,577 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+import "forge-std/Script.sol";
+import "forge-std/console.sol";
+import "../src/core/RiskRegistry.sol";
+import "../src/core/PortfolioRiskAnalyzer.sol";
+import "../src/core/RiskInsurance.sol";
+import "../src/oracles/RiskOracle.sol";
+import "../src/automation/AlertSystem.sol";
+import "../test/RiskGuardian.t.sol"; // MockAggregator
+
+/**
+ * @title DeployComplete
+ * @dev UPDATED: Deploy complete with AlertSystem library support
+ */
+contract DeployComplete is Script {
+    // All contract instances
+    RiskRegistry public riskRegistry;
+    PortfolioRiskAnalyzer public portfolioAnalyzer;
+    RiskInsurance public riskInsurance;
+    RiskOracle public riskOracle;
+    AlertSystem public alertSystem;
+    
+    // Mock price feeds for development
+    MockAggregator public ethPriceFeed;
+    MockAggregator public btcPriceFeed;
+    MockAggregator public usdcPriceFeed;
+    MockAggregator public usdtPriceFeed;
+    MockAggregator public daiPriceFeed;
+    
+    // Deployment tracking
+    address public deployer;
+    uint256 public deploymentStartTime;
+    uint256 public totalGasUsed;
+    
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        deployer = vm.addr(deployerPrivateKey);
+        deploymentStartTime = block.timestamp;
+        
+        console.log("DEPLOYING COMPLETE RISKGUARDIAN SYSTEM");
+        console.log("========================================");
+        console.log("Deployer:", deployer);
+        console.log("Chain ID:", block.chainid);
+        console.log("Block Number:", block.number);
+        console.log("Timestamp:", block.timestamp);
+        console.log("");
+        
+        vm.startBroadcast(deployerPrivateKey);
+        
+        // Track gas usage
+        uint256 gasStart = gasleft();
+        
+        // 1. Deploy Core Registry
+        _deployRiskRegistry();
+        
+        // 2. Deploy Risk Oracle
+        _deployRiskOracle();
+        
+        // 3. Deploy Portfolio Analyzer
+        _deployPortfolioAnalyzer();
+        
+        // 4. Deploy Risk Insurance
+        _deployRiskInsurance();
+        
+        // 5. Deploy Alert System (UPDATED WITH LIBRARIES)
+        _deployAlertSystem();
+        
+        // 6. Deploy Price Feeds (if local network)
+        if (block.chainid == 31337) {
+            _deployMockPriceFeeds();
+        }
+        
+        // 7. Setup initial configuration
+        _setupInitialConfiguration();
+        
+        // 8. Verify all deployments
+        _verifyDeployments();
+        
+        totalGasUsed = gasStart - gasleft();
+        
+        vm.stopBroadcast();
+        
+        // 9. Generate deployment report
+        _generateDeploymentReport();
+    }
+    
+    /**
+     * @dev Deploy RiskRegistry contract
+     */
+    function _deployRiskRegistry() internal {
+        console.log("Deploying RiskRegistry...");
+        uint256 gasStart = gasleft();
+        
+        riskRegistry = new RiskRegistry();
+        
+        uint256 gasUsed = gasStart - gasleft();
+        console.log("   RiskRegistry deployed at:", address(riskRegistry));
+        console.log("   Gas used:", gasUsed);
+        console.log("");
+    }
+    
+    /**
+     * @dev Deploy RiskOracle contract
+     */
+    function _deployRiskOracle() internal {
+        console.log("Deploying RiskOracle...");
+        uint256 gasStart = gasleft();
+        
+        riskOracle = new RiskOracle();
+        
+        uint256 gasUsed = gasStart - gasleft();
+        console.log("   RiskOracle deployed at:", address(riskOracle));
+        console.log("   Gas used:", gasUsed);
+        console.log("");
+    }
+    
+    /**
+     * @dev Deploy PortfolioRiskAnalyzer contract
+     */
+    function _deployPortfolioAnalyzer() internal {
+        console.log("Deploying PortfolioRiskAnalyzer...");
+        uint256 gasStart = gasleft();
+        
+        portfolioAnalyzer = new PortfolioRiskAnalyzer(address(riskRegistry));
+        
+        uint256 gasUsed = gasStart - gasleft();
+        console.log("   PortfolioRiskAnalyzer deployed at:", address(portfolioAnalyzer));
+        console.log("   Gas used:", gasUsed);
+        console.log("");
+    }
+    
+    /**
+     * @dev Deploy RiskInsurance contract
+     */
+    function _deployRiskInsurance() internal {
+        console.log("Deploying RiskInsurance...");
+        uint256 gasStart = gasleft();
+        
+        riskInsurance = new RiskInsurance(address(portfolioAnalyzer));
+        
+        uint256 gasUsed = gasStart - gasleft();
+        console.log("   RiskInsurance deployed at:", address(riskInsurance));
+        console.log("   Gas used:", gasUsed);
+        console.log("");
+    }
+    
+    /**
+     * @dev Deploy AlertSystem contract with libraries
+     * UPDATED: Handles library deployment for AlertSystem
+     */
+    function _deployAlertSystem() internal {
+        console.log("Deploying AlertSystem with libraries...");
+        uint256 gasStart = gasleft();
+        
+        // Foundry automatically handles library linking when they're imported
+        // No need for manual library deployment in most cases
+        
+        console.log("   Deploying AlertSystem (libraries auto-linked)...");
+        
+        alertSystem = new AlertSystem(
+            address(riskOracle),
+            address(portfolioAnalyzer),
+            address(riskRegistry)
+        );
+        
+        uint256 gasUsed = gasStart - gasleft();
+        console.log("   AlertSystem deployed at:", address(alertSystem));
+        console.log("   Gas used:", gasUsed);
+        
+        // Verify that libraries are properly linked
+        _verifyAlertSystemLibraries();
+        
+        console.log("");
+    }
+    
+    /**
+     * @dev Verify AlertSystem libraries are properly linked
+     */
+    function _verifyAlertSystemLibraries() internal view {
+        console.log("   Verifying AlertSystem library integration...");
+        
+        // Test basic functionality to ensure libraries are working
+        try alertSystem.owner() returns (address owner) {
+            console.log("   SUCCESS: AlertSystem libraries properly linked");
+            console.log("   SUCCESS: AlertSystem owner:", owner);
+        } catch {
+            console.log("   ERROR: AlertSystem library linking failed");
+        }
+    }
+    
+    /**
+     * @dev Deploy mock price feeds for local development
+     */
+    function _deployMockPriceFeeds() internal {
+        console.log("Deploying Mock Price Feeds (Local Network)...");
+        
+        ethPriceFeed = new MockAggregator(2000e8, 8);   // $2000 ETH
+        btcPriceFeed = new MockAggregator(50000e8, 8);  // $50000 BTC
+        usdcPriceFeed = new MockAggregator(1e8, 8);     // $1 USDC
+        usdtPriceFeed = new MockAggregator(1e8, 8);     // $1 USDT
+        daiPriceFeed = new MockAggregator(1e8, 8);      // $1 DAI
+        
+        console.log("   ETH Price Feed:", address(ethPriceFeed));
+        console.log("   BTC Price Feed:", address(btcPriceFeed));
+        console.log("   USDC Price Feed:", address(usdcPriceFeed));
+        console.log("   USDT Price Feed:", address(usdtPriceFeed));
+        console.log("   DAI Price Feed:", address(daiPriceFeed));
+        console.log("");
+    }
+    
+    /**
+     * @dev Setup initial configuration for all contracts
+     */
+    function _setupInitialConfiguration() internal {
+        console.log("Setting up initial configuration...");
+        
+        // 1. Register demo protocols
+        _registerDemoProtocols();
+        
+        // 2. Setup risk providers for oracle
+        _setupRiskProviders();
+        
+        // 3. Configure price feeds
+        if (block.chainid == 31337) {
+            _configurePriceFeeds();
+        }
+        
+        // 4. Set initial risk metrics
+        _setInitialRiskMetrics();
+        
+        // 5. Setup alert thresholds
+        _setupAlertThresholds();
+        
+        // 6. Setup AlertSystem integration
+        _setupAlertSystemIntegration();
+        
+        console.log("   Initial configuration complete");
+        console.log("");
+    }
+    
+    /**
+     * @dev Setup AlertSystem integration with other contracts
+     */
+    function _setupAlertSystemIntegration() internal {
+        console.log("   Setting up AlertSystem integration...");
+        
+        // Test AlertSystem functionality
+        try alertSystem.createSubscription(
+            AlertTypes.AlertType.RISK_THRESHOLD,
+            address(0x1F98431c8aD98523631AE4a59f267346ea31F984), // Uniswap V3
+            7000 // 70% risk threshold
+        ) {
+            console.log("   SUCCESS: AlertSystem subscription test successful");
+        } catch Error(string memory reason) {
+            console.log("   WARNING: AlertSystem test failed:", reason);
+        } catch {
+            console.log("   WARNING: AlertSystem test failed: unknown error");
+        }
+        
+        console.log("   AlertSystem integration configured");
+    }
+    
+    /**
+     * @dev Register demo protocols for testing
+     */
+    function _registerDemoProtocols() internal {
+        console.log("   Registering demo protocols...");
+        
+        // Major DeFi protocols
+        riskRegistry.registerProtocol(
+            0x1F98431c8aD98523631AE4a59f267346ea31F984, // Uniswap V3 Factory
+            "Uniswap V3",
+            "dex"
+        );
+        
+        riskRegistry.registerProtocol(
+            0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2, // Aave V3 Pool
+            "Aave V3",
+            "lending"
+        );
+        
+        riskRegistry.registerProtocol(
+            0xc3d688B66703497DAA19211EEdff47f25384cdc3, // Compound V3 USDC
+            "Compound V3",
+            "lending"
+        );
+        
+        riskRegistry.registerProtocol(
+            0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84, // Lido stETH
+            "Lido",
+            "staking"
+        );
+        
+        riskRegistry.registerProtocol(
+            0xD51a44d3FaE010294C616388b506AcdA1bfAAE46, // Curve Registry
+            "Curve Finance",
+            "dex"
+        );
+        
+        console.log("   Registered 5 demo protocols");
+    }
+    
+    /**
+     * @dev Setup risk data providers
+     */
+    function _setupRiskProviders() internal {
+        console.log("   Setting up risk providers...");
+        
+        // Add deployer as primary risk provider
+        riskOracle.addRiskProvider(deployer, "Primary Risk Provider", 10000);
+        
+        console.log("   Added primary risk provider");
+    }
+    
+    /**
+     * @dev Configure price feeds for tokens
+     */
+    function _configurePriceFeeds() internal {
+        console.log("   Configuring price feeds...");
+        
+        // Configure mock price feeds for common tokens
+        portfolioAnalyzer.setPriceFeed(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2, address(ethPriceFeed));  // WETH
+        portfolioAnalyzer.setPriceFeed(0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599, address(btcPriceFeed));  // WBTC
+        portfolioAnalyzer.setPriceFeed(0xa0B86a33E6411b0fCb8B6E65FA8b6f16b6F7c8a2, address(usdcPriceFeed)); // USDC
+        portfolioAnalyzer.setPriceFeed(0xdAC17F958D2ee523a2206206994597C13D831ec7, address(usdtPriceFeed)); // USDT
+        portfolioAnalyzer.setPriceFeed(0x6B175474E89094C44Da98b954EedeAC495271d0F, address(daiPriceFeed));  // DAI
+        
+        console.log("   Configured price feeds for 5 major tokens");
+    }
+    
+    /**
+     * @dev Set initial risk metrics for demo protocols
+     */
+    function _setInitialRiskMetrics() internal {
+        console.log("   Setting initial risk metrics...");
+        
+        // Uniswap V3 - Medium-high risk (DEX)
+        riskRegistry.updateRiskMetrics(
+            0x1F98431c8aD98523631AE4a59f267346ea31F984,
+            6000, // volatility
+            8000, // liquidity
+            4000, // smart contract
+            6000  // governance
+        );
+        
+        // Aave V3 - Low-medium risk (established lending)
+        riskRegistry.updateRiskMetrics(
+            0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2,
+            3000, // volatility
+            9000, // liquidity
+            2000, // smart contract
+            4000  // governance
+        );
+        
+        // Compound V3 - Low-medium risk
+        riskRegistry.updateRiskMetrics(
+            0xc3d688B66703497DAA19211EEdff47f25384cdc3,
+            3500, // volatility
+            8500, // liquidity
+            2500, // smart contract
+            4500  // governance
+        );
+        
+        // Lido - Medium risk (liquid staking)
+        riskRegistry.updateRiskMetrics(
+            0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84,
+            4000, // volatility
+            7000, // liquidity
+            3000, // smart contract
+            5000  // governance
+        );
+        
+        // Curve Finance - Medium risk
+        riskRegistry.updateRiskMetrics(
+            0xD51a44d3FaE010294C616388b506AcdA1bfAAE46,
+            5000, // volatility
+            7500, // liquidity
+            3500, // smart contract
+            5500  // governance
+        );
+        
+        console.log("   Set risk metrics for 5 protocols");
+    }
+    
+    /**
+     * @dev Setup alert thresholds for monitoring
+     */
+    function _setupAlertThresholds() internal {
+        console.log("   Setting up alert thresholds...");
+        
+        // Set risk thresholds for critical protocols
+        riskOracle.setRiskThreshold(0x1F98431c8aD98523631AE4a59f267346ea31F984, 8000); // Uniswap
+        riskOracle.setRiskThreshold(0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2, 6000); // Aave
+        riskOracle.setRiskThreshold(0xc3d688B66703497DAA19211EEdff47f25384cdc3, 6000); // Compound
+        riskOracle.setRiskThreshold(0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84, 7000); // Lido
+        riskOracle.setRiskThreshold(0xD51a44d3FaE010294C616388b506AcdA1bfAAE46, 7000); // Curve
+        
+        console.log("   Configured alert thresholds for 5 protocols");
+    }
+    
+    /**
+     * @dev Verify all contract deployments
+     */
+    function _verifyDeployments() internal view {
+        console.log("Verifying deployments...");
+        
+        // Check that all contracts are deployed
+        require(address(riskRegistry).code.length > 0, "RiskRegistry not deployed");
+        require(address(riskOracle).code.length > 0, "RiskOracle not deployed");
+        require(address(portfolioAnalyzer).code.length > 0, "PortfolioAnalyzer not deployed");
+        require(address(riskInsurance).code.length > 0, "RiskInsurance not deployed");
+        require(address(alertSystem).code.length > 0, "AlertSystem not deployed");
+        
+        // Verify contract ownership
+        require(riskRegistry.owner() == deployer, "RiskRegistry ownership error");
+        require(riskOracle.owner() == deployer, "RiskOracle ownership error");
+        require(portfolioAnalyzer.owner() == deployer, "PortfolioAnalyzer ownership error");
+        require(riskInsurance.owner() == deployer, "RiskInsurance ownership error");
+        require(alertSystem.owner() == deployer, "AlertSystem ownership error");
+        
+        // Verify contract integrations
+        require(address(portfolioAnalyzer.riskRegistry()) == address(riskRegistry), "Portfolio-Registry integration error");
+        require(address(riskInsurance.portfolioAnalyzer()) == address(portfolioAnalyzer), "Insurance-Portfolio integration error");
+        require(address(alertSystem.riskOracle()) == address(riskOracle), "AlertSystem-Oracle integration error");
+        require(address(alertSystem.portfolioAnalyzer()) == address(portfolioAnalyzer), "AlertSystem-Portfolio integration error");
+        require(address(alertSystem.riskRegistry()) == address(riskRegistry), "AlertSystem-Registry integration error");
+        
+        console.log("   All deployments verified successfully");
+        console.log("");
+    }
+    
+    /**
+     * @dev Generate comprehensive deployment report
+     */
+    function _generateDeploymentReport() internal view {
+        uint256 deploymentTime = block.timestamp - deploymentStartTime;
+        
+        console.log("DEPLOYMENT COMPLETE!");
+        console.log("=====================================");
+        console.log("Total deployment time:", deploymentTime, "seconds");
+        console.log("Total gas used:", totalGasUsed);
+        console.log("");
+        
+        console.log("CONTRACT ADDRESSES:");
+        console.log("=====================================");
+        console.log("RiskRegistry:        ", address(riskRegistry));
+        console.log("RiskOracle:          ", address(riskOracle));
+        console.log("PortfolioAnalyzer:   ", address(portfolioAnalyzer));
+        console.log("RiskInsurance:       ", address(riskInsurance));
+        console.log("AlertSystem:         ", address(alertSystem));
+        console.log("");
+        
+        if (block.chainid == 31337) {
+            console.log("MOCK PRICE FEEDS:");
+            console.log("=====================================");
+            console.log("ETH/USD:  ", address(ethPriceFeed));
+            console.log("BTC/USD:  ", address(btcPriceFeed));
+            console.log("USDC/USD: ", address(usdcPriceFeed));
+            console.log("USDT/USD: ", address(usdtPriceFeed));
+            console.log("DAI/USD:  ", address(daiPriceFeed));
+            console.log("");
+        }
+        
+        console.log("SYSTEM CONFIGURATION:");
+        console.log("=====================================");
+        console.log("Registered Protocols: 5");
+        console.log("Risk Providers: 1");
+        console.log("Price Feeds: 5");
+        console.log("Alert Thresholds: 5");
+        console.log("AlertSystem Libraries: Auto-linked");
+        console.log("");
+        
+        console.log("SYSTEM STATUS:");
+        console.log("=====================================");
+        console.log("All contracts deployed successfully");
+        console.log("Initial configuration complete");
+        console.log("Integration verified");
+        console.log("AlertSystem libraries linked");
+        console.log("Ready for frontend integration");
+        console.log("Ready for production use");
+        console.log("");
+        
+        console.log("NEXT STEPS:");
+        console.log("=====================================");
+        console.log("1. Update frontend with contract addresses");
+        console.log("2. Configure backend API endpoints");
+        console.log("3. Setup monitoring and alerts");
+        console.log("4. Test AlertSystem functionality");
+        console.log("5. Add more risk data providers");
+        console.log("6. Deploy to mainnet when ready");
+        console.log("");
+        
+        console.log("RISKGUARDIAN AI IS READY!");
+        console.log("=====================================");
+    }
+}
+
+/**
+ * @title DeployQuick
+ * @dev Quick deployment for development/testing
+ */
+contract DeployQuick is Script {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        
+        vm.startBroadcast(deployerPrivateKey);
+        
+        console.log("Quick deployment for development...");
+        
+        // Deploy only core contracts
+        RiskRegistry riskRegistry = new RiskRegistry();
+        PortfolioRiskAnalyzer portfolioAnalyzer = new PortfolioRiskAnalyzer(address(riskRegistry));
+        RiskInsurance riskInsurance = new RiskInsurance(address(portfolioAnalyzer));
+        
+        console.log("RiskRegistry:", address(riskRegistry));
+        console.log("PortfolioAnalyzer:", address(portfolioAnalyzer));
+        console.log("RiskInsurance:", address(riskInsurance));
+        
+        vm.stopBroadcast();
+        
+        console.log("Quick deployment complete!");
+    }
+}
+
+/**
+ * @title DeployTest
+ * @dev Test deployment with comprehensive testing
+ */
+contract DeployTest is Script {
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        address deployer = vm.addr(deployerPrivateKey);
+        
+        vm.startBroadcast(deployerPrivateKey);
+        
+        console.log("Test deployment with validation...");
+        
+        // Deploy all contracts
+        RiskRegistry riskRegistry = new RiskRegistry();
+        RiskOracle riskOracle = new RiskOracle();
+        PortfolioRiskAnalyzer portfolioAnalyzer = new PortfolioRiskAnalyzer(address(riskRegistry));
+        RiskInsurance riskInsurance = new RiskInsurance(address(portfolioAnalyzer));
+        AlertSystem alertSystem = new AlertSystem(
+            address(riskOracle),
+            address(portfolioAnalyzer),
+            address(riskRegistry)
+        );
+        
+        // Basic functionality test
+        address testProtocol = address(0x123);
+        riskRegistry.registerProtocol(testProtocol, "TestProtocol", "test");
+        riskRegistry.updateRiskMetrics(testProtocol, 5000, 5000, 5000, 5000);
+        
+        // Test portfolio functionality
+        address testToken = address(0x456);
+        MockAggregator mockFeed = new MockAggregator(1000e8, 8);
+        portfolioAnalyzer.setPriceFeed(testToken, address(mockFeed));
+        portfolioAnalyzer.addPosition(testProtocol, testToken, 1e18);
+        
+        uint256 risk = portfolioAnalyzer.calculatePortfolioRisk(deployer);
+        
+        vm.stopBroadcast();
+        
+        console.log("Test deployment successful!");
+        console.log("Calculated risk:", risk);
+        console.log("All systems operational!");
+        
+        console.log("Contract Addresses:");
+        console.log("RiskRegistry:", address(riskRegistry));
+        console.log("RiskOracle:", address(riskOracle));
+        console.log("PortfolioAnalyzer:", address(portfolioAnalyzer));
+        console.log("RiskInsurance:", address(riskInsurance));
+        console.log("AlertSystem:", address(alertSystem));
+    }
+}

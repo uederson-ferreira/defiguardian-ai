@@ -156,9 +156,14 @@ contracts/script/extras
 */script/extras
 script/extras
 
+.deps
+.deps/npm
+
 # Build artifacts
 forge-cache/
 .forge-cache/
+*/artifacts
+artifacts
 
 # Test & analysis results
 test_results.log
