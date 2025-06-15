@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  address   String   @unique
+  nonce     String   @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  portfolios Portfolio[]
+  insurancePolicies InsurancePolicy[]
+  alertSubscriptions AlertSubscription[]
+
+  @@map("users")
+}
+
+model Portfolio {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  name        String?
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Cached analytics
+  lastRiskScore        Int?      // Basis points
+  lastTotalValue       Decimal?  // USD value
+  lastDiversification  Int?      // Diversification score
+  lastAnalysisAt       DateTime?
+
+  @@map("portfolios")
+}
+
+model InsurancePolicy {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Policy details
+  coverageAmount  Decimal
+  premium         Decimal
+  riskThreshold   Int      // Basis points
+  duration        Int      // Seconds
+  
+  // Status
+  isActive    Boolean   @default(true)
+  hasClaimed  Boolean   @default(false)
+  claimedAt   DateTime?
+  payoutAmount Decimal?
+
+  // Blockchain data
+  policyId      String    // On-chain policy ID
+  txHash        String?   // Creation transaction
+  claimTxHash   String?   // Claim transaction
+  
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@map("insurance_policies")
+}
+
+model AlertSubscription {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  alertType       Int     // 0=RISK_THRESHOLD, 1=LIQUIDATION_WARNING, etc.
+  protocolAddress String?
+  threshold       Int     // Basis points
+  isActive        Boolean @default(true)
+  
+  cooldownMinutes  Int     @default(60)
+  lastTriggeredAt  DateTime?
+  
+  createdAt DateTime @default(now())
+
+  @@map("alert_subscriptions")
+}
+
+model CacheEntry {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     Json
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("cache_entries")
+}

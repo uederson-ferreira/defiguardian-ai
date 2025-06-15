@@ -1,0 +1,6 @@
+[
+  "function getAllProtocols() view returns (address[])",
+  "function protocols(address) view returns (string name, address protocolAddress, string category, uint256 tvl, tuple(uint256 volatilityScore, uint256 liquidityScore, uint256 smartContractScore, uint256 governanceScore, uint256 overallRisk, uint256 lastUpdated, bool isActive) riskMetrics, bool isWhitelisted)",
+  "function owner() view returns (address)",
+  "function riskAssessors(address) view returns (bool)"
+]
