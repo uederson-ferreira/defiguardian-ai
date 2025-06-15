@@ -1,0 +1,49 @@
+{
+  "networkId": 11155111,
+  "networkName": "sepolia",
+  "rpcUrl": "https://sepolia.drpc.org",
+  "explorerUrl": "https://ethereum-sepolia-rpc.publicnode.com",
+  "contracts": {
+    "RiskRegistry": {
+      "address": "0x1b7e83b953d6d4e3e6eb5be6039d079e22a375be
+0x1b7e83b953d6d4e3e6eb5be6039d079e22a375be
+0x1b7e83b953d6d4e3e6eb5be6039d079e22a375be
+0x1b7e83b953d6d4e3e6eb5be6039d079e22a375be
+0x1b7e83b953d6d4e3e6eb5be6039d079e22a375be
+0x1b7e83b953d6d4e3e6eb5be6039d079e22a375be
+0x1b7e83b953d6d4e3e6eb5be6039d079e22a375be",
+      "abi": "../../../contracts/out/RiskRegistry.sol/RiskRegistry.json"
+    },
+    "PortfolioRiskAnalyzer": {
+      "address": "0x68532091c3c02092804a028e0109091781cd1bda",
+      "abi": "../../../contracts/out/PortfolioRiskAnalyzer.sol/PortfolioRiskAnalyzer.json"
+    },
+    "RiskInsurance": {
+      "address": "0xc757ad750bb5ca01fb8d4151449e7af8c1e01527",
+      "abi": "../../../contracts/out/RiskInsurance.sol/RiskInsurance.json"
+    },
+    "RiskOracle": {
+      "address": "0x12d10085441a0257add5b71c831c61b880ef0569
+0x12d10085441a0257add5b71c831c61b880ef0569
+0x12d10085441a0257add5b71c831c61b880ef0569
+0x12d10085441a0257add5b71c831c61b880ef0569
+0x12d10085441a0257add5b71c831c61b880ef0569",
+      "abi": "../../../contracts/out/RiskOracle.sol/RiskOracle.json"
+    },
+    "AlertSystem": {
+      "address": "0x532dedf68da445ed37cfaf74c4e3245101190ad1
+0x532dedf68da445ed37cfaf74c4e3245101190ad1",
+      "abi": "../../../contracts/out/AlertSystem.sol/AlertSystem.json"
+    }
+  },
+  "externalProtocols": {
+    "uniswapV3Factory": "0x0227628f3F023bb0B980b67D528571c95c6DaC1c",
+    "aaveV3Pool": "0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951",
+    "compoundV3": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238"
+  },
+  "chainlinkFeeds": {
+    "ETH_USD": "0x694AA1769357215DE4FAC081bf1f309aDC325306",
+    "BTC_USD": "0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43",
+    "USDC_USD": "0xA2F78ab2355fe2f984D808B5CeE7FD0A93D5270E"
+  }
+}

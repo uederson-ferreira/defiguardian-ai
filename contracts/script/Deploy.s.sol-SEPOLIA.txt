@@ -1,0 +1,489 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+import "forge-std/Script.sol";
+import "forge-std/console.sol";
+import "../src/core/RiskRegistry.sol";
+import "../src/core/PortfolioRiskAnalyzer.sol";
+import "../src/core/RiskInsurance.sol";
+import "../src/oracles/RiskOracle.sol";
+import "../src/automation/AlertSystem.sol";
+import "../test/RiskGuardian.t.sol"; // MockAggregator
+
+/**
+ * @title DeployComplete
+ * @dev UPDATED: Multi-network support (Sepolia, Ronin, Local)
+ */
+contract DeployComplete is Script {
+    // All contract instances
+    RiskRegistry public riskRegistry;
+    PortfolioRiskAnalyzer public portfolioAnalyzer;
+    RiskInsurance public riskInsurance;
+    RiskOracle public riskOracle;
+    AlertSystem public alertSystem;
+    
+    // Mock price feeds for local/unsupported networks
+    MockAggregator public ethPriceFeed;
+    MockAggregator public btcPriceFeed;
+    MockAggregator public usdcPriceFeed;
+    MockAggregator public usdtPriceFeed;
+    MockAggregator public daiPriceFeed;
+    
+    // Deployment tracking
+    address public deployer;
+    uint256 public deploymentStartTime;
+    uint256 public totalGasUsed;
+    uint256 public currentChainId;
+    string public networkName;
+    
+    function run() external {
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        deployer = vm.addr(deployerPrivateKey);
+        deploymentStartTime = block.timestamp;
+        currentChainId = block.chainid;
+        networkName = _getNetworkName();
+        
+        console.log("DEPLOYING COMPLETE RISKGUARDIAN SYSTEM");
+        console.log("========================================");
+        console.log("Deployer:", deployer);
+        console.log("Chain ID:", currentChainId);
+        console.log("Network:", networkName);
+        console.log("Block Number:", block.number);
+        console.log("Timestamp:", block.timestamp);
+        console.log("");
+        
+        vm.startBroadcast(deployerPrivateKey);
+        
+        uint256 gasStart = gasleft();
+        
+        // 1. Deploy Core Contracts
+        _deployRiskRegistry();
+        _deployRiskOracle();
+        _deployPortfolioAnalyzer();
+        _deployRiskInsurance();
+        _deployAlertSystem();
+        
+        // 2. Deploy/Configure Price Feeds
+        _configurePriceFeeds();
+        
+        // 3. Setup Initial Configuration
+        _setupInitialConfiguration();
+        
+        // 4. Verify Deployments
+        _verifyDeployments();
+        
+        totalGasUsed = gasStart - gasleft();
+        
+        vm.stopBroadcast();
+        
+        // 5. Generate Report
+        _generateDeploymentReport();
+    }
+    
+    /**
+     * @dev Get network name from chain ID
+     */
+    function _getNetworkName() internal view returns (string memory) {
+        if (currentChainId == 1) return "Ethereum Mainnet";
+        if (currentChainId == 11155111) return "Sepolia Testnet";
+        if (currentChainId == 2021) return "Ronin Saigon Testnet";
+        if (currentChainId == 31337) return "Local Anvil";
+        return "Unknown Network";
+    }
+    
+    /**
+     * @dev Deploy RiskRegistry contract
+     */
+    function _deployRiskRegistry() internal {
+        console.log("Deploying RiskRegistry...");
+        uint256 gasStart = gasleft();
+        
+        riskRegistry = new RiskRegistry();
+        
+        uint256 gasUsed = gasStart - gasleft();
+        console.log("   RiskRegistry deployed at:", address(riskRegistry));
+        console.log("   Gas used:", gasUsed);
+        console.log("");
+    }
+    
+    /**
+     * @dev Deploy RiskOracle contract
+     */
+    function _deployRiskOracle() internal {
+        console.log("Deploying RiskOracle...");
+        uint256 gasStart = gasleft();
+        
+        riskOracle = new RiskOracle();
+        
+        uint256 gasUsed = gasStart - gasleft();
+        console.log("   RiskOracle deployed at:", address(riskOracle));
+        console.log("   Gas used:", gasUsed);
+        console.log("");
+    }
+    
+    /**
+     * @dev Deploy PortfolioRiskAnalyzer contract
+     */
+    function _deployPortfolioAnalyzer() internal {
+        console.log("Deploying PortfolioRiskAnalyzer...");
+        uint256 gasStart = gasleft();
+        
+        portfolioAnalyzer = new PortfolioRiskAnalyzer(address(riskRegistry));
+        
+        uint256 gasUsed = gasStart - gasleft();
+        console.log("   PortfolioRiskAnalyzer deployed at:", address(portfolioAnalyzer));
+        console.log("   Gas used:", gasUsed);
+        console.log("");
+    }
+    
+    /**
+     * @dev Deploy RiskInsurance contract
+     */
+    function _deployRiskInsurance() internal {
+        console.log("Deploying RiskInsurance...");
+        uint256 gasStart = gasleft();
+        
+        riskInsurance = new RiskInsurance(address(portfolioAnalyzer));
+        
+        uint256 gasUsed = gasStart - gasleft();
+        console.log("   RiskInsurance deployed at:", address(riskInsurance));
+        console.log("   Gas used:", gasUsed);
+        console.log("");
+    }
+    
+    /**
+     * @dev Deploy AlertSystem contract
+     */
+    function _deployAlertSystem() internal {
+        console.log("Deploying AlertSystem with libraries...");
+        uint256 gasStart = gasleft();
+        
+        alertSystem = new AlertSystem(
+            address(riskOracle),
+            address(portfolioAnalyzer),
+            address(riskRegistry)
+        );
+        
+        uint256 gasUsed = gasStart - gasleft();
+        console.log("   AlertSystem deployed at:", address(alertSystem));
+        console.log("   Gas used:", gasUsed);
+        
+        // Verify libraries
+        try alertSystem.owner() returns (address owner) {
+            console.log("   SUCCESS: AlertSystem libraries properly linked");
+            console.log("   SUCCESS: AlertSystem owner:", owner);
+        } catch {
+            console.log("   ERROR: AlertSystem library linking failed");
+        }
+        
+        console.log("");
+    }
+    
+    /**
+     * @dev Configure price feeds based on network
+     */
+    function _configurePriceFeeds() internal {
+        console.log("Configuring price feeds for", networkName, "...");
+        
+        if (currentChainId == 11155111) {
+            // Sepolia - Use real Chainlink feeds
+            _configureSepoliaFeeds();
+        } else if (currentChainId == 31337 || currentChainId == 2021) {
+            // Local/Ronin - Deploy mock feeds
+            _deployMockFeeds();
+        } else {
+            console.log("   No price feed configuration for this network");
+        }
+        
+        console.log("");
+    }
+    
+    /**
+     * @dev Configure Sepolia Chainlink price feeds
+     */
+    function _configureSepoliaFeeds() internal {
+        console.log("   Using Sepolia Chainlink price feeds...");
+        
+        // Real Chainlink feeds on Sepolia
+        address ethUsdFeed = 0x694AA1769357215DE4FAC081bf1f309aDC325306;
+        address btcUsdFeed = 0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43;
+        address usdcUsdFeed = 0xA2F78ab2355fe2f984D808B5CeE7FD0A93D5270E;
+        
+        // WETH and other token addresses on Sepolia
+        address wethSepolia = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
+        address wbtcSepolia = 0x29f2D40B0605204364af54EC677bD022dA425d03; // Example
+        address usdcSepolia = 0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8; // Example
+        
+        // Configure real price feeds
+        portfolioAnalyzer.setPriceFeed(wethSepolia, ethUsdFeed);
+        portfolioAnalyzer.setPriceFeed(wbtcSepolia, btcUsdFeed);
+        portfolioAnalyzer.setPriceFeed(usdcSepolia, usdcUsdFeed);
+        
+        console.log("   ETH/USD Feed:", ethUsdFeed);
+        console.log("   BTC/USD Feed:", btcUsdFeed);
+        console.log("   USDC/USD Feed:", usdcUsdFeed);
+        console.log("   Configured 3 real Chainlink feeds");
+    }
+    
+    /**
+     * @dev Deploy mock price feeds for local/unsupported networks
+     */
+    function _deployMockFeeds() internal {
+        console.log("   Deploying mock price feeds...");
+        
+        ethPriceFeed = new MockAggregator(2000e8, 8);   // $2000 ETH
+        btcPriceFeed = new MockAggregator(50000e8, 8);  // $50000 BTC
+        usdcPriceFeed = new MockAggregator(1e8, 8);     // $1 USDC
+        usdtPriceFeed = new MockAggregator(1e8, 8);     // $1 USDT
+        daiPriceFeed = new MockAggregator(1e8, 8);      // $1 DAI
+        
+        // Generic token addresses for testing
+        address mockWeth = address(0x1001);
+        address mockWbtc = address(0x1002);
+        address mockUsdc = address(0x1003);
+        address mockUsdt = address(0x1004);
+        address mockDai = address(0x1005);
+        
+        // Configure mock feeds
+        portfolioAnalyzer.setPriceFeed(mockWeth, address(ethPriceFeed));
+        portfolioAnalyzer.setPriceFeed(mockWbtc, address(btcPriceFeed));
+        portfolioAnalyzer.setPriceFeed(mockUsdc, address(usdcPriceFeed));
+        portfolioAnalyzer.setPriceFeed(mockUsdt, address(usdtPriceFeed));
+        portfolioAnalyzer.setPriceFeed(mockDai, address(daiPriceFeed));
+        
+        console.log("   ETH Mock Feed:", address(ethPriceFeed));
+        console.log("   BTC Mock Feed:", address(btcPriceFeed));
+        console.log("   USDC Mock Feed:", address(usdcPriceFeed));
+        console.log("   Configured 5 mock price feeds");
+    }
+    
+    /**
+     * @dev Setup initial configuration
+     */
+    function _setupInitialConfiguration() internal {
+        console.log("Setting up initial configuration...");
+        
+        // 1. Register protocols based on network
+        _registerProtocols();
+        
+        // 2. Setup risk providers
+        _setupRiskProviders();
+        
+        // 3. Set initial risk metrics
+        _setInitialRiskMetrics();
+        
+        // 4. Setup alert thresholds
+        _setupAlertThresholds();
+        
+        console.log("   Initial configuration complete");
+        console.log("");
+    }
+    
+    /**
+     * @dev Register protocols based on network
+     */
+    function _registerProtocols() internal {
+        console.log("   Registering protocols for", networkName, "...");
+        
+        if (currentChainId == 11155111) {
+            // Sepolia - Use real protocol addresses
+            _registerSepoliaProtocols();
+        } else {
+            // Other networks - Use generic addresses
+            _registerGenericProtocols();
+        }
+    }
+    
+    /**
+     * @dev Register real Sepolia protocols
+     */
+    function _registerSepoliaProtocols() internal {
+        console.log("   Registering real Sepolia protocols...");
+        
+        // Real Sepolia addresses
+        riskRegistry.registerProtocol(
+            0x0227628f3F023bb0B980b67D528571c95c6DaC1c, // Uniswap V3 Factory
+            "Uniswap V3",
+            "dex"
+        );
+        
+        riskRegistry.registerProtocol(
+            0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951, // Aave V3 Pool
+            "Aave V3",
+            "lending"
+        );
+        
+        riskRegistry.registerProtocol(
+            0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238, // Compound V3
+            "Compound V3",
+            "lending"
+        );
+        
+        console.log("   Registered 3 real Sepolia protocols");
+    }
+    
+    /**
+     * @dev Register generic test protocols
+     */
+    function _registerGenericProtocols() internal {
+        console.log("   Registering generic test protocols...");
+        
+        // Use deployer address variations for consistent addresses
+        address protocol1 = address(uint160(uint256(keccak256(abi.encodePacked(deployer, "protocol1")))));
+        address protocol2 = address(uint160(uint256(keccak256(abi.encodePacked(deployer, "protocol2")))));
+        address protocol3 = address(uint160(uint256(keccak256(abi.encodePacked(deployer, "protocol3")))));
+        
+        riskRegistry.registerProtocol(protocol1, "Test DEX Protocol", "dex");
+        riskRegistry.registerProtocol(protocol2, "Test Lending Protocol", "lending");
+        riskRegistry.registerProtocol(protocol3, "Test Staking Protocol", "staking");
+        
+        console.log("   Registered 3 test protocols");
+        console.log("   Protocol 1 (DEX):", protocol1);
+        console.log("   Protocol 2 (Lending):", protocol2);
+        console.log("   Protocol 3 (Staking):", protocol3);
+    }
+    
+    /**
+     * @dev Setup risk providers
+     */
+    function _setupRiskProviders() internal {
+        console.log("   Setting up risk providers...");
+        
+        riskOracle.addRiskProvider(deployer, "Primary Risk Provider", 10000);
+        
+        console.log("   Added primary risk provider:", deployer);
+    }
+    
+    /**
+     * @dev Set initial risk metrics
+     */
+    function _setInitialRiskMetrics() internal {
+        console.log("   Setting initial risk metrics...");
+        
+        address[] memory protocols = riskRegistry.getAllProtocols();
+        
+        for (uint256 i = 0; i < protocols.length; i++) {
+            // Set different risk levels based on protocol type
+            uint256 volatility = 4000 + (i * 1000);  // 4000, 5000, 6000
+            uint256 liquidity = 8000 - (i * 500);    // 8000, 7500, 7000
+            uint256 smartContract = 3000 + (i * 500); // 3000, 3500, 4000
+            uint256 governance = 5000;                 // Consistent 5000
+            
+            riskRegistry.updateRiskMetrics(
+                protocols[i],
+                volatility,
+                liquidity,
+                smartContract,
+                governance
+            );
+        }
+        
+        console.log("   Set risk metrics for", protocols.length, "protocols");
+    }
+    
+    /**
+     * @dev Setup alert thresholds
+     */
+    function _setupAlertThresholds() internal {
+        console.log("   Setting up alert thresholds...");
+        
+        address[] memory protocols = riskRegistry.getAllProtocols();
+        
+        for (uint256 i = 0; i < protocols.length; i++) {
+            uint256 threshold = 7000 + (i * 500); // 7000, 7500, 8000
+            riskOracle.setRiskThreshold(protocols[i], threshold);
+        }
+        
+        console.log("   Configured alert thresholds for", protocols.length, "protocols");
+    }
+    
+    /**
+     * @dev Verify all deployments
+     */
+    function _verifyDeployments() internal view {
+        console.log("Verifying deployments...");
+        
+        // Check contracts exist
+        require(address(riskRegistry).code.length > 0, "RiskRegistry not deployed");
+        require(address(riskOracle).code.length > 0, "RiskOracle not deployed");
+        require(address(portfolioAnalyzer).code.length > 0, "PortfolioAnalyzer not deployed");
+        require(address(riskInsurance).code.length > 0, "RiskInsurance not deployed");
+        require(address(alertSystem).code.length > 0, "AlertSystem not deployed");
+        
+        // Check ownership
+        require(riskRegistry.owner() == deployer, "RiskRegistry ownership error");
+        require(riskOracle.owner() == deployer, "RiskOracle ownership error");
+        require(portfolioAnalyzer.owner() == deployer, "PortfolioAnalyzer ownership error");
+        require(riskInsurance.owner() == deployer, "RiskInsurance ownership error");
+        require(alertSystem.owner() == deployer, "AlertSystem ownership error");
+        
+        // Check integrations
+        require(address(portfolioAnalyzer.riskRegistry()) == address(riskRegistry), "Portfolio-Registry integration error");
+        require(address(riskInsurance.portfolioAnalyzer()) == address(portfolioAnalyzer), "Insurance-Portfolio integration error");
+        require(address(alertSystem.riskOracle()) == address(riskOracle), "AlertSystem-Oracle integration error");
+        
+        console.log("   All deployments verified successfully");
+        console.log("");
+    }
+    
+    /**
+     * @dev Generate deployment report
+     */
+    function _generateDeploymentReport() internal view {
+        uint256 deploymentTime = block.timestamp - deploymentStartTime;
+        
+        console.log("DEPLOYMENT COMPLETE!");
+        console.log("=====================================");
+        console.log("Network:", networkName);
+        console.log("Chain ID:", currentChainId);
+        console.log("Deployment time:", deploymentTime, "seconds");
+        console.log("Total gas used:", totalGasUsed);
+        console.log("");
+        
+        console.log("CONTRACT ADDRESSES:");
+        console.log("=====================================");
+        console.log("RiskRegistry:        ", address(riskRegistry));
+        console.log("RiskOracle:          ", address(riskOracle));
+        console.log("PortfolioAnalyzer:   ", address(portfolioAnalyzer));
+        console.log("RiskInsurance:       ", address(riskInsurance));
+        console.log("AlertSystem:         ", address(alertSystem));
+        console.log("");
+        
+        if (currentChainId == 11155111) {
+            console.log("USING REAL CHAINLINK FEEDS:");
+            console.log("=====================================");
+            console.log("ETH/USD: 0x694AA1769357215DE4FAC081bf1f309aDC325306");
+            console.log("BTC/USD: 0x1b44F3514812d835EB1BDB0acB33d3fA3351Ee43");
+            console.log("USDC/USD: 0xA2F78ab2355fe2f984D808B5CeE7FD0A93D5270E");
+            console.log("");
+            console.log("USING REAL PROTOCOLS:");
+            console.log("=====================================");
+            console.log("Uniswap V3: 0x0227628f3F023bb0B980b67D528571c95c6DaC1c");
+            console.log("Aave V3: 0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951");
+            console.log("Compound V3: 0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238");
+        } else if (address(ethPriceFeed) != address(0)) {
+            console.log("MOCK PRICE FEEDS:");
+            console.log("=====================================");
+            console.log("ETH/USD:  ", address(ethPriceFeed));
+            console.log("BTC/USD:  ", address(btcPriceFeed));
+            console.log("USDC/USD: ", address(usdcPriceFeed));
+        }
+        
+        console.log("");
+        console.log("NEXT STEPS:");
+        console.log("=====================================");
+        console.log("1. Update frontend with contract addresses");
+        console.log("2. Configure backend API endpoints");
+        console.log("3. Test with real DeFi protocols");
+        console.log("4. Setup monitoring and alerts");
+        
+        if (currentChainId == 11155111) {
+            console.log("5. Test with real Chainlink price feeds");
+            console.log("6. Test with real Uniswap/Aave integration");
+        }
+        
+        console.log("");
+        console.log("RISKGUARDIAN AI IS READY ON", networkName, "!");
+        console.log("=====================================");
+    }
+}
