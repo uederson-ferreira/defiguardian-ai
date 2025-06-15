@@ -184,6 +184,9 @@ deployments/polygon/
 deployments/arbitrum/
 deployments/optimism/
 
+.gitmodules
+*/.gitmodules
+
 # Keep local/test deployments for reference
 # deployments/localhost/
 # deployments/anvil/
@@ -448,3 +451,7 @@ NOTES.md
 # =============================================================================
 # END OF .gitignore
 # =============================================================================
+# Foundry
+contracts/lib/
+contracts/cache/
+contracts/out/
