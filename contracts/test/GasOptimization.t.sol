@@ -307,7 +307,7 @@ contract GasOptimizationTest is Test {
         // Test createSubscription gas usage
         uint256 gasBefore = gasleft();
         alertSystem.createSubscription(
-            AlertSystem.AlertType.RISK_THRESHOLD,
+            AlertTypes.AlertType.RISK_THRESHOLD, // Properly using enum type
             protocol1,
             7000
         );
