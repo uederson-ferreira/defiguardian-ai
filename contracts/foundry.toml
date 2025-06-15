@@ -9,10 +9,10 @@ solc_version = "0.8.20"
 optimizer = true
 optimizer_runs = 200
 
-# Remappings para dependências - CORRIGIDO para sua estrutura
+# Remappings para dependências
 remappings = [
     "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
-    "@chainlink/contracts/=lib/chainlink/contracts/",
+    "@chainlink/contracts/=lib/chainlink-brownie-contracts/contracts/",
     "forge-std/=lib/forge-std/src/",
     "ds-test/=lib/forge-std/lib/ds-test/src/"
 ]
@@ -20,15 +20,24 @@ remappings = [
 # ===== RPC ENDPOINTS =====
 [rpc_endpoints]
 # Sepolia Testnet (Ethereum)
-sepolia = "https://ethereum-sepolia-rpc.publicnode.com"
-sepolia_alt = "https://sepolia.drpc.org"
+sepolia = "https://sepolia.drpc.org"
+sepolia_alt = "https://ethereum-sepolia-rpc.publicnode.com"
+
+# Providers secundários para Sepolia
+#sepolia_alchemy = "https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
+#sepolia_infura = "https://sepolia.infura.io/v3/${INFURA_PROJECT_ID}"
+#sepolia_ankr = "https://rpc.ankr.com/eth_sepolia"
+
+# Fallbacks
+sepolia_1rpc = "https://1rpc.io/sepolia"
+sepolia_blockpi = "https://ethereum-sepolia.blockpi.network/v1/rpc/public"
 
 # Mainnet (para verificação)
 mainnet = "https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
 
 # Local development (comentado)
-# anvil = "http://localhost:8545"
-# localhost = "http://localhost:8545"
+anvil = "http://localhost:8545"
+localhost = "http://localhost:8545"
 
 # Ronin Testnet (comentado)
 # ronin_testnet = "https://saigon-testnet.roninchain.com/rpc"
