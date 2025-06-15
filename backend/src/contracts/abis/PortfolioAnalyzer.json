@@ -1,0 +1,6 @@
+[
+  "function calculatePortfolioRisk(address user) view returns (uint256)",
+  "function getUserPositions(address user) view returns (tuple(address protocol, address token, uint256 amount, uint256 value)[])",
+  "function getPortfolioAnalysis(address user) view returns (tuple(uint256 totalValue, uint256 overallRisk, uint256 diversificationScore, uint256 timestamp, bool isValid))",
+  "function riskRegistry() view returns (address)"
+]
