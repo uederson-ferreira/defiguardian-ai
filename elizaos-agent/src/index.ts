@@ -2,78 +2,42 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import dotenv from 'dotenv';
+import compression from 'compression';
+import { config } from './config/env';
+import { setupLogging } from './config/logger';
+import { setupRateLimit } from './config/rate-limit';
+import routes from './routes';
 
-// Load environment variables
-dotenv.config();
+// Initialize logger
+const logger = setupLogging();
 
+// Create Express app
 const app = express();
-const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: config.corsOrigin,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+app.use(compression());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Basic health check
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    service: 'RiskGuardian ElizaOS Agent',
-    timestamp: new Date().toISOString(),
-    version: '0.1.0'
-  });
-});
+// Rate limiting
+app.use(setupRateLimit());
 
-// Basic AI endpoint placeholder
-app.post('/chat', async (req, res) => {
-  try {
-    const { message } = req.body;
-    
-    // TODO: Implement AI logic here
-    const response = {
-      message: `Echo: ${message}`,
-      timestamp: new Date().toISOString(),
-      agent: 'RiskGuardian',
-      status: 'development'
-    };
+// Routes
+app.use('/api', routes);
 
-    res.json(response);
-  } catch (error) {
-    console.error('Chat error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Risk analysis endpoint placeholder  
-app.post('/analyze-risk', async (req, res) => {
-  try {
-    const { portfolioData } = req.body;
-    
-    // TODO: Implement risk analysis logic
-    const analysis = {
-      riskLevel: 'moderate',
-      healthFactor: 2.5,
-      recommendations: [
-        'Portfolio appears stable',
-        'Consider diversifying across chains'
-      ],
-      timestamp: new Date().toISOString()
-    };
-
-    res.json(analysis);
-  } catch (error) {
-    console.error('Risk analysis error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+// Error handling
+app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  logger.error('Unhandled error:', err);
+  res.status(500).json({ status: 'error', message: 'Internal server error' });
 });
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`🤖 RiskGuardian ElizaOS Agent running on port ${PORT}`);
-  console.log(`🌐 Health check: http://localhost:${PORT}/health`);
-  console.log(`💬 Chat endpoint: http://localhost:${PORT}/chat`);
-  console.log(`📊 Risk analysis: http://localhost:${PORT}/analyze-risk`);
+app.listen(config.port, () => {
+  logger.info(`Server running on port ${config.port}`);
 });
-
-export default app;
