@@ -31,8 +31,8 @@ COPY package*.json ./
 RUN npm ci --only=production=false && \
     npm cache clean --force
 
-# Instalar ferramentas de desenvolvimento globalmente
-RUN npm install -g nodemon@3.0.3 prisma@5.9.1
+# Install development tools
+RUN npm install -g nodemon
 
 # Copiar código fonte
 COPY . .

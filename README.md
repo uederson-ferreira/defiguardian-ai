@@ -1,290 +1,313 @@
-# 🚀 RiskGuardian AI
+# 🛡️ RiskGuardian AI
 
-**AI-powered DeFi Risk Analysis Platform**
+Sistema inteligente de análise de risco e automação de hedge para portfólios DeFi, utilizando múltiplos modelos de IA e contratos inteligentes.
 
-A comprehensive blockchain risk analysis platform built with Next.js, Node.js, ElizaOS AI agents, and multi-chain support.
+## 🎯 Visão Geral
 
-## 🎯 Features
+O RiskGuardian AI é uma plataforma avançada que combina inteligência artificial e contratos inteligentes para analisar e proteger portfólios DeFi. O sistema utiliza GPT-4 e Claude para análises, junto com Chainlink Automation e CCIP para execução automatizada de estratégias de hedge.
 
-- 🤖 **AI Risk Analysis** - ElizaOS-powered intelligent risk assessment
-- ⛓️ **Multi-Blockchain** - Ethereum, Chromia, and more
-- 📊 **Real-time Dashboard** - Interactive risk visualization
-- 🔗 **Smart Contracts** - On-chain risk management protocols
-- 🏗️ **Microservices** - Scalable Docker-based architecture
+## ✨ Funcionalidades Principais
 
-## 🚀 Quick Start
+### 🔍 Análise de Portfólio
+- Avaliação em tempo real de posições DeFi
+- Cálculo de métricas de risco (fator de saúde, razão de colateral)
+- Detecção de exposição excessiva
+- Análise de diversificação
 
-### Prerequisites
+### 🤖 Automação de Hedge
+- Execução automática via Chainlink Automation
+- Estratégias de stop loss e take profit
+- Rebalanceamento cross-chain via CCIP
+- Monitoramento de preços em tempo real
 
-- [Docker](https://docs.docker.com/get-docker/) (latest version)
-- [Docker Compose](https://docs.docker.com/compose/install/) (latest version)
-- Git
+### 💡 Explicações Inteligentes
+- Tradução de métricas técnicas para linguagem simples
+- Identificação dos principais riscos
+- Sugestões de otimização
+- Conteúdo educacional sobre DeFi
 
-### Setup (5 minutes)
+### 📊 Monitoramento de Mercado
+- Acompanhamento de tendências em tempo real
+- Alertas de volatilidade
+- Detecção de anomalias
+- Oportunidades de arbitragem
 
+## 🛠️ Tecnologias
+
+### Smart Contracts
+- Solidity & Hardhat
+- Chainlink Automation & CCIP
+- OpenZeppelin Contracts
+- Gelato Network Automation
+
+### Backend (ElizaOS Agent)
+- Node.js & TypeScript
+- Express & WebSocket
+- OpenAI & Anthropic APIs
+- Cache distribuído
+- Sistema de logging avançado
+
+### Frontend
+- Next.js & React
+- WebSocket para updates em tempo real
+- Interface responsiva
+- Gráficos interativos
+
+## 🚀 Começando
+
+### Pré-requisitos
+- Node.js 18+
+- npm ou yarn
+- PostgreSQL
+- Redis (opcional)
+
+### Instalação
+
+1. Clone o repositório:
 ```bash
-# 1. Clone repository
 git clone https://github.com/uederson-ferreira/riskguardian-ai.git
 cd riskguardian-ai
-
-# 2. Setup environment
-./scripts/setup.sh
-
-# 3. Access applications
-# Frontend:  http://localhost:3000
-# Backend:   http://localhost:8000
-# ElizaOS:   http://localhost:3001
 ```
 
-That's it! 🎉
-
-## 🔧 Configuration
-
-### Required API Keys
-
-Copy `.env.example` to `.env` and fill in:
-
+2. Instale as dependências:
 ```bash
-# AI Services (Required)
-OPENAI_API_KEY=sk-your-openai-key
-ANTHROPIC_API_KEY=sk-ant-your-anthropic-key
+# Projeto principal
+npm install
 
-# Authentication (Required)  
-JWT_SECRET=your-secure-jwt-secret-min-32-chars
+# Backend
+cd elizaos-agent
+npm install
 
-# Optional: Advanced features
-CHAINLINK_API_KEY=your-chainlink-key
-ETHERSCAN_API_KEY=your-etherscan-key
+# Frontend
+cd ../frontend
+npm install
 ```
 
-## 🏗️ Architecture
-
-```
-┌─────────────────┬─────────────────┬─────────────────┐
-│   Frontend      │   Backend       │   ElizaOS       │
-│   (Next.js)     │   (Node.js)     │   (AI Agent)    │
-│   Port: 3000    │   Port: 8000    │   Port: 3001    │
-└─────────────────┴─────────────────┴─────────────────┘
-                           │
-┌─────────────────┬─────────────────┬─────────────────┐
-│   PostgreSQL    │   Redis         │   Anvil         │
-│   (Database)    │   (Cache)       │   (Blockchain)  │
-│   Port: 5432    │   Port: 6379    │   Port: 8545    │
-└─────────────────┴─────────────────┴─────────────────┘
-                           │
-                  ┌─────────────────┐
-                  │   Chromia       │
-                  │   (Database)    │
-                  │   Port: 7740    │
-                  └─────────────────┘
-```
-
-## 🛠️ Development
-
-### Daily Commands
-
+3. Configure o ambiente:
 ```bash
-# Start development environment
-./scripts/start-dev.sh
+# Projeto principal
+cp .env.example .env-dev
+# Edite .env-dev com suas configurações
 
-# Stop all services
-./scripts/stop.sh
+# Backend
+cd elizaos-agent
+cp .env.example .env-dev
+# Edite .env-dev com suas configurações
 
-# View logs
-docker-compose logs -f [service-name]
-
-# Restart specific service
-docker-compose restart [service-name]
+# Frontend
+cd ../frontend
+cp .env.local.example .env.local
+# Edite .env.local com suas configurações
 ```
 
-### Project Structure
-
-```
-riskguardian-ai/
-├── frontend/          # Next.js React application
-├── backend/           # Node.js REST API
-├── elizaos-agent/     # AI risk analysis agent
-├── contracts/         # Smart contracts (Solidity)
-├── chromia/           # Chromia blockchain integration
-├── scripts/           # Automation scripts
-└── docker-compose.yml # Service orchestration
-```
-
-### Available Services
-
-| Service | URL | Description |
-|---------|-----|-------------|
-| Frontend | http://localhost:3000 | React dashboard |
-| Backend API | http://localhost:8000 | REST API endpoints |
-| ElizaOS Agent | http://localhost:3001 | AI risk analysis |
-| Chromia | http://localhost:7740 | Database API |
-| Anvil | http://localhost:8545 | Local blockchain |
-| PostgreSQL | localhost:5432 | Primary database |
-| Redis | localhost:6379 | Cache layer |
-
-## 🧪 Testing
-
+4. Compile os contratos:
 ```bash
-# Test all services connectivity
-./scripts/test-connectivity.sh
-
-# Test blockchain
-curl -X POST \
-  -H "Content-Type: application/json" \
-  -d '{"method":"eth_blockNumber","params":[],"id":1,"jsonrpc":"2.0"}' \
-  http://localhost:8545
-
-# Test backend API  
-curl http://localhost:8000
-
-# Test frontend
-curl http://localhost:3000
+npx hardhat compile
 ```
 
-## 🚀 Deployment
-
-### Development
+5. Inicie os serviços:
 ```bash
-./scripts/start-dev.sh
+# Backend
+cd elizaos-agent
+npm run dev
+
+# Frontend
+cd ../frontend
+npm run dev
 ```
 
-### Production
+## 📡 Smart Contracts
+
+### Contratos Principais
+
+#### HedgeAutomation.sol
+- Gerenciamento de estratégias de hedge
+- Monitoramento de preços via Chainlink
+- Execução automática de operações
+- Suporte a stop loss e take profit
+
+#### CrossChainHedge.sol
+- Operações cross-chain via CCIP
+- Rebalanceamento entre redes
+- Verificações de slippage
+- Proteções de segurança
+
+### Deploy
+
+Para fazer deploy na testnet Fuji:
 ```bash
-./scripts/deploy.sh
+npx hardhat deploy --network fuji
 ```
 
-### Docker Tools (Optional)
+Para fazer deploy na mainnet Avalanche:
 ```bash
-# Database admin interface
-docker-compose --profile tools up -d pgadmin
-# Access: http://localhost:5050
-
-# Smart contracts development
-docker-compose --profile tools up -d contracts
+npx hardhat deploy --network avalanche
 ```
 
-## 🤝 Contributing
+## 📡 API WebSocket
 
-1. **Fork** the repository
-2. **Create** feature branch: `git checkout -b feature/amazing-feature`
-3. **Commit** changes: `git commit -m 'Add amazing feature'`
-4. **Push** to branch: `git push origin feature/amazing-feature`
-5. **Open** Pull Request
-
-### Development Workflow
-
-```bash
-# Setup development environment
-./scripts/setup.sh
-
-# Make your changes in:
-# - frontend/src/     (React components)
-# - backend/src/      (API endpoints)  
-# - elizaos-agent/src/ (AI agents)
-# - contracts/src/    (Smart contracts)
-
-# Test your changes
-./scripts/test-connectivity.sh
-
-# Commit and push
-git add .
-git commit -m "feat: your awesome feature"
-git push
+### Conexão
+```javascript
+const ws = new WebSocket('ws://localhost:3000');
 ```
 
-## 📋 Troubleshooting
+### Mensagens
 
-### Common Issues
-
-**Port conflicts:**
-```bash
-# Check if ports are in use
-lsof -i :3000,:8000,:8545
-
-# Stop conflicting services
-docker-compose down
+#### 1. Análise de Portfólio
+```javascript
+ws.send(JSON.stringify({
+  type: 'analyze',
+  address: '0x742d35Cc6635C0532925a3b8D0D8f8Cc86d0AB8B',
+  content: 'Analise meu portfólio DeFi'
+}));
 ```
 
-**Anvil connection issues:**
-```bash
-# Check Anvil logs
-docker-compose logs anvil
-
-# Restart Anvil
-docker-compose restart anvil
+#### 2. Histórico de Análises
+```javascript
+ws.send(JSON.stringify({
+  type: 'history'
+}));
 ```
 
-**Database connection issues:**
-```bash
-# Check PostgreSQL
-docker-compose exec postgres pg_isready -U chromia
+### Respostas
 
-# Reset database
-docker-compose down -v
-./scripts/setup.sh
+#### 1. Resultado de Análise
+```javascript
+{
+  type: 'analysis_result',
+  content: {
+    riskLevel: 'moderado',
+    totalValue: 25000,
+    healthFactor: 2.1,
+    mainRisks: [
+      'Alta concentração em tokens voláteis',
+      'Posição alavancada em DEX'
+    ],
+    recommendations: [
+      'Considere diversificar 20% para stablecoins',
+      'Aumente o colateral para melhorar o fator de saúde'
+    ],
+    explanation: 'Seu portfólio apresenta...'
+  }
+}
 ```
 
-## 🔧 Environment Variables
+## 🔒 Segurança
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `OPENAI_API_KEY` | ✅ | OpenAI API for AI features |
-| `JWT_SECRET` | ✅ | Authentication secret (32+ chars) |
-| `ANTHROPIC_API_KEY` | ⚠️ | Anthropic Claude API (backup) |
-| `CHAINLINK_API_KEY` | ❌ | Chainlink integration |
-| `ETHERSCAN_API_KEY` | ❌ | Ethereum network data |
+### Smart Contracts
+- Auditorias de segurança
+- Verificações de slippage
+- Proteções contra reentrância
+- Padrões OpenZeppelin
 
-## 📊 Monitoring
+### Proteção de Dados
+- Validação rigorosa de inputs
+- Sanitização de dados
+- Rate limiting por IP
+- CORS configurável
 
-```bash
-# Service status
-docker-compose ps
+### Autenticação & Autorização
+- JWT para autenticação
+- Controle granular de permissões
+- Proteção contra ataques comuns
+- Headers de segurança via Helmet
 
-# Live logs
-docker-compose logs -f
+## 📊 Monitoramento
 
-# Resource usage
-docker stats
+### Logs & Métricas
+- Logs estruturados por nível
+- Métricas de performance
+- Estatísticas de uso da IA
+- Monitoramento de WebSocket
 
-# System health
-./scripts/test-connectivity.sh
+### Cache & Performance
+- Cache distribuído
+- TTL configurável
+- Métricas de hit/miss
+- Otimização automática
+
+## 🔧 Configuração
+
+### Variáveis de Ambiente
+```env
+# Server
+PORT=3000
+NODE_ENV=development
+LOG_LEVEL=debug
+
+# IA
+OPENAI_API_KEY=sua_chave
+ANTHROPIC_API_KEY=sua_chave
+
+# Blockchain
+PRIVATE_KEY=sua_chave_privada
+AVALANCHE_RPC_URL=url_do_nó
+CHAINLINK_AUTOMATION_REGISTRY=endereço_do_registro
+
+# Cache
+CACHE_TTL=5
+CACHE_CHECK_PERIOD=1
+
+# Segurança
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX_REQUESTS=100
+
+# Database
+DATABASE_URL=postgresql://user:password@localhost:5432/riskguardian
+
+# Blockchain
+SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/your-project-id
+
+# Smart Contracts
+RISK_REGISTRY_ADDRESS=0x...
+PORTFOLIO_ANALYZER_ADDRESS=0x...
+
+# Auth
+JWT_SECRET=your-secret-key
 ```
 
-## 📚 API Documentation
+## 🤝 Contribuindo
 
-### Backend Endpoints
+1. Faça um Fork
+2. Crie sua Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add: nova funcionalidade'`)
+4. Push para a Branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
 
-- `GET /` - Service health check
-- `GET /api/risks` - Get risk analysis data
-- `POST /api/portfolio/analyze` - Analyze portfolio risk
-- `GET /api/health` - System health status
+## 📝 Licença
 
-### ElizaOS Agent Endpoints
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-- `GET /health` - Agent health check
-- `POST /analyze` - Risk analysis request
-- `GET /status` - Analysis status
+## ✨ Agradecimentos
 
-## 🏆 Tech Stack
+- ElizaOS Framework
+- OpenAI
+- Anthropic
+- Chainlink
+- Avalanche
+- OpenZeppelin
+- Comunidade DeFi
+- Todos os contribuidores
 
-- **Frontend**: Next.js, React, TypeScript
-- **Backend**: Node.js, Express, PostgreSQL
-- **AI**: ElizaOS, OpenAI, Anthropic
-- **Blockchain**: Anvil (Foundry), Chromia
-- **Cache**: Redis
-- **Deployment**: Docker, Docker Compose
-- **Smart Contracts**: Solidity, Foundry
+## 📞 Suporte
 
-## 📄 License
+- GitHub Issues
+- Email: suporte@riskguardian.ai
+- Discord: [RiskGuardian Community](https://discord.gg/riskguardian)
 
-MIT License - see [LICENSE](LICENSE) file for details.
+## 🗺️ Roadmap
 
-## 🙋‍♂️ Support
+### Q2 2024
+- [ ] Suporte a mais blockchains
+- [ ] Análise de protocolos DeFi específicos
+- [ ] Interface mobile
 
-- 📧 **Email**: support@riskguardian.ai
-- 🐛 **Issues**: [GitHub Issues](https://github.com/uederson-ferreira/riskguardian-ai/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/uederson-ferreira/riskguardian-ai/discussions)
+### Q3 2024
+- [ ] Machine Learning para previsões
+- [ ] Integração com mais provedores de IA
+- [ ] API pública
 
----
-
-**Built with ❤️ by the RiskGuardian team**
+### Q4 2024
+- [ ] Alertas personalizados
+- [ ] Relatórios automatizados
+- [ ] Dashboard avançado
