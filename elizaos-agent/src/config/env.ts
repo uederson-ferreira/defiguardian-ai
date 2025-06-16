@@ -17,7 +17,8 @@ const requiredEnvVars = [
   'BSC_RPC_URL',
   'AVALANCHE_RPC_URL',
   'RATE_LIMIT_WINDOW_MS',
-  'RATE_LIMIT_MAX_REQUESTS'
+  'RATE_LIMIT_MAX_REQUESTS',
+  'OPENAI_API_KEY'
 ];
 
 // Check for required environment variables
@@ -35,6 +36,16 @@ export const config = {
 
   // ElizaOS API
   elizaosApiKey: process.env.ELIZAOS_API_KEY,
+
+  // AI Providers
+  openai: {
+    apiKey: process.env.OPENAI_API_KEY,
+    model: process.env.OPENAI_MODEL || 'gpt-4-turbo-preview'
+  },
+  anthropic: {
+    apiKey: process.env.ANTHROPIC_API_KEY,
+    model: process.env.ANTHROPIC_MODEL || 'claude-3-opus-20240229'
+  },
 
   // Blockchain
   ethereum: {
@@ -58,7 +69,7 @@ export const config = {
 
   // Cache Configuration
   cache: {
-    ttl: parseInt(process.env.CACHE_TTL || '300', 10), // 5 minutes
-    checkPeriod: parseInt(process.env.CACHE_CHECK_PERIOD || '60', 10) // 1 minute
+    ttl: parseInt(process.env.CACHE_TTL || '5', 10), // 5 seconds
+    checkPeriod: parseInt(process.env.CACHE_CHECK_PERIOD || '1', 10) // 1 second
   }
 }; 

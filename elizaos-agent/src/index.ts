@@ -7,12 +7,16 @@ import { config } from './config/env';
 import { setupLogging } from './config/logger';
 import { setupRateLimit } from './config/rate-limit';
 import routes from './routes';
+import { createServer } from 'http';
+import { createWebSocketService } from './services/websocket';
+import { aiAgentService } from './services/ai-agent';
 
 // Initialize logger
 const logger = setupLogging();
 
 // Create Express app
 const app = express();
+const server = createServer(app);
 
 // Middleware
 app.use(helmet());
@@ -28,8 +32,33 @@ app.use(express.urlencoded({ extended: true }));
 // Rate limiting
 app.use(setupRateLimit());
 
+// Initialize WebSocket
+const wsService = createWebSocketService(server);
+
 // Routes
 app.use('/api', routes);
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Portfolio analysis endpoint
+app.post('/api/analyze-portfolio', async (req, res) => {
+  try {
+    const { address, context } = req.body;
+
+    if (!address) {
+      return res.status(400).json({ error: 'Address is required' });
+    }
+
+    const analysis = await aiAgentService.analyzePortfolio(address, context);
+    res.json(analysis);
+  } catch (error) {
+    logger.error('Portfolio analysis failed:', error);
+    res.status(500).json({ error: 'Analysis failed' });
+  }
+});
 
 // Error handling
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -38,6 +67,6 @@ app.use((err: Error, req: express.Request, res: express.Response, next: express.
 });
 
 // Start server
-app.listen(config.port, () => {
+server.listen(config.port, () => {
   logger.info(`Server running on port ${config.port}`);
 });
