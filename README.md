@@ -1,184 +1,267 @@
-# RiskGuardian AI
+# ��️ RiskGuardian AI
 
-RiskGuardian AI is a risk analysis platform for smart contracts and crypto markets, powered by ElizaOS.
+Sistema inteligente de análise de risco para portfólios DeFi, utilizando múltiplos modelos de IA.
 
-## Features
+## 🎯 Visão Geral
 
-- Smart contract security analysis
-- Real-time market monitoring
-- Anomaly detection
-- AI chat interface
-- Blockchain integration (Avalanche)
+O RiskGuardian AI é uma plataforma avançada que utiliza inteligência artificial para analisar portfólios DeFi e fornecer insights valiosos sobre riscos e oportunidades. O sistema combina o poder do GPT-4 e Claude para oferecer análises precisas e recomendações personalizadas.
 
-## Technologies
+## ✨ Funcionalidades Principais
+
+### 🔍 Análise de Portfólio
+- Avaliação em tempo real de posições DeFi
+- Cálculo de métricas de risco (fator de saúde, razão de colateral)
+- Detecção de exposição excessiva
+- Análise de diversificação
+
+### 💡 Explicações Inteligentes
+- Tradução de métricas técnicas para linguagem simples
+- Identificação dos principais riscos
+- Sugestões de otimização
+- Conteúdo educacional sobre DeFi
+
+### 📊 Monitoramento de Mercado
+- Acompanhamento de tendências em tempo real
+- Alertas de volatilidade
+- Detecção de anomalias
+- Oportunidades de arbitragem
+
+### 🤖 IA Multimodelo
+- GPT-4 para análise principal
+- Claude para validação e análises complexas
+- Sistema de fallback automático
+- Contexto persistente de conversas
+
+## 🛠️ Tecnologias
 
 ### Backend (ElizaOS Agent)
-- Node.js
-- TypeScript
-- Express
-- Viem
-- Winston (logging)
-- Node Cache
-- Express Validator
-- Rate Limiting
-- Helmet (security)
+- Node.js & TypeScript
+- Express & WebSocket
+- OpenAI & Anthropic APIs
+- Cache distribuído
+- Sistema de logging avançado
 
 ### Frontend
-- Next.js
-- TypeScript
-- Chakra UI
-- React Query
-- Axios
+- Next.js & React
+- WebSocket para updates em tempo real
+- Interface responsiva
+- Gráficos interativos
 
-## Requirements
+## 🚀 Começando
 
-- Node.js v18.0.0 or higher
-- npm v9.0.0 or higher
+### Pré-requisitos
+- Node.js 18+
+- npm ou yarn
+- PostgreSQL
+- Redis (opcional)
 
-## Setup
+### Instalação
 
-1. Clone the repository:
+1. Clone o repositório:
 ```bash
-git clone https://github.com/your-username/riskguardian-ai.git
+git clone https://github.com/uederson-ferreira/riskguardian-ai.git
 cd riskguardian-ai
 ```
 
-2. Set up environment variables:
+2. Instale as dependências:
+```bash
+# Backend
+cd elizaos-agent
+npm install
 
-For backend (elizaos-agent/.env):
+# Frontend
+cd ../frontend
+npm install
+```
+
+3. Configure o ambiente:
+```bash
+# Backend
+cp .env.example .env-dev
+# Edite .env-dev com suas configurações
+
+# Frontend
+cp .env.local.example .env.local
+# Edite .env.local com suas configurações
+```
+
+4. Inicie os serviços:
+```bash
+# Backend
+cd elizaos-agent
+npm run dev
+
+# Frontend
+cd ../frontend
+npm run dev
+```
+
+## 📡 API WebSocket
+
+### Conexão
+```javascript
+const ws = new WebSocket('ws://localhost:3000');
+```
+
+### Mensagens
+
+#### 1. Análise de Portfólio
+```javascript
+ws.send(JSON.stringify({
+  type: 'analyze',
+  address: '0x742d35Cc6635C0532925a3b8D0D8f8Cc86d0AB8B',
+  content: 'Analise meu portfólio DeFi'
+}));
+```
+
+#### 2. Histórico de Análises
+```javascript
+ws.send(JSON.stringify({
+  type: 'history'
+}));
+```
+
+#### 3. Updates de Mercado
+```javascript
+ws.send(JSON.stringify({
+  type: 'market_update',
+  content: {
+    // Dados de mercado
+  }
+}));
+```
+
+### Respostas
+
+#### 1. Resultado de Análise
+```javascript
+{
+  type: 'analysis_result',
+  content: {
+    riskLevel: 'moderado',
+    totalValue: 25000,
+    healthFactor: 2.1,
+    mainRisks: [
+      'Alta concentração em tokens voláteis',
+      'Posição alavancada em DEX'
+    ],
+    recommendations: [
+      'Considere diversificar 20% para stablecoins',
+      'Aumente o colateral para melhorar o fator de saúde'
+    ],
+    explanation: 'Seu portfólio apresenta...'
+  }
+}
+```
+
+#### 2. Histórico
+```javascript
+{
+  type: 'history_result',
+  content: [
+    'Usuário: Analise meu portfólio',
+    'IA: Seu portfólio atual...'
+  ]
+}
+```
+
+#### 3. Erro
+```javascript
+{
+  type: 'error',
+  content: 'Mensagem de erro'
+}
+```
+
+## 🔒 Segurança
+
+### Proteção de Dados
+- Validação rigorosa de inputs
+- Sanitização de dados
+- Rate limiting por IP
+- CORS configurável
+
+### Autenticação & Autorização
+- JWT para autenticação
+- Controle granular de permissões
+- Proteção contra ataques comuns
+- Headers de segurança via Helmet
+
+## 📊 Monitoramento
+
+### Logs & Métricas
+- Logs estruturados por nível
+- Métricas de performance
+- Estatísticas de uso da IA
+- Monitoramento de WebSocket
+
+### Cache & Performance
+- Cache distribuído
+- TTL configurável
+- Métricas de hit/miss
+- Otimização automática
+
+## 🔧 Configuração
+
+### Variáveis de Ambiente
 ```env
-# ElizaOS
-ELIZAOS_API_KEY=your_elizaos_api_key
-ELIZAOS_ENDPOINT=http://localhost:3000
+# Server
+PORT=3000
+NODE_ENV=development
+LOG_LEVEL=debug
 
-# OpenAI
-OPENAI_API_KEY=your_openai_api_key
-
-# Chainlink
-CHAINLINK_NODE_URL=http://localhost:6688
-CHAINLINK_TOKEN=your_chainlink_token
-
-# Blockchain
-WEB3_PROVIDER_URL=https://avax-mainnet.g.alchemy.com/v2/your_api_key
-NETWORK_ID=43114
-BACKUP_WEB3_PROVIDER_URL=https://api.avax.network/ext/bc/C/rpc
-EXPLORER_URL=https://snowtrace.io
+# IA
+OPENAI_API_KEY=sua_chave
+ANTHROPIC_API_KEY=sua_chave
 
 # Cache
-CACHE_TTL=300
-CACHE_CHECK_PERIOD=60
+CACHE_TTL=5
+CACHE_CHECK_PERIOD=1
 
-# Rate Limiting
-RATE_LIMIT_WINDOW=15
+# Segurança
+RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX_REQUESTS=100
-
-# Logging
-LOG_LEVEL=info
-LOG_FILE_PATH=logs/app.log
-ERROR_LOG_FILE_PATH=logs/error.log
 ```
 
-For frontend (frontend/.env.local):
-```env
-# API
-NEXT_PUBLIC_API_URL=http://localhost:3000
+## 🤝 Contribuindo
 
-# Authentication
-NEXT_PUBLIC_AUTH_DOMAIN=your_auth_domain
-NEXT_PUBLIC_AUTH_CLIENT_ID=your_auth_client_id
-NEXT_PUBLIC_AUTH_AUDIENCE=your_auth_audience
+1. Faça um Fork
+2. Crie sua Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add: nova funcionalidade'`)
+4. Push para a Branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
 
-# Feature Flags
-NEXT_PUBLIC_ENABLE_ANALYTICS=false
-NEXT_PUBLIC_ENABLE_CHAT=true
-NEXT_PUBLIC_ENABLE_MARKET_MONITORING=true
-```
+## 📝 Licença
 
-3. Install dependencies and start the development environment:
-```bash
-./start-dev.sh
-```
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-The `start-dev.sh` script will:
-- Install backend and frontend dependencies
-- Set up the development environment
-- Start the backend on port 3000
-- Start the frontend on port 3001
-- Monitor logs for both services
+## ✨ Agradecimentos
 
-## API Endpoints
+- ElizaOS Framework
+- OpenAI
+- Anthropic
+- Comunidade DeFi
+- Todos os contribuidores
 
-### Contract Analysis
-- `POST /analyze-contract`
-  ```json
-  {
-    "contractAddress": "0x...",
-    "chainId": 43114
-  }
-  ```
+## 📞 Suporte
 
-### Market Monitoring
-- `POST /monitor-market`
-  ```json
-  {
-    "assets": ["0x...", "0x..."]
-  }
-  ```
+- GitHub Issues
+- Email: suporte@riskguardian.ai
+- Discord: [RiskGuardian Community](https://discord.gg/riskguardian)
 
-### Anomaly Detection
-- `POST /detect-anomalies`
-  ```json
-  {
-    "price": [...],
-    "volume": [...],
-    "liquidity": [...],
-    "transactions": [...]
-  }
-  ```
+## 🗺️ Roadmap
 
-### Chat
-- `POST /chat`
-  ```json
-  {
-    "message": "string",
-    "context": {}
-  }
-  ```
+### Q2 2024
+- [ ] Suporte a mais blockchains
+- [ ] Análise de protocolos DeFi específicos
+- [ ] Interface mobile
 
-### Blockchain
-- `GET /block/:blockNumber`
-- `GET /balance/:address`
-- `GET /transaction/:txHash`
+### Q3 2024
+- [ ] Machine Learning para previsões
+- [ ] Integração com mais provedores de IA
+- [ ] API pública
 
-## Caching
-
-The system uses in-memory caching to optimize performance:
-- Contract analysis: 5 minutes
-- Market data: 1 minute
-- Key system based on method and parameters
-
-## Logging
-
-Logs are separated into:
-- `logs/app.log`: General application logs
-- `logs/error.log`: Error logs
-
-## Security
-
-- IP-based rate limiting
-- Input validation
-- Configured CORS
-- Security headers via Helmet
-- Data sanitization
-
-## Contributing
-
-1. Fork the project
-2. Create a feature branch (`git checkout -b feature/new-feature`)
-3. Commit your changes (`git commit -am 'Add new feature'`)
-4. Push to the branch (`git push origin feature/new-feature`)
-5. Create a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### Q4 2024
+- [ ] Alertas personalizados
+- [ ] Relatórios automatizados
+- [ ] Dashboard avançado
