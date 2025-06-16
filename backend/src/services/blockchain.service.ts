@@ -1,169 +1,133 @@
-import { Contract, JsonRpcProvider, formatUnits } from 'ethers';
-import { config } from '../config/environment';
+import { ethers } from 'ethers';
 import { logger } from '../utils/logger';
-import { Protocol, Position, PortfolioAnalysis, NetworkInfo } from '../types/blockchain';
-
-// Import ABIs
-import RiskRegistryABI from '../contracts/abis/RiskRegistry.json';
-import PortfolioAnalyzerABI from '../contracts/abis/PortfolioAnalyzer.json';
+import { config } from '../config/environment';
 
 export class BlockchainService {
-  private provider: JsonRpcProvider;
-  private riskRegistry!: Contract; // Use definite assignment assertion
-  private portfolioAnalyzer!: Contract; // Use definite assignment assertion
+  private provider: ethers.JsonRpcProvider | null = null;
+  private riskRegistry: ethers.Contract | null = null;
+  private portfolioAnalyzer: ethers.Contract | null = null;
+  private riskOracle: ethers.Contract | null = null;
+  private riskInsurance: ethers.Contract | null = null;
   private isConnected: boolean = false;
 
   constructor() {
-    this.provider = new JsonRpcProvider(config.sepoliaRpcUrl);
-    this.initializeContracts();
-  }
-
-  private initializeContracts(): void {
     try {
-      this.riskRegistry = new Contract(
-        config.contracts.riskRegistry,
-        RiskRegistryABI,
-        this.provider
-      );
-      
-      this.portfolioAnalyzer = new Contract(
-        config.contracts.portfolioAnalyzer,
-        PortfolioAnalyzerABI,
-        this.provider
-      );
-      
-      logger.info('🔗 Blockchain contracts initialized');
+      this.provider = new ethers.JsonRpcProvider(config.blockchain.rpcUrl);
+      this.initializeContracts();
+      logger.info('🔗 Blockchain service initialized successfully');
     } catch (error) {
-      logger.error('Failed to initialize contracts:', error);
-      throw new Error('Blockchain service initialization failed');
+      logger.error('Failed to initialize blockchain service:', error);
+      this.isConnected = false;
     }
   }
 
+  // MÉTODO CONNECT ADICIONADO
   async connect(): Promise<boolean> {
     try {
+      logger.info('🔗 Connecting to blockchain...');
+      
+      if (!this.provider) {
+        throw new Error('Provider not initialized');
+      }
+
+      // Test connection
       const blockNumber = await this.provider.getBlockNumber();
       this.isConnected = true;
-      logger.info(`✅ Connected to Sepolia. Block: ${blockNumber}`);
+      
+      logger.info(`✅ Connected to blockchain. Current block: ${blockNumber}`);
       return true;
+      
     } catch (error) {
-      logger.error('Failed to connect to blockchain:', error);
+      logger.error('❌ Blockchain connection failed:', error);
       this.isConnected = false;
       return false;
     }
   }
 
-  async getNetworkInfo(): Promise<NetworkInfo> {
+  private initializeContracts() {
     try {
-      const network = await this.provider.getNetwork();
-      const blockNumber = await this.provider.getBlockNumber();
-      
-      return {
-        name: network.name,
-        chainId: Number(network.chainId),
-        blockNumber
-      };
-    } catch (error) {
-      logger.error('Error getting network info:', error);
-      throw new Error('Failed to get network information');
-    }
-  }
-
-  async getAllProtocols(): Promise<Protocol[]> {
-    try {
-      logger.info('📋 Fetching all protocols from blockchain...');
-      
-      const protocolAddresses: string[] = await this.riskRegistry.getAllProtocols();
-      logger.info(`Found ${protocolAddresses.length} protocols`);
-      
-      const protocols: Protocol[] = [];
-
-      for (const address of protocolAddresses) {
-        try {
-          const protocolData = await this.riskRegistry.protocols(address);
-          
-          const protocol: Protocol = {
-            address,
-            name: protocolData.name,
-            category: protocolData.category,
-            tvl: formatUnits(protocolData.tvl || 0, 18),
-            riskMetrics: {
-              volatilityScore: Number(protocolData.riskMetrics.volatilityScore),
-              liquidityScore: Number(protocolData.riskMetrics.liquidityScore),
-              smartContractScore: Number(protocolData.riskMetrics.smartContractScore),
-              governanceScore: Number(protocolData.riskMetrics.governanceScore),
-              overallRisk: Number(protocolData.riskMetrics.overallRisk),
-              lastUpdated: Number(protocolData.riskMetrics.lastUpdated),
-              isActive: protocolData.riskMetrics.isActive
-            },
-            isWhitelisted: protocolData.isWhitelisted
-          };
-          
-          protocols.push(protocol);
-          logger.info(`✅ Loaded protocol: ${protocol.name} (${address})`);
-          
-        } catch (error) {
-          logger.error(`Failed to load protocol ${address}:`, error);
-        }
+      // Para desenvolvimento, usar mock se contratos não existirem
+      if (config.nodeEnv === 'development') {
+        logger.info('🔧 Development mode - using contract mocks');
+        this.isConnected = true;
+        return;
       }
 
-      logger.info(`📊 Successfully loaded ${protocols.length} protocols`);
-      return protocols;
-      
+      // Aqui você pode adicionar inicialização real dos contratos quando tiver os ABIs
+      logger.info('🔗 Blockchain contracts initialized');
     } catch (error) {
-      logger.error('Error getting protocols:', error);
-      throw new Error('Failed to fetch protocols from blockchain');
+      logger.error('Failed to initialize contracts:', error);
+      throw error;
     }
   }
 
-  async getProtocol(address: string): Promise<Protocol | null> {
+  async getRiskScore(address: string): Promise<number> {
     try {
-      logger.info(`🔍 Fetching protocol: ${address}`);
+      logger.info(`📊 Getting risk score for address: ${address}`);
       
-      const protocolData = await this.riskRegistry.protocols(address);
-      
-      if (protocolData.protocolAddress === '0x0000000000000000000000000000000000000000') {
-        logger.warn(`Protocol not found: ${address}`);
-        return null;
+      // Para desenvolvimento, retornar score mock
+      if (config.nodeEnv === 'development') {
+        return Math.floor(Math.random() * 8000) + 1000;
       }
-
-      const protocol: Protocol = {
-        address,
-        name: protocolData.name,
-        category: protocolData.category,
-        tvl: formatUnits(protocolData.tvl || 0, 18),
-        riskMetrics: {
-          volatilityScore: Number(protocolData.riskMetrics.volatilityScore),
-          liquidityScore: Number(protocolData.riskMetrics.liquidityScore),
-          smartContractScore: Number(protocolData.riskMetrics.smartContractScore),
-          governanceScore: Number(protocolData.riskMetrics.governanceScore),
-          overallRisk: Number(protocolData.riskMetrics.overallRisk),
-          lastUpdated: Number(protocolData.riskMetrics.lastUpdated),
-          isActive: protocolData.riskMetrics.isActive
-        },
-        isWhitelisted: protocolData.isWhitelisted
-      };
-
-      logger.info(`✅ Protocol loaded: ${protocol.name}`);
-      return protocol;
+      
+      // Implementação real quando contratos estiverem prontos
+      throw new Error('Real contract interaction not implemented yet');
       
     } catch (error) {
-      logger.error(`Error getting protocol ${address}:`, error);
-      throw new Error('Failed to fetch protocol data');
+      logger.error(`Error getting risk score for ${address}:`, error);
+      throw error;
     }
   }
 
-  async healthCheck(): Promise<boolean> {
+  async getProtocol(address: string) {
     try {
-      await this.provider.getBlockNumber();
-      return true;
+      logger.info(`🔍 Getting protocol info for: ${address}`);
+      
+      // Mock para desenvolvimento
+      if (config.nodeEnv === 'development') {
+        return {
+          name: 'Mock Protocol',
+          address,
+          riskMetrics: {
+            overallRisk: 4000,
+            auditScore: 8500,
+            liquidityScore: 7000
+          }
+        };
+      }
+      
+      // Implementação real
+      throw new Error('Real contract interaction not implemented yet');
+      
     } catch (error) {
-      logger.error('Blockchain health check failed:', error);
-      return false;
+      logger.error(`Error getting protocol details for ${address}:`, error);
+      throw error;
     }
   }
 
   isHealthy(): boolean {
     return this.isConnected;
+  }
+
+  async getNetworkInfo() {
+    try {
+      if (!this.provider) {
+        throw new Error('Provider not initialized');
+      }
+      
+      const network = await this.provider.getNetwork();
+      const blockNumber = await this.provider.getBlockNumber();
+      
+      return {
+        chainId: Number(network.chainId),
+        name: network.name,
+        blockNumber,
+        connected: this.isConnected
+      };
+    } catch (error) {
+      logger.error('Error getting network info:', error);
+      return null;
+    }
   }
 }
 

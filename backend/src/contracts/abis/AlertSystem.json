@@ -2,17 +2,69 @@
   "abi": [
     {
       "type": "constructor",
-      "inputs": [],
+      "inputs": [
+        {
+          "name": "_riskRegistry",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
       "stateMutability": "nonpayable"
     },
     {
       "type": "function",
-      "name": "addRiskAssessor",
+      "name": "checkUserAlerts",
       "inputs": [
         {
-          "name": "_assessor",
+          "name": "_user",
           "type": "address",
           "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "tuple[]",
+          "internalType": "struct AlertSystem.Alert[]",
+          "components": [
+            {
+              "name": "protocolAddress",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "alertType",
+              "type": "uint8",
+              "internalType": "enum AlertSystem.AlertType"
+            },
+            {
+              "name": "timestamp",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "resolved",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ]
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "createSubscription",
+      "inputs": [
+        {
+          "name": "_protocolAddress",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "_riskThreshold",
+          "type": "uint256",
+          "internalType": "uint256"
         }
       ],
       "outputs": [],
@@ -20,21 +72,13 @@
     },
     {
       "type": "function",
-      "name": "getAllProtocols",
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "",
-          "type": "address[]",
-          "internalType": "address[]"
-        }
-      ],
-      "stateMutability": "view"
-    },
-    {
-      "type": "function",
-      "name": "getProtocolRiskMetrics",
+      "name": "getSubscription",
       "inputs": [
+        {
+          "name": "_user",
+          "type": "address",
+          "internalType": "address"
+        },
         {
           "name": "_protocolAddress",
           "type": "address",
@@ -45,15 +89,20 @@
         {
           "name": "",
           "type": "tuple",
-          "internalType": "struct RiskRegistry.RiskMetrics",
+          "internalType": "struct AlertSystem.Subscription",
           "components": [
             {
-              "name": "riskScore",
-              "type": "uint256",
-              "internalType": "uint256"
+              "name": "subscriber",
+              "type": "address",
+              "internalType": "address"
             },
             {
-              "name": "timestamp",
+              "name": "protocolAddress",
+              "type": "address",
+              "internalType": "address"
+            },
+            {
+              "name": "riskThreshold",
               "type": "uint256",
               "internalType": "uint256"
             },
@@ -63,6 +112,25 @@
               "internalType": "bool"
             }
           ]
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getUserSubscriptions",
+      "inputs": [
+        {
+          "name": "_user",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "address[]",
+          "internalType": "address[]"
         }
       ],
       "stateMutability": "view"
@@ -102,7 +170,14 @@
     },
     {
       "type": "function",
-      "name": "registerProtocol",
+      "name": "renounceOwnership",
+      "inputs": [],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "resolveAlert",
       "inputs": [
         {
           "name": "_protocolAddress",
@@ -115,23 +190,16 @@
     },
     {
       "type": "function",
-      "name": "removeRiskAssessor",
-      "inputs": [
+      "name": "riskRegistry",
+      "inputs": [],
+      "outputs": [
         {
-          "name": "_assessor",
+          "name": "",
           "type": "address",
           "internalType": "address"
         }
       ],
-      "outputs": [],
-      "stateMutability": "nonpayable"
-    },
-    {
-      "type": "function",
-      "name": "renounceOwnership",
-      "inputs": [],
-      "outputs": [],
-      "stateMutability": "nonpayable"
+      "stateMutability": "view"
     },
     {
       "type": "function",
@@ -155,7 +223,7 @@
     },
     {
       "type": "function",
-      "name": "updateRiskMetrics",
+      "name": "updateSubscription",
       "inputs": [
         {
           "name": "_protocolAddress",
@@ -163,13 +231,57 @@
           "internalType": "address"
         },
         {
-          "name": "_riskScore",
+          "name": "_newRiskThreshold",
           "type": "uint256",
           "internalType": "uint256"
         }
       ],
       "outputs": [],
       "stateMutability": "nonpayable"
+    },
+    {
+      "type": "event",
+      "name": "AlertCreated",
+      "inputs": [
+        {
+          "name": "user",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "protocolAddress",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "alertType",
+          "type": "uint8",
+          "indexed": false,
+          "internalType": "enum AlertSystem.AlertType"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "AlertResolved",
+      "inputs": [
+        {
+          "name": "user",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "protocolAddress",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        }
+      ],
+      "anonymous": false
     },
     {
       "type": "event",
@@ -205,47 +317,14 @@
     },
     {
       "type": "event",
-      "name": "ProtocolRegistered",
+      "name": "SubscriptionCreated",
       "inputs": [
         {
-          "name": "protocolAddress",
+          "name": "subscriber",
           "type": "address",
           "indexed": true,
           "internalType": "address"
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "RiskAssessorAdded",
-      "inputs": [
-        {
-          "name": "assessor",
-          "type": "address",
-          "indexed": true,
-          "internalType": "address"
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "RiskAssessorRemoved",
-      "inputs": [
-        {
-          "name": "assessor",
-          "type": "address",
-          "indexed": true,
-          "internalType": "address"
-        }
-      ],
-      "anonymous": false
-    },
-    {
-      "type": "event",
-      "name": "RiskMetricsUpdated",
-      "inputs": [
+        },
         {
           "name": "protocolAddress",
           "type": "address",
@@ -253,7 +332,32 @@
           "internalType": "address"
         },
         {
-          "name": "riskScore",
+          "name": "riskThreshold",
+          "type": "uint256",
+          "indexed": false,
+          "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "SubscriptionUpdated",
+      "inputs": [
+        {
+          "name": "subscriber",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "protocolAddress",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "newRiskThreshold",
           "type": "uint256",
           "indexed": false,
           "internalType": "uint256"

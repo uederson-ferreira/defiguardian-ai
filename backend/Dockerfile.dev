@@ -1,23 +1,57 @@
-# backend/Dockerfile.dev
-FROM node:20-alpine
+FROM node:20.11.1-alpine3.19-slim@sha256:c0a3badbd8a0a788de0c1cf4876d0b5da429516739c26c9845be0db3f3f2c2a4
 
+# Adicionar informações de segurança
+LABEL maintainer="RiskGuardian Team"
+LABEL description="RiskGuardian AI Backend Development Container"
+LABEL version="1.0.0"
+
+# Criar usuário não-root para segurança
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S backend -u 1001
+
+# Definir diretório de trabalho
 WORKDIR /app
 
-# Install system dependencies
-RUN apk add --no-cache python3 make g++
+# Instalar dependências do sistema de forma segura
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    git \
+    curl \
+    && rm -rf /var/cache/apk/*
 
-# Install dependencies
+# Atualizar npm para versão mais segura
+RUN npm install -g npm@latest
+
+# Copiar arquivos de dependências primeiro (para cache layer)
 COPY package*.json ./
-RUN npm install
 
-# Install development tools
-RUN npm install -g nodemon
+# Instalar dependências
+RUN npm ci --only=production=false && \
+    npm cache clean --force
 
-# Copy source code
+# Instalar ferramentas de desenvolvimento globalmente
+RUN npm install -g nodemon@3.0.3 prisma@5.9.1
+
+# Copiar código fonte
 COPY . .
 
-# Expose port
+# Alterar proprietário dos arquivos para usuário não-root
+RUN chown -R backend:nodejs /app
+
+# Mudar para usuário não-root
+USER backend
+
+# Gerar Prisma client
+RUN npx prisma generate
+
+# Expor porta
 EXPOSE 8000
 
-# Development command with hot reload
-CMD ["npm", "run", "dev"] 
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Comando de desenvolvimento com hot reload
+CMD ["npm", "run", "dev"]

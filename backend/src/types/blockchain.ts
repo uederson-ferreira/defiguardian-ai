@@ -35,3 +35,41 @@ export interface NetworkInfo {
   chainId: number;
   blockNumber: number;
 }
+
+export interface RiskData {
+  protocol: string;
+  riskScore: number;
+  timestamp: number;
+  provider: string;
+  data: any;
+}
+
+export interface InsurancePolicy {
+  id: number;
+  protocol: string;
+  holder: string;
+  amount: string;
+  premium: string;
+  startTime: number;
+  endTime: number;
+  isActive: boolean;
+  isClaimed: boolean;
+}
+
+export interface InsurancePool {
+  protocol: string;
+  totalFunds: string;
+  availableFunds: string;
+  totalPolicies: number;
+  riskFactor: number;
+}
+
+export interface Alert {
+  id: number;
+  user: string;
+  protocol: string;
+  threshold: number;
+  condition: string;
+  isActive: boolean;
+  lastTriggered: number;
+}

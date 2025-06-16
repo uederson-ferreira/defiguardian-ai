@@ -186,6 +186,8 @@ deployments/optimism/
 
 .gitmodules
 */.gitmodules
+.env.bak
+*/.env.bak
 
 # Keep local/test deployments for reference
 # deployments/localhost/

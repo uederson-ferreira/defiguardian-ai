@@ -13,17 +13,25 @@
     },
     {
       "type": "function",
-      "name": "analyzePortfolioRisk",
+      "name": "addRiskProvider",
       "inputs": [
         {
-          "name": "_user",
+          "name": "_provider",
           "type": "address",
           "internalType": "address"
-        },
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
+      "name": "getAggregatedRisk",
+      "inputs": [
         {
-          "name": "_protocols",
-          "type": "address[]",
-          "internalType": "address[]"
+          "name": "_protocolAddress",
+          "type": "address",
+          "internalType": "address"
         }
       ],
       "outputs": [
@@ -31,6 +39,42 @@
           "name": "",
           "type": "uint256",
           "internalType": "uint256"
+        }
+      ],
+      "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "getRiskData",
+      "inputs": [
+        {
+          "name": "_protocolAddress",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "",
+          "type": "tuple",
+          "internalType": "struct RiskOracle.RiskData",
+          "components": [
+            {
+              "name": "riskScore",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "timestamp",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "isValid",
+              "type": "bool",
+              "internalType": "bool"
+            }
+          ]
         }
       ],
       "stateMutability": "view"
@@ -70,6 +114,19 @@
     },
     {
       "type": "function",
+      "name": "removeRiskProvider",
+      "inputs": [
+        {
+          "name": "_provider",
+          "type": "address",
+          "internalType": "address"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
+    },
+    {
+      "type": "function",
       "name": "renounceOwnership",
       "inputs": [],
       "outputs": [],
@@ -87,6 +144,24 @@
         }
       ],
       "stateMutability": "view"
+    },
+    {
+      "type": "function",
+      "name": "submitRiskData",
+      "inputs": [
+        {
+          "name": "_protocolAddress",
+          "type": "address",
+          "internalType": "address"
+        },
+        {
+          "name": "_riskScore",
+          "type": "uint256",
+          "internalType": "uint256"
+        }
+      ],
+      "outputs": [],
+      "stateMutability": "nonpayable"
     },
     {
       "type": "function",
@@ -142,10 +217,16 @@
     },
     {
       "type": "event",
-      "name": "PortfolioRiskAnalyzed",
+      "name": "RiskDataSubmitted",
       "inputs": [
         {
-          "name": "user",
+          "name": "provider",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        },
+        {
+          "name": "protocolAddress",
           "type": "address",
           "indexed": true,
           "internalType": "address"
@@ -155,6 +236,32 @@
           "type": "uint256",
           "indexed": false,
           "internalType": "uint256"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "RiskProviderAdded",
+      "inputs": [
+        {
+          "name": "provider",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
+        }
+      ],
+      "anonymous": false
+    },
+    {
+      "type": "event",
+      "name": "RiskProviderRemoved",
+      "inputs": [
+        {
+          "name": "provider",
+          "type": "address",
+          "indexed": true,
+          "internalType": "address"
         }
       ],
       "anonymous": false

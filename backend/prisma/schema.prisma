@@ -1,3 +1,6 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,90 +13,132 @@ datasource db {
 model User {
   id        String   @id @default(cuid())
   address   String   @unique
-  nonce     String   @default(cuid())
+  nonce     String   @default(cuid()) // ✅ CORRIGIDO: removido ? para ser obrigatório
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  portfolios Portfolio[]
+  portfolios        Portfolio[]        // ✅ ADICIONADO: relação com Portfolio
   insurancePolicies InsurancePolicy[]
-  alertSubscriptions AlertSubscription[]
+  claims            Claim[]
 
   @@map("users")
 }
 
+// ✅ ADICIONADO: Modelo Portfolio completo que estava faltando
 model Portfolio {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  name        String?
+  name      String?
   description String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  // Cached analytics
+  // ✅ Campos que estavam causando os erros TypeScript
   lastRiskScore        Int?      // Basis points
-  lastTotalValue       Decimal?  // USD value
+  lastTotalValue       String?   // USD value como String para números grandes
   lastDiversification  Int?      // Diversification score
-  lastAnalysisAt       DateTime?
+  lastAnalysisAt       DateTime? // Campo que estava faltando
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("portfolios")
 }
 
 model InsurancePolicy {
-  id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String            @id @default(cuid())
+  userId           String
+  userAddress      String
+  policyType       PolicyType
+  coverageAmount   String            // Using String for big numbers
+  premium          String
+  duration         Int               // in days
+  status           PolicyStatus      @default(ACTIVE)
+  riskScore        Float?
+  startDate        DateTime          @default(now())
+  endDate          DateTime
+  contractAddress  String?
+  transactionHash  String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 
-  // Policy details
-  coverageAmount  Decimal
-  premium         Decimal
-  riskThreshold   Int      // Basis points
-  duration        Int      // Seconds
-  
-  // Status
-  isActive    Boolean   @default(true)
-  hasClaimed  Boolean   @default(false)
-  claimedAt   DateTime?
-  payoutAmount Decimal?
-
-  // Blockchain data
-  policyId      String    // On-chain policy ID
-  txHash        String?   // Creation transaction
-  claimTxHash   String?   // Claim transaction
-  
-  createdAt DateTime @default(now())
-  expiresAt DateTime
+  // Relations
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  claims Claim[]
 
   @@map("insurance_policies")
 }
 
-model AlertSubscription {
-  id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+model Claim {
+  id              String      @id @default(cuid())
+  policyId        String
+  userId          String
+  claimType       ClaimType
+  amount          String      // Using String for big numbers
+  description     String?
+  evidence        String?     // JSON string for evidence data
+  status          ClaimStatus @default(PENDING)
+  submittedAt     DateTime    @default(now())
+  processedAt     DateTime?
+  approvedAmount  String?
+  rejectionReason String?
+  transactionHash String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 
-  alertType       Int     // 0=RISK_THRESHOLD, 1=LIQUIDATION_WARNING, etc.
-  protocolAddress String?
-  threshold       Int     // Basis points
-  isActive        Boolean @default(true)
-  
-  cooldownMinutes  Int     @default(60)
-  lastTriggeredAt  DateTime?
-  
-  createdAt DateTime @default(now())
+  // Relations
+  policy InsurancePolicy @relation(fields: [policyId], references: [id], onDelete: Cascade)
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("alert_subscriptions")
+  @@map("claims")
 }
 
-model CacheEntry {
-  id        String   @id @default(cuid())
-  key       String   @unique
-  value     Json
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+model RiskAssessment {
+  id                String   @id @default(cuid())
+  userAddress       String
+  protocolAddress   String?
+  riskScore         Float
+  volatilityScore   Float?
+  liquidityScore    Float?
+  auditScore        Float?
+  assessmentData    String   // JSON string for detailed data
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
-  @@map("cache_entries")
+  @@map("risk_assessments")
+}
+
+// Enums
+enum PolicyType {
+  SMART_CONTRACT
+  DEFI_PROTOCOL
+  WALLET_PROTECTION
+  YIELD_FARMING
+  LIQUIDITY_MINING
+}
+
+enum PolicyStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  CLAIMED
+}
+
+enum ClaimType {
+  SMART_CONTRACT_HACK
+  PROTOCOL_FAILURE
+  IMPERMANENT_LOSS
+  LIQUIDATION
+  ORACLE_FAILURE
+  OTHER
+}
+
+enum ClaimStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  PAID
 }

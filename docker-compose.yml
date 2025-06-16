@@ -25,10 +25,10 @@ services:
       context: ./backend
       dockerfile: Dockerfile.dev
     ports:
-      - "8000:8000"
+      - "8001:8001"
     environment:
       - NODE_ENV=development
-      - PORT=8000
+      - PORT=8001
       - CHROMIA_URL=http://chromia-node:7740
       - REDIS_URL=redis://redis:6379
       - ETHEREUM_RPC_URL=https://sepolia.drpc.org
@@ -77,7 +77,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - CHROMIA_URL=http://chromia-node:7740
-      - BACKEND_URL=http://backend:8000
+      - BACKEND_URL=http://backend:8002
       - REDIS_URL=redis://redis:6379
       - ETHEREUM_RPC_URL=http://anvil:8545
       - CHAINLINK_API_KEY=${CHAINLINK_API_KEY}
@@ -100,7 +100,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./chromia/database/init:/docker-entrypoint-initdb.d
     networks:
       - riskguardian-network
     restart: unless-stopped
@@ -109,7 +108,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
+      
   chromia-node:
     image: nginx:alpine
     ports:
