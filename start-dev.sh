@@ -123,7 +123,7 @@ check_service() {
             print_status "$service is running on port $port"
             return 0
         fi
-        sleep 1
+    sleep 1
         attempt=$((attempt + 1))
     done
     print_error "$service failed to start on port $port"
