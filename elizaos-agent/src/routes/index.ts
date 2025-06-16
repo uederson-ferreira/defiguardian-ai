@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { elizaosService } from '../services/elizaos';
 import { blockchainService } from '../services/blockchain';
 import { cacheService } from '../services/cache';
@@ -6,7 +6,7 @@ import { cacheService } from '../services/cache';
 const router = Router();
 
 // Health check
-router.get('/health', async (req, res) => {
+router.get('/health', async (_req: Request, res: Response): Promise<void> => {
   try {
     const elizaosHealth = await elizaosService.healthCheck();
     res.json({ status: 'ok', elizaos: elizaosHealth });
@@ -16,17 +16,19 @@ router.get('/health', async (req, res) => {
 });
 
 // Analyze contract
-router.post('/analyze-contract', async (req, res) => {
+router.post('/analyze-contract', async (req: Request, res: Response): Promise<void> => {
   try {
     const { contractAddress } = req.body;
     if (!contractAddress) {
-      return res.status(400).json({ status: 'error', message: 'Contract address is required' });
+      res.status(400).json({ status: 'error', message: 'Contract address is required' });
+      return;
     }
 
     // Check cache first
     const cachedResult = cacheService.get(`contract:${contractAddress}`);
     if (cachedResult) {
-      return res.json(cachedResult);
+      res.json(cachedResult);
+      return;
     }
 
     // Get analysis from ElizaOS
@@ -42,18 +44,20 @@ router.post('/analyze-contract', async (req, res) => {
 });
 
 // Monitor market
-router.post('/monitor-market', async (req, res) => {
+router.post('/monitor-market', async (req: Request, res: Response): Promise<void> => {
   try {
     const { assets } = req.body;
     if (!assets || !Array.isArray(assets) || assets.length === 0) {
-      return res.status(400).json({ status: 'error', message: 'Assets array is required' });
+      res.status(400).json({ status: 'error', message: 'Assets array is required' });
+      return;
     }
 
     // Check cache first
     const cacheKey = `market:${assets.sort().join(',')}`;
     const cachedResult = cacheService.get(cacheKey);
     if (cachedResult) {
-      return res.json(cachedResult);
+      res.json(cachedResult);
+      return;
     }
 
     // Get market data from ElizaOS
@@ -69,14 +73,15 @@ router.post('/monitor-market', async (req, res) => {
 });
 
 // Get balances
-router.get('/balances/:address', async (req, res) => {
+router.get('/balances/:address', async (req: Request, res: Response): Promise<void> => {
   try {
     const { address } = req.params;
     
     // Check cache first
     const cachedResult = cacheService.get(`balances:${address}`);
     if (cachedResult) {
-      return res.json(cachedResult);
+      res.json(cachedResult);
+      return;
     }
 
     // Get balances from different chains

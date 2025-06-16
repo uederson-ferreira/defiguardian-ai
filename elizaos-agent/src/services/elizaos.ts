@@ -1,6 +1,3 @@
-import axios from 'axios';
-import { config } from '../config/env';
-
 interface MarketData {
   price: number;
   volume24h: number;
@@ -17,17 +14,39 @@ interface MarketData {
   timestamp: number;
 }
 
-// Create a mock API client for development
-const elizaosApi = axios.create({
-  baseURL: 'http://localhost:3001/api', // Local mock server
-  headers: {
-    'Authorization': `Bearer ${config.elizaosApiKey}`,
-    'Content-Type': 'application/json'
-  }
-});
+interface ContractAnalysis {
+  security: {
+    score: number;
+    issues: Array<{
+      severity: 'low' | 'medium' | 'high';
+      description: string;
+      recommendation: string;
+    }>;
+  };
+  efficiency: {
+    score: number;
+    recommendations: string[];
+    gasUsage: {
+      average: number;
+      peak: number;
+    };
+  };
+  bestPractices: {
+    score: number;
+    suggestions: string[];
+  };
+  riskLevel: 'low' | 'moderate' | 'high';
+  lastUpdated: string;
+}
+
+interface HealthCheckResponse {
+  status: 'ok' | 'error';
+  version: string;
+  timestamp: string;
+}
 
 export const elizaosService = {
-  async healthCheck() {
+  async healthCheck(): Promise<HealthCheckResponse> {
     try {
       // Mock response for development
       return {
@@ -40,7 +59,7 @@ export const elizaosService = {
     }
   },
 
-  async analyzeContract(contractAddress: string) {
+  async analyzeContract(_contractAddress: string): Promise<ContractAnalysis> {
     try {
       // Mock response for development
       return {
@@ -74,7 +93,7 @@ export const elizaosService = {
     }
   },
 
-  async monitorMarket(assets: string[]) {
+  async monitorMarket(assets: string[]): Promise<Record<string, MarketData>> {
     try {
       // Mock response for development
       const mockData: Record<string, MarketData> = {};

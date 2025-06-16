@@ -19,6 +19,7 @@ interface PortfolioAnalysis {
 }
 
 class OpenAIProvider implements AIProvider {
+  public readonly name = 'OpenAI';
   private client: OpenAI;
   private readonly SYSTEM_PROMPT = `You are an expert DeFi risk analyst. Analyze portfolios and explain risks in simple English.
 Focus on:
@@ -56,6 +57,7 @@ Provide actionable recommendations based on risk tolerance.`;
 }
 
 class AnthropicProvider implements AIProvider {
+  public readonly name = 'Anthropic';
   private client: Anthropic;
   private readonly SYSTEM_PROMPT = `You are Claude, an expert DeFi risk analyst. Analyze portfolios and explain risks in simple English.`;
 
@@ -76,7 +78,16 @@ class AnthropicProvider implements AIProvider {
         ]
       });
 
-      return response.content[0].text;
+      if (!response.content || response.content.length === 0) {
+        return 'No analysis available';
+      }
+
+      const textContent = response.content[0];
+      if ('text' in textContent) {
+        return textContent.text;
+      }
+
+      return 'No analysis available';
     } catch (error) {
       logger.error('Anthropic analysis failed:', error);
       throw error;
@@ -96,7 +107,7 @@ class AIAgentService {
     this.conversationHistory = new Map();
 
     logger.info('AI Agent Service initialized with providers:', {
-      providers: this.providers.map(p => p.constructor.name)
+      providers: this.providers.map(p => p.name)
     });
   }
 
@@ -123,12 +134,12 @@ class AIAgentService {
       try {
         const result = await provider.analyze(input);
         logger.info('Analysis successful with provider:', {
-          provider: provider.constructor.name
+          provider: provider.name
         });
         return result;
       } catch (error) {
         logger.warn('Provider failed, trying next:', {
-          provider: provider.constructor.name,
+          provider: provider.name,
           error
         });
         continue;

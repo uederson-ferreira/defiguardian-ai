@@ -1,6 +1,6 @@
 import { body, query, param, validationResult } from 'express-validator';
 import { Request, Response, NextFunction } from 'express';
-import { logger } from '../config/logger';
+import logger from '../config/logger';
 
 // Função para validar endereços Ethereum
 const isValidEthereumAddress = (address: string): boolean => {
@@ -14,17 +14,18 @@ const isValidChainId = (chainId: number): boolean => {
 };
 
 // Middleware para validar resultados
-export const validate = (req: Request, res: Response, next: NextFunction) => {
+export const validate = (req: Request, res: Response, next: NextFunction): void => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     logger.warn('Validation failed', {
       path: req.path,
       errors: errors.array()
     });
-    return res.status(400).json({
+    res.status(400).json({
       error: 'Validation Error',
       details: errors.array()
     });
+    return;
   }
   next();
 };
@@ -35,7 +36,7 @@ export const validateContractAnalysis = [
     .trim()
     .notEmpty()
     .withMessage('O endereço do contrato é obrigatório')
-    .custom((value) => {
+    .custom((value: string) => {
       if (!isValidEthereumAddress(value)) {
         throw new Error('Endereço de contrato inválido');
       }
@@ -44,7 +45,7 @@ export const validateContractAnalysis = [
   body('chainId')
     .isInt()
     .withMessage('Chain ID deve ser um número inteiro')
-    .custom((value) => {
+    .custom((value: number) => {
       if (!isValidChainId(value)) {
         throw new Error('Chain ID não suportado');
       }
@@ -72,7 +73,7 @@ export const validateMarketMonitoring = [
 // Validações para detecção de anomalias
 export const validateAnomalyDetection = [
   body()
-    .custom((value) => {
+    .custom((value: Record<string, unknown>) => {
       const requiredFields = ['price', 'volume', 'liquidity', 'transactions'];
       const hasAtLeastOne = requiredFields.some(field => Array.isArray(value[field]) && value[field].length > 0);
       if (!hasAtLeastOne) {
@@ -84,8 +85,8 @@ export const validateAnomalyDetection = [
     .optional()
     .isArray()
     .withMessage('O campo price deve ser um array de números')
-    .custom((value) => {
-      if (!value.every((n: any) => typeof n === 'number' && !isNaN(n))) {
+    .custom((value: unknown[]) => {
+      if (!value.every((n) => typeof n === 'number' && !isNaN(n))) {
         throw new Error('Todos os valores de price devem ser números válidos');
       }
       return true;
@@ -94,8 +95,8 @@ export const validateAnomalyDetection = [
     .optional()
     .isArray()
     .withMessage('O campo volume deve ser um array de números')
-    .custom((value) => {
-      if (!value.every((n: any) => typeof n === 'number' && !isNaN(n))) {
+    .custom((value: unknown[]) => {
+      if (!value.every((n) => typeof n === 'number' && !isNaN(n))) {
         throw new Error('Todos os valores de volume devem ser números válidos');
       }
       return true;
@@ -104,8 +105,8 @@ export const validateAnomalyDetection = [
     .optional()
     .isArray()
     .withMessage('O campo liquidity deve ser um array de números')
-    .custom((value) => {
-      if (!value.every((n: any) => typeof n === 'number' && !isNaN(n))) {
+    .custom((value: unknown[]) => {
+      if (!value.every((n) => typeof n === 'number' && !isNaN(n))) {
         throw new Error('Todos os valores de liquidity devem ser números válidos');
       }
       return true;
@@ -114,8 +115,8 @@ export const validateAnomalyDetection = [
     .optional()
     .isArray()
     .withMessage('O campo transactions deve ser um array de números')
-    .custom((value) => {
-      if (!value.every((n: any) => typeof n === 'number' && !isNaN(n))) {
+    .custom((value: unknown[]) => {
+      if (!value.every((n) => typeof n === 'number' && !isNaN(n))) {
         throw new Error('Todos os valores de transactions devem ser números válidos');
       }
       return true;
@@ -143,7 +144,7 @@ export const validateRouteParams = {
   // Validação de endereço
   address: param('address')
     .trim()
-    .custom((value) => {
+    .custom((value: string) => {
       if (!isValidEthereumAddress(value)) {
         throw new Error('Endereço inválido');
       }

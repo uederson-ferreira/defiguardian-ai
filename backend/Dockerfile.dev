@@ -11,7 +11,7 @@ COPY package*.json ./
 RUN npm install
 
 # Install development tools
-RUN npm install -g nodemon
+RUN npm install -g nodemon ts-node typescript
 
 # Copy source code
 COPY . .

@@ -33,13 +33,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(setupRateLimit());
 
 // Initialize WebSocket
-const wsService = createWebSocketService(server);
+createWebSocketService(server);
 
 // Routes
 app.use('/api', routes);
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
@@ -53,17 +53,17 @@ app.post('/api/analyze-portfolio', async (req, res) => {
     }
 
     const analysis = await aiAgentService.analyzePortfolio(address, context);
-    res.json(analysis);
+    return res.json(analysis);
   } catch (error) {
     logger.error('Portfolio analysis failed:', error);
-    res.status(500).json({ error: 'Analysis failed' });
+    return res.status(500).json({ error: 'Analysis failed' });
   }
 });
 
 // Error handling
-app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  logger.error('Unhandled error:', err);
-  res.status(500).json({ status: 'error', message: 'Internal server error' });
+app.use((_err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  logger.error('Unhandled error:', _err);
+  return res.status(500).json({ status: 'error', message: 'Internal server error' });
 });
 
 // Start server

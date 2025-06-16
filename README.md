@@ -1,10 +1,10 @@
-# ��️ RiskGuardian AI
+# 🛡️ RiskGuardian AI
 
-Sistema inteligente de análise de risco para portfólios DeFi, utilizando múltiplos modelos de IA.
+Sistema inteligente de análise de risco e automação de hedge para portfólios DeFi, utilizando múltiplos modelos de IA e contratos inteligentes.
 
 ## 🎯 Visão Geral
 
-O RiskGuardian AI é uma plataforma avançada que utiliza inteligência artificial para analisar portfólios DeFi e fornecer insights valiosos sobre riscos e oportunidades. O sistema combina o poder do GPT-4 e Claude para oferecer análises precisas e recomendações personalizadas.
+O RiskGuardian AI é uma plataforma avançada que combina inteligência artificial e contratos inteligentes para analisar e proteger portfólios DeFi. O sistema utiliza GPT-4 e Claude para análises, junto com Chainlink Automation e CCIP para execução automatizada de estratégias de hedge.
 
 ## ✨ Funcionalidades Principais
 
@@ -13,6 +13,12 @@ O RiskGuardian AI é uma plataforma avançada que utiliza inteligência artifici
 - Cálculo de métricas de risco (fator de saúde, razão de colateral)
 - Detecção de exposição excessiva
 - Análise de diversificação
+
+### 🤖 Automação de Hedge
+- Execução automática via Chainlink Automation
+- Estratégias de stop loss e take profit
+- Rebalanceamento cross-chain via CCIP
+- Monitoramento de preços em tempo real
 
 ### 💡 Explicações Inteligentes
 - Tradução de métricas técnicas para linguagem simples
@@ -26,13 +32,13 @@ O RiskGuardian AI é uma plataforma avançada que utiliza inteligência artifici
 - Detecção de anomalias
 - Oportunidades de arbitragem
 
-### 🤖 IA Multimodelo
-- GPT-4 para análise principal
-- Claude para validação e análises complexas
-- Sistema de fallback automático
-- Contexto persistente de conversas
-
 ## 🛠️ Tecnologias
+
+### Smart Contracts
+- Solidity & Hardhat
+- Chainlink Automation & CCIP
+- OpenZeppelin Contracts
+- Gelato Network Automation
 
 ### Backend (ElizaOS Agent)
 - Node.js & TypeScript
@@ -65,6 +71,9 @@ cd riskguardian-ai
 
 2. Instale as dependências:
 ```bash
+# Projeto principal
+npm install
+
 # Backend
 cd elizaos-agent
 npm install
@@ -76,16 +85,27 @@ npm install
 
 3. Configure o ambiente:
 ```bash
+# Projeto principal
+cp .env.example .env-dev
+# Edite .env-dev com suas configurações
+
 # Backend
+cd elizaos-agent
 cp .env.example .env-dev
 # Edite .env-dev com suas configurações
 
 # Frontend
+cd ../frontend
 cp .env.local.example .env.local
 # Edite .env.local com suas configurações
 ```
 
-4. Inicie os serviços:
+4. Compile os contratos:
+```bash
+npx hardhat compile
+```
+
+5. Inicie os serviços:
 ```bash
 # Backend
 cd elizaos-agent
@@ -94,6 +114,34 @@ npm run dev
 # Frontend
 cd ../frontend
 npm run dev
+```
+
+## 📡 Smart Contracts
+
+### Contratos Principais
+
+#### HedgeAutomation.sol
+- Gerenciamento de estratégias de hedge
+- Monitoramento de preços via Chainlink
+- Execução automática de operações
+- Suporte a stop loss e take profit
+
+#### CrossChainHedge.sol
+- Operações cross-chain via CCIP
+- Rebalanceamento entre redes
+- Verificações de slippage
+- Proteções de segurança
+
+### Deploy
+
+Para fazer deploy na testnet Fuji:
+```bash
+npx hardhat deploy --network fuji
+```
+
+Para fazer deploy na mainnet Avalanche:
+```bash
+npx hardhat deploy --network avalanche
 ```
 
 ## 📡 API WebSocket
@@ -121,16 +169,6 @@ ws.send(JSON.stringify({
 }));
 ```
 
-#### 3. Updates de Mercado
-```javascript
-ws.send(JSON.stringify({
-  type: 'market_update',
-  content: {
-    // Dados de mercado
-  }
-}));
-```
-
 ### Respostas
 
 #### 1. Resultado de Análise
@@ -154,26 +192,13 @@ ws.send(JSON.stringify({
 }
 ```
 
-#### 2. Histórico
-```javascript
-{
-  type: 'history_result',
-  content: [
-    'Usuário: Analise meu portfólio',
-    'IA: Seu portfólio atual...'
-  ]
-}
-```
-
-#### 3. Erro
-```javascript
-{
-  type: 'error',
-  content: 'Mensagem de erro'
-}
-```
-
 ## 🔒 Segurança
+
+### Smart Contracts
+- Auditorias de segurança
+- Verificações de slippage
+- Proteções contra reentrância
+- Padrões OpenZeppelin
 
 ### Proteção de Dados
 - Validação rigorosa de inputs
@@ -214,6 +239,11 @@ LOG_LEVEL=debug
 OPENAI_API_KEY=sua_chave
 ANTHROPIC_API_KEY=sua_chave
 
+# Blockchain
+PRIVATE_KEY=sua_chave_privada
+AVALANCHE_RPC_URL=url_do_nó
+CHAINLINK_AUTOMATION_REGISTRY=endereço_do_registro
+
 # Cache
 CACHE_TTL=5
 CACHE_CHECK_PERIOD=1
@@ -221,6 +251,19 @@ CACHE_CHECK_PERIOD=1
 # Segurança
 RATE_LIMIT_WINDOW_MS=900000
 RATE_LIMIT_MAX_REQUESTS=100
+
+# Database
+DATABASE_URL=postgresql://user:password@localhost:5432/riskguardian
+
+# Blockchain
+SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/your-project-id
+
+# Smart Contracts
+RISK_REGISTRY_ADDRESS=0x...
+PORTFOLIO_ANALYZER_ADDRESS=0x...
+
+# Auth
+JWT_SECRET=your-secret-key
 ```
 
 ## 🤝 Contribuindo
@@ -240,6 +283,9 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 - ElizaOS Framework
 - OpenAI
 - Anthropic
+- Chainlink
+- Avalanche
+- OpenZeppelin
 - Comunidade DeFi
 - Todos os contribuidores
 

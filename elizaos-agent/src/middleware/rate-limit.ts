@@ -1,12 +1,23 @@
 import rateLimit from 'express-rate-limit';
 import { Request, Response } from 'express';
 import { config } from '../config/env';
-import { logger } from '../config/logger';
+import logger from '../config/logger';
+
+interface ExtendedRequest extends Request {
+  body: {
+    contractAddress?: string;
+  };
+  query: {
+    contractAddress?: string;
+  };
+}
 
 // Configuração do rate limiter
 export const rateLimiter = rateLimit({
   windowMs: config.rateLimit.windowMs,
-  max: config.rateLimit.max
+  max: config.rateLimit.max,
+  standardHeaders: true,
+  legacyHeaders: false
 });
 
 // Rate limiter específico para rotas de análise
@@ -26,18 +37,10 @@ export const analysisRateLimiter = rateLimit({
       retryAfter: res.getHeader('Retry-After')
     });
   },
-  keyGenerator: (req: Request): string => {
+  keyGenerator: (req: ExtendedRequest): string => {
     // Usar IP + contractAddress como chave para limitar por contrato
-    const contractAddress = (req.body?.contractAddress || req.query?.contractAddress) as string;
-    return `${req.ip}-${contractAddress || 'default'}`;
-  },
-  onLimitReached: (req) => {
     const contractAddress = req.body?.contractAddress || req.query?.contractAddress;
-    logger.warn('Analysis rate limit reached', {
-      ip: req.ip,
-      contractAddress,
-      headers: req.headers
-    });
+    return `${req.ip}-${contractAddress || 'default'}`;
   }
 });
 
@@ -64,12 +67,6 @@ export const chatRateLimiter = rateLimit({
   },
   keyGenerator: (req: Request): string => {
     // Usar IP como chave para limitar por usuário
-    return req.ip;
-  },
-  onLimitReached: (req) => {
-    logger.warn('Chat rate limit reached', {
-      ip: req.ip,
-      headers: req.headers
-    });
+    return req.ip || 'unknown';
   }
 }); 
