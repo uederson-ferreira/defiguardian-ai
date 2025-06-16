@@ -2,9 +2,11 @@ import NodeCache from 'node-cache';
 import logger from '../config/logger';
 import { config } from '../config/env';
 
+const STATS_UPDATE_INTERVAL = 5000; // 5 seconds
+
 const cache = new NodeCache({
-  stdTTL: config.cache?.ttl || 300, // 5 minutes
-  checkperiod: config.cache?.checkPeriod || 60 // 1 minute
+  stdTTL: config.cache?.ttl || 5, // 5 seconds default
+  checkperiod: config.cache?.checkPeriod || 1 // 1 second default
 });
 
 interface CacheStats {
@@ -23,14 +25,15 @@ class CacheService {
   };
 
   constructor() {
-    // Update stats periodically
+    // Update stats more frequently
     setInterval(() => {
       this.updateStats();
-    }, 60000);
+    }, STATS_UPDATE_INTERVAL);
 
     logger.info('Cache service initialized', {
-      ttl: config.cache?.ttl || 300,
-      checkPeriod: config.cache?.checkPeriod || 60
+      ttl: config.cache?.ttl || 5,
+      checkPeriod: config.cache?.checkPeriod || 1,
+      statsUpdateInterval: STATS_UPDATE_INTERVAL
     });
   }
 
@@ -58,7 +61,7 @@ class CacheService {
   }
 
   public set<T>(key: string, value: T, ttl?: number): boolean {
-    const success = cache.set(key, value, ttl || config.cache?.ttl || 300);
+    const success = cache.set(key, value, ttl || config.cache?.ttl || 5);
     logger.debug('Cache set', { key, ttl, success });
     return success;
   }
