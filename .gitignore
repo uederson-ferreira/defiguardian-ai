@@ -458,7 +458,7 @@ contracts/out/
 
 # Dependencies
 node_modules/
-.pnp/
+.pnp
 .pnp.js
 
 # Testing
@@ -511,3 +511,15 @@ logs/
 *.tgz
 *.tar.gz
 *.zip
+
+# TypeChain
+typechain-types/
+
+# Hardhat
+cache/
+artifacts/
+
+# Misc
+.cache/
+.temp/
+*.pem
