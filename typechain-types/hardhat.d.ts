@@ -33,6 +33,26 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC165__factory>;
     getContractFactory(
+      name: "AutomationBase",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AutomationBase__factory>;
+    getContractFactory(
+      name: "AutomationCompatible",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AutomationCompatible__factory>;
+    getContractFactory(
+      name: "AutomationCompatibleInterface",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AutomationCompatibleInterface__factory>;
+    getContractFactory(
+      name: "AggregatorV3Interface",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.AggregatorV3Interface__factory>;
+    getContractFactory(
+      name: "Ownable",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.Ownable__factory>;
+    getContractFactory(
       name: "IERC20",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.IERC20__factory>;
@@ -40,6 +60,34 @@ declare module "hardhat/types/runtime" {
       name: "CrossChainHedge",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.CrossChainHedge__factory>;
+    getContractFactory(
+      name: "RebalanceHedge",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.RebalanceHedge__factory>;
+    getContractFactory(
+      name: "IRebalanceHedge",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IRebalanceHedge__factory>;
+    getContractFactory(
+      name: "IStopLossHedge",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IStopLossHedge__factory>;
+    getContractFactory(
+      name: "IVolatilityHedge",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IVolatilityHedge__factory>;
+    getContractFactory(
+      name: "RiskGuardianMaster",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.RiskGuardianMaster__factory>;
+    getContractFactory(
+      name: "StopLossHedge",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.StopLossHedge__factory>;
+    getContractFactory(
+      name: "VolatilityHedge",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.VolatilityHedge__factory>;
 
     getContractAt(
       name: "CCIPReceiver",
@@ -67,6 +115,31 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.IERC165>;
     getContractAt(
+      name: "AutomationBase",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AutomationBase>;
+    getContractAt(
+      name: "AutomationCompatible",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AutomationCompatible>;
+    getContractAt(
+      name: "AutomationCompatibleInterface",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AutomationCompatibleInterface>;
+    getContractAt(
+      name: "AggregatorV3Interface",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.AggregatorV3Interface>;
+    getContractAt(
+      name: "Ownable",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.Ownable>;
+    getContractAt(
       name: "IERC20",
       address: string,
       signer?: ethers.Signer
@@ -76,6 +149,41 @@ declare module "hardhat/types/runtime" {
       address: string,
       signer?: ethers.Signer
     ): Promise<Contracts.CrossChainHedge>;
+    getContractAt(
+      name: "RebalanceHedge",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.RebalanceHedge>;
+    getContractAt(
+      name: "IRebalanceHedge",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IRebalanceHedge>;
+    getContractAt(
+      name: "IStopLossHedge",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IStopLossHedge>;
+    getContractAt(
+      name: "IVolatilityHedge",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IVolatilityHedge>;
+    getContractAt(
+      name: "RiskGuardianMaster",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.RiskGuardianMaster>;
+    getContractAt(
+      name: "StopLossHedge",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.StopLossHedge>;
+    getContractAt(
+      name: "VolatilityHedge",
+      address: string,
+      signer?: ethers.Signer
+    ): Promise<Contracts.VolatilityHedge>;
 
     // default types
     getContractFactory(

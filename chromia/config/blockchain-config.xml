@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<dict>
+    <!-- Configuração Blockchain Chromia/Postchain -->
+    <!-- Arquivo: config/blockchain-config.xml -->
+    
+    <!-- Blockchain Identity -->
+    <entry key="blockchain_rid">
+        <bytea>78967baa4768cbcef11c508326ffb13a956689fcb6dc3ba17f4b895cbb1577a3</bytea>
+    </entry>
+    
+    <entry key="blockchain_name">
+        <string>riskguardian-chain</string>
+    </entry>
+    
+    <entry key="blockchain_version">
+        <string>1.0.0</string>
+    </entry>
+
+    <!-- GTX Configuration (Rell) -->
+    <entry key="gtx">
+        <dict>
+            <entry key="rell">
+                <dict>
+                    <entry key="version">
+                        <string>0.10.8</string>
+                    </entry>
+                    
+                    <entry key="sources">
+                        <array>
+                            <string>/app/src/rell/portfolio.rell</string>
+                        </array>
+                    </entry>
+                    
+                    <entry key="modules">
+                        <array>
+                            <string>portfolio</string>
+                        </array>
+                    </entry>
+                    
+                    <entry key="main_module">
+                        <string>portfolio</string>
+                    </entry>
+                </dict>
+            </entry>
+            
+            <!-- Transaction Configuration -->
+            <entry key="tx_strategy">
+                <string>DEFAULT</string>
+            </entry>
+            
+            <entry key="max_tx_delay">
+                <int>30000</int>
+            </entry>
+            
+            <entry key="tx_pool_size">
+                <int>1000</int>
+            </entry>
+        </dict>
+    </entry>
+
+    <!-- Network Configuration -->
+    <entry key="signers">
+        <array>
+            <bytea>03a301697bdfcd704313ba48e51d567543f2a182031efd6915ddc07bbcc4e16070</bytea>
+        </array>
+    </entry>
+
+    <!-- Block Configuration -->
+    <entry key="blockstrategy">
+        <dict>
+            <entry key="name">
+                <string>net.postchain.base.BaseBlockBuildingStrategy</string>
+            </entry>
+            
+            <entry key="maxblocksize">
+                <int>1048576</int>
+            </entry>
+            
+            <entry key="maxblocktransactions">
+                <int>100</int>
+            </entry>
+            
+            <entry key="blocktimeout">
+                <int>5000</int>
+            </entry>
+            
+            <entry key="configurationfactory">
+                <string>net.postchain.gtx.GTXBlockchainConfigurationFactory</string>
+            </entry>
+        </dict>
+    </entry>
+
+    <!-- Dependencies -->
+    <entry key="dependencies">
+        <dict>
+            <entry key="net.postchain:postchain-base">
+                <string>3.8.0</string>
+            </entry>
+            
+            <entry key="net.postchain:postchain-gtx">
+                <string>3.8.0</string>
+            </entry>
+        </dict>
+    </entry>
+
+    <!-- Database Schema -->
+    <entry key="database_schema_name">
+        <string>chromia</string>
+    </entry>
+
+    <!-- API Configuration -->
+    <entry key="api">
+        <dict>
+            <entry key="enabled">
+                <boolean>true</boolean>
+            </entry>
+            
+            <entry key="port">
+                <int>7740</int>
+            </entry>
+            
+            <entry key="basepath">
+                <string>/api/v1</string>
+            </entry>
+            
+            <entry key="cors_enabled">
+                <boolean>true</boolean>
+            </entry>
+            
+            <entry key="rate_limit_enabled">
+                <boolean>true</boolean>
+            </entry>
+        </dict>
+    </entry>
+
+    <!-- Monitoring -->
+    <entry key="monitoring">
+        <dict>
+            <entry key="enabled">
+                <boolean>true</boolean>
+            </entry>
+            
+            <entry key="metrics_enabled">
+                <boolean>true</boolean>
+            </entry>
+            
+            <entry key="health_check_enabled">
+                <boolean>true</boolean>
+            </entry>
+        </dict>
+    </entry>
+
+    <!-- Development Settings -->
+    <entry key="development">
+        <dict>
+            <entry key="debug_enabled">
+                <boolean>true</boolean>
+            </entry>
+            
+            <entry key="log_level">
+                <string>DEBUG</string>
+            </entry>
+            
+            <entry key="test_mode">
+                <boolean>false</boolean>
+            </entry>
+        </dict>
+    </entry>
+
+    <!-- Custom Portfolio Configuration -->
+    <entry key="portfolio">
+        <dict>
+            <entry key="risk_analysis_enabled">
+                <boolean>true</boolean>
+            </entry>
+            
+            <entry key="alert_system_enabled">
+                <boolean>true</boolean>
+            </entry>
+            
+            <entry key="defi_integration_enabled">
+                <boolean>true</boolean>
+            </entry>
+            
+            <entry key="webhook_url">
+                <string>http://chromia_aws:3002/alerts</string>
+            </entry>
+        </dict>
+    </entry>
+
+</dict> 
