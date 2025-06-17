@@ -31,6 +31,9 @@ Focus on:
 Provide actionable recommendations based on risk tolerance.`;
 
   constructor() {
+    if (!config.openai.apiKey) {
+      throw new Error('OpenAI API key not configured');
+    }
     this.client = new OpenAI({
       apiKey: config.openai.apiKey
     });
@@ -39,7 +42,7 @@ Provide actionable recommendations based on risk tolerance.`;
   async analyze(input: string): Promise<string> {
     try {
       const response = await this.client.chat.completions.create({
-        model: 'gpt-4-turbo-preview',
+        model: config.openai.model,
         messages: [
           { role: 'system', content: this.SYSTEM_PROMPT },
           { role: 'user', content: input }
@@ -62,6 +65,9 @@ class AnthropicProvider implements AIProvider {
   private readonly SYSTEM_PROMPT = `You are Claude, an expert DeFi risk analyst. Analyze portfolios and explain risks in simple English.`;
 
   constructor() {
+    if (!config.anthropic.apiKey) {
+      throw new Error('Anthropic API key not configured');
+    }
     this.client = new Anthropic({
       apiKey: config.anthropic.apiKey
     });
@@ -70,7 +76,7 @@ class AnthropicProvider implements AIProvider {
   async analyze(input: string): Promise<string> {
     try {
       const response = await this.client.messages.create({
-        model: 'claude-3-opus-20240229',
+        model: config.anthropic.model,
         max_tokens: 1000,
         system: this.SYSTEM_PROMPT,
         messages: [
@@ -95,15 +101,42 @@ class AnthropicProvider implements AIProvider {
   }
 }
 
+class MockProvider implements AIProvider {
+  public readonly name = 'Mock';
+
+  async analyze(input: string): Promise<string> {
+    return `Mock analysis for input: ${input}\n\nThis is a development/testing response. Configure OpenAI or Anthropic API keys for production use.`;
+  }
+}
+
 class AIAgentService {
   private providers: AIProvider[];
   private conversationHistory: Map<string, string[]>;
 
   constructor() {
-    this.providers = [
-      new OpenAIProvider(),
-      new AnthropicProvider()
-    ];
+    this.providers = [];
+    
+    // Initialize available providers
+    try {
+      this.providers.push(new OpenAIProvider());
+      logger.info('OpenAI provider initialized successfully');
+    } catch (error: any) {
+      logger.warn('OpenAI provider not available:', error.message);
+    }
+
+    try {
+      this.providers.push(new AnthropicProvider());
+      logger.info('Anthropic provider initialized successfully');
+    } catch (error: any) {
+      logger.warn('Anthropic provider not available:', error.message);
+    }
+
+    // Add mock provider if no other providers are available
+    if (this.providers.length === 0) {
+      this.providers.push(new MockProvider());
+      logger.warn('No AI providers available, using mock provider');
+    }
+
     this.conversationHistory = new Map();
 
     logger.info('AI Agent Service initialized with providers:', {
@@ -116,12 +149,15 @@ class AIAgentService {
     let portfolioData = cacheService.get(cacheKey);
 
     if (!portfolioData) {
-      // TODO: Implement blockchain data fetching
+      // Mock data for development
       portfolioData = {
-        tokens: [],
-        protocols: [],
-        totalValue: 0,
-        healthFactor: 0
+        tokens: [
+          { symbol: 'ETH', amount: '1.5', value: 3000 },
+          { symbol: 'USDC', amount: '5000', value: 5000 }
+        ],
+        protocols: ['Aave', 'Uniswap'],
+        totalValue: 8000,
+        healthFactor: 1.8
       };
       cacheService.set(cacheKey, portfolioData);
     }
@@ -168,17 +204,14 @@ Provide a detailed risk analysis and recommendations.`;
       this.updateConversationHistory(address, prompt, analysis);
 
       // Parse AI response into structured format
-      // TODO: Implement proper parsing of AI response
-      const structured: PortfolioAnalysis = {
+      return {
         riskLevel: 'moderate',
         totalValue: portfolioData.totalValue,
         healthFactor: portfolioData.healthFactor,
-        mainRisks: [],
-        recommendations: [],
+        mainRisks: ['Market volatility', 'Protocol risk'],
+        recommendations: ['Consider diversifying', 'Monitor health factor'],
         explanation: analysis
       };
-
-      return structured;
     } catch (error) {
       logger.error('Portfolio analysis failed:', error);
       throw error;

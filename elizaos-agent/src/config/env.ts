@@ -7,18 +7,12 @@ dotenv.config({ path: path.resolve(process.cwd(), envFile) });
 
 // Required environment variables
 const requiredEnvVars = [
-  'ELIZAOS_API_KEY',
   'PORT',
   'NODE_ENV',
   'LOG_LEVEL',
   'CORS_ORIGIN',
-  'ETHEREUM_RPC_URL',
-  'POLYGON_RPC_URL',
-  'BSC_RPC_URL',
-  'AVALANCHE_RPC_URL',
   'RATE_LIMIT_WINDOW_MS',
-  'RATE_LIMIT_MAX_REQUESTS',
-  'OPENAI_API_KEY'
+  'RATE_LIMIT_MAX_REQUESTS'
 ];
 
 // Check for required environment variables
@@ -34,9 +28,6 @@ export const config = {
   logLevel: process.env.LOG_LEVEL || 'info',
   corsOrigin: process.env.CORS_ORIGIN || '*',
 
-  // ElizaOS API
-  elizaosApiKey: process.env.ELIZAOS_API_KEY,
-
   // AI Providers
   openai: {
     apiKey: process.env.OPENAI_API_KEY,
@@ -47,18 +38,18 @@ export const config = {
     model: process.env.ANTHROPIC_MODEL || 'claude-3-opus-20240229'
   },
 
-  // Blockchain
+  // Blockchain (Optional)
   ethereum: {
-    rpcUrl: process.env.ETHEREUM_RPC_URL
+    rpcUrl: process.env.ETHEREUM_RPC_URL || 'https://eth-sepolia.g.alchemy.com/v2/demo'
   },
   polygon: {
-    rpcUrl: process.env.POLYGON_RPC_URL
+    rpcUrl: process.env.POLYGON_RPC_URL || 'https://polygon-mumbai.g.alchemy.com/v2/demo'
   },
   bsc: {
-    rpcUrl: process.env.BSC_RPC_URL
+    rpcUrl: process.env.BSC_RPC_URL || 'https://data-seed-prebsc-1-s1.binance.org:8545'
   },
   avalanche: {
-    rpcUrl: process.env.AVALANCHE_RPC_URL
+    rpcUrl: process.env.AVALANCHE_RPC_URL || 'https://api.avax-test.network/ext/bc/C/rpc'
   },
 
   // Rate Limiting
