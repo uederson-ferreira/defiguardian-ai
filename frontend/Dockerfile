@@ -1,31 +1,47 @@
-# frontend/Dockerfile
-FROM node:20-alpine AS builder
+# frontend/Dockerfile (Production)
+FROM node:20-alpine AS base
+
+# Install pnpm
+RUN npm install -g pnpm
+
+# Builder stage
+FROM base AS builder
 
 WORKDIR /app
 
+# Copy package files
+COPY package.json pnpm-lock.yaml ./
+
 # Install dependencies
-COPY package*.json ./
-RUN npm install
+RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY . .
 
 # Build application
-RUN npm run build
+RUN pnpm build
 
-# Production image
-FROM node:20-alpine AS runner
+# Runner stage
+FROM base AS runner
 
 WORKDIR /app
 
-# Copy built assets
-COPY --from=builder /app/.next ./.next
+# Don't run as root
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Copy built application
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
 
 # Expose port
 EXPOSE 3000
 
-# Start command
-CMD ["npm", "start"] 
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Start application
+CMD ["node", "server.js"]
