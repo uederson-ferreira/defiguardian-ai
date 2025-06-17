@@ -1,179 +1,65 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity 0.8.19;
 
-import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
-import "@chainlink/contracts/src/v0.8/ccip/interfaces/IRouterClient.sol";
-import "@chainlink/contracts/src/v0.8/ccip/libraries/Client.sol";
+import "@chainlink/contracts-ccip/src/v0.8/ccip/interfaces/IRouterClient.sol";
+import "@chainlink/contracts-ccip/src/v0.8/ccip/libraries/Client.sol";
+import "@chainlink/contracts-ccip/src/v0.8/ccip/applications/CCIPReceiver.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
-/**
- * @title CrossChainHedge
- * @dev Contrato para execução cross-chain de estratégias de hedge
- */
-contract CrossChainHedge is Ownable {
-    // Chainlink CCIP Router
-    IRouterClient private immutable i_router;
-
-    // Mapeamento de chains suportadas
-    mapping(uint64 => bool) public supportedChains;
+contract CrossChainHedge is CCIPReceiver {
+    address public owner;
+    IRouterClient private router;
+    IERC20 public linkToken;
     
-    // Estrutura para mensagem cross-chain
-    struct HedgeMessage {
-        address token;
-        uint256 amount;
-        address recipient;
-        uint256 targetPrice;
-        uint256 slippage;
+    event MessageSent(bytes32 indexed messageId);
+    event MessageReceived(bytes32 indexed messageId, address sender, bytes data);
+    
+    constructor(address _router, address _link) CCIPReceiver(_router) {
+        owner = msg.sender;
+        router = IRouterClient(_router);
+        linkToken = IERC20(_link);
     }
-
-    // Eventos
-    event CrossChainHedgeInitiated(
-        bytes32 messageId,
+    
+    function sendMessage(
         uint64 destinationChainSelector,
-        address token,
-        uint256 amount
-    );
+        address receiver,
+        bytes calldata message
+    ) external returns (bytes32) {
+        bytes memory extraArgs = Client._argsToBytes(
+            Client.EVMExtraArgsV1({
+                gasLimit: 200_000,
+                strict: false
+            })
+        );
 
-    event CrossChainHedgeExecuted(
-        bytes32 messageId,
-        address token,
-        uint256 amount,
-        address recipient
-    );
-
-    constructor(address router) Ownable(msg.sender) {
-        i_router = IRouterClient(router);
-        
-        // Adiciona chains suportadas (Avalanche e outras)
-        supportedChains[43114] = true; // Avalanche C-Chain
-        supportedChains[1] = true;     // Ethereum
-        supportedChains[56] = true;    // BSC
-    }
-
-    /**
-     * @dev Inicia uma operação de hedge cross-chain
-     */
-    function initiateHedge(
-        uint64 destinationChainSelector,
-        address token,
-        uint256 amount,
-        address recipient,
-        uint256 targetPrice,
-        uint256 slippage
-    ) external payable {
-        require(supportedChains[destinationChainSelector], "Chain nao suportada");
-        require(amount > 0, "Quantidade invalida");
-        
-        // Transfere tokens do usuário para este contrato
-        IERC20(token).transferFrom(msg.sender, address(this), amount);
-        
-        // Prepara a mensagem cross-chain
-        HedgeMessage memory hedgeMessage = HedgeMessage({
-            token: token,
-            amount: amount,
-            recipient: recipient,
-            targetPrice: targetPrice,
-            slippage: slippage
-        });
-
-        // Codifica a mensagem
-        bytes memory encodedMessage = abi.encode(hedgeMessage);
-
-        // Prepara os dados para o CCIP
-        Client.EVM2AnyMessage memory message = Client.EVM2AnyMessage({
-            receiver: abi.encode(address(this)),
-            data: encodedMessage,
+        Client.EVM2AnyMessage memory evm2AnyMessage = Client.EVM2AnyMessage({
+            receiver: abi.encode(receiver),
+            data: message,
             tokenAmounts: new Client.EVMTokenAmount[](0),
-            extraArgs: "",
-            feeToken: address(0)
+            extraArgs: extraArgs,
+            feeToken: address(linkToken)
         });
-
-        // Envia a mensagem cross-chain
-        bytes32 messageId = i_router.ccipSend{value: msg.value}(
-            destinationChainSelector,
-            message
-        );
-
-        emit CrossChainHedgeInitiated(
-            messageId,
-            destinationChainSelector,
-            token,
-            amount
-        );
-    }
-
-    /**
-     * @dev Recebe e processa mensagem cross-chain
-     */
-    function ccipReceive(Client.Any2EVMMessage memory message) external {
-        require(msg.sender == address(i_router), "Somente router");
-
-        // Decodifica a mensagem
-        HedgeMessage memory hedgeMessage = abi.decode(message.data, (HedgeMessage));
-
-        // Executa o hedge na chain destino
-        executeHedge(hedgeMessage);
-
-        emit CrossChainHedgeExecuted(
-            message.messageId,
-            hedgeMessage.token,
-            hedgeMessage.amount,
-            hedgeMessage.recipient
-        );
-    }
-
-    /**
-     * @dev Executa a operação de hedge na chain destino
-     */
-    function executeHedge(HedgeMessage memory message) internal {
-        // Verifica o preço atual
-        uint256 currentPrice = getCurrentPrice(message.token);
         
-        // Verifica slippage
-        require(
-            currentPrice >= message.targetPrice * (100 - message.slippage) / 100 &&
-            currentPrice <= message.targetPrice * (100 + message.slippage) / 100,
-            "Slippage muito alto"
-        );
-
-        // Executa a operação de hedge
-        IERC20(message.token).transfer(message.recipient, message.amount);
+        uint256 fees = router.getFee(destinationChainSelector, evm2AnyMessage);
+        require(linkToken.transferFrom(msg.sender, address(this), fees), "Fee transfer failed");
+        require(linkToken.approve(address(router), fees), "Fee approval failed");
+        
+        bytes32 messageId = router.ccipSend(destinationChainSelector, evm2AnyMessage);
+        emit MessageSent(messageId);
+        return messageId;
     }
-
-    /**
-     * @dev Retorna o preço atual de um token
-     */
-    function getCurrentPrice(address token) internal view returns (uint256) {
-        AggregatorV3Interface priceFeed = AggregatorV3Interface(getPriceFeed(token));
-        (, int256 price,,,) = priceFeed.latestRoundData();
-        return uint256(price);
+    
+    function _ccipReceive(Client.Any2EVMMessage memory message) internal override {
+        emit MessageReceived(message.messageId, abi.decode(message.sender, (address)), message.data);
     }
-
-    /**
-     * @dev Retorna o endereço do price feed para um token
-     */
-    function getPriceFeed(address token) internal pure returns (address) {
-        // Implementar mapeamento de tokens para price feeds
-        return address(0);
+    
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner");
+        _;
     }
-
-    /**
-     * @dev Adiciona suporte a uma nova chain
-     */
-    function addSupportedChain(uint64 chainSelector) external onlyOwner {
-        supportedChains[chainSelector] = true;
+    
+    function withdraw(address token) external onlyOwner {
+        uint256 balance = IERC20(token).balanceOf(address(this));
+        require(IERC20(token).transfer(owner, balance), "Transfer failed");
     }
-
-    /**
-     * @dev Remove suporte a uma chain
-     */
-    function removeSupportedChain(uint64 chainSelector) external onlyOwner {
-        supportedChains[chainSelector] = false;
-    }
-
-    /**
-     * @dev Permite que o contrato receba AVAX
-     */
-    receive() external payable {}
 } 
