@@ -6,6 +6,8 @@ RiskGuardian AI é uma plataforma de gerenciamento de riscos baseada em blockcha
 
 ## 🏗️ Arquitetura
 
+Para uma visão detalhada da arquitetura do sistema, incluindo diagramas e fluxos, consulte nossa [Documentação de Arquitetura](ARCHITECTURE.md).
+
 O projeto é composto por vários microserviços:
 
 ### Frontend (Next.js)
@@ -112,19 +114,19 @@ Para fazer deploy em produção:
 
 ## 📝 Documentação Adicional
 
-- [Guia de Contribuição](CONTRIBUTING.md)
-- [Arquitetura Detalhada](ARCHITECTURE.md)
-- [Guia de API](API.md)
+- [Documentação de Arquitetura](ARCHITECTURE.md)
+- [Guia de Contribuição](../CONTRIBUTING.md)
+- [API](../backend/api-docs.md)
 - [Smart Contracts](SMART_CONTRACTS.md)
 - [Segurança](SECURITY.md)
 
 ## 🤝 Contribuindo
 
-Por favor, leia o [Guia de Contribuição](CONTRIBUTING.md) para detalhes sobre nosso código de conduta e o processo para enviar pull requests.
+Por favor, leia o [Guia de Contribuição](../CONTRIBUTING.md) para detalhes sobre nosso código de conduta e o processo para enviar pull requests.
 
 ## 📄 Licença
 
-Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](../LICENSE) para detalhes.
 
 ## 📞 Suporte
 

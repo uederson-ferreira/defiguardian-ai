@@ -1,0 +1,420 @@
+// Chromia Rell - Portfolio Management Smart Contract
+// Arquivo: src/rell/portfolio.rell
+
+// ===== ENTIDADES DO PORTFÓLIO =====
+
+entity portfolio {
+    key portfolio_id: text;
+    owner_address: text;
+    name: text;
+    description: text;
+    total_value: decimal;
+    risk_score: decimal;
+    created_at: timestamp;
+    last_updated: timestamp;
+}
+
+entity portfolio_asset {
+    key portfolio: portfolio, asset_symbol: text;
+    asset_address: text?;
+    amount: decimal;
+    value_usd: decimal;
+    last_price: decimal?;
+    weight_percentage: decimal?;
+    created_at: timestamp;
+    updated_at: timestamp;
+}
+
+entity portfolio_alert {
+    key alert_id: rowid;
+    portfolio: portfolio;
+    alert_type: text; // 'warning', 'critical', 'info'
+    message: text;
+    alert_data: text?; // JSON string
+    severity: integer;
+    is_read: boolean;
+    acknowledged_at: timestamp?;
+    created_at: timestamp;
+}
+
+entity risk_metrics {
+    key portfolio: portfolio, calculated_at: timestamp;
+    volatility: decimal;
+    var_95: decimal;
+    var_99: decimal;
+    sharpe_ratio: decimal;
+    max_drawdown: decimal;
+    correlation_score: decimal;
+}
+
+entity defi_transaction {
+    key tx_hash: text;
+    portfolio: portfolio;
+    protocol: text;
+    action_type: text; // 'swap', 'deposit', 'withdraw', 'stake', etc.
+    token_in: text?;
+    token_out: text?;
+    amount_in: decimal?;
+    amount_out: decimal?;
+    gas_used: integer?;
+    gas_price: decimal?;
+    block_number: integer?;
+    timestamp: timestamp;
+    created_at: timestamp;
+}
+
+// ===== OPERAÇÕES DO PORTFÓLIO =====
+
+operation create_portfolio(
+    portfolio_id: text,
+    owner_address: text,
+    name: text,
+    description: text
+) {
+    require(owner_address == op_context.get_signers()[0].to_hex(), "Unauthorized: only owner can create portfolio");
+    require(portfolio_id.size() > 0, "Portfolio ID cannot be empty");
+    require(name.size() > 0, "Portfolio name cannot be empty");
+    
+    // Verificar se portfolio já existe
+    require(empty(portfolio @? { .portfolio_id == portfolio_id }), "Portfolio already exists");
+    
+    val current_time = op_context.last_block_time;
+    
+    create portfolio (
+        portfolio_id = portfolio_id,
+        owner_address = owner_address,
+        name = name,
+        description = description,
+        total_value = 0.0,
+        risk_score = 0.0,
+        created_at = current_time,
+        last_updated = current_time
+    );
+}
+
+operation update_portfolio(
+    portfolio_id: text,
+    total_value: decimal,
+    risk_score: decimal
+) {
+    val target_portfolio = portfolio @ { .portfolio_id == portfolio_id };
+    require(target_portfolio.owner_address == op_context.get_signers()[0].to_hex(), "Unauthorized: only owner can update portfolio");
+    
+    update target_portfolio (
+        total_value = total_value,
+        risk_score = risk_score,
+        last_updated = op_context.last_block_time
+    );
+}
+
+operation add_portfolio_asset(
+    portfolio_id: text,
+    asset_symbol: text,
+    asset_address: text?,
+    amount: decimal,
+    value_usd: decimal,
+    last_price: decimal?
+) {
+    val target_portfolio = portfolio @ { .portfolio_id == portfolio_id };
+    require(target_portfolio.owner_address == op_context.get_signers()[0].to_hex(), "Unauthorized: only owner can add assets");
+    require(amount > 0.0, "Asset amount must be positive");
+    require(value_usd > 0.0, "Asset value must be positive");
+    
+    val current_time = op_context.last_block_time;
+    
+    // Calcular weight percentage
+    val weight_percentage = if (target_portfolio.total_value > 0.0) value_usd / target_portfolio.total_value * 100.0 else 100.0;
+    
+    // Upsert do asset
+    val existing_asset = portfolio_asset @? { .portfolio == target_portfolio, .asset_symbol == asset_symbol };
+    
+    if (existing_asset != null) {
+        update existing_asset (
+            amount = amount,
+            value_usd = value_usd,
+            last_price = last_price,
+            weight_percentage = weight_percentage,
+            updated_at = current_time
+        );
+    } else {
+        create portfolio_asset (
+            portfolio = target_portfolio,
+            asset_symbol = asset_symbol,
+            asset_address = asset_address,
+            amount = amount,
+            value_usd = value_usd,
+            last_price = last_price,
+            weight_percentage = weight_percentage,
+            created_at = current_time,
+            updated_at = current_time
+        );
+    }
+}
+
+operation remove_portfolio_asset(
+    portfolio_id: text,
+    asset_symbol: text
+) {
+    val target_portfolio = portfolio @ { .portfolio_id == portfolio_id };
+    require(target_portfolio.owner_address == op_context.get_signers()[0].to_hex(), "Unauthorized: only owner can remove assets");
+    
+    val target_asset = portfolio_asset @ { .portfolio == target_portfolio, .asset_symbol == asset_symbol };
+    delete target_asset;
+}
+
+// ===== OPERAÇÕES DE ALERTAS =====
+
+operation create_alert(
+    portfolio_id: text,
+    alert_type: text,
+    message: text,
+    alert_data: text?,
+    severity: integer
+) {
+    require(alert_type in ["warning", "critical", "info"], "Invalid alert type");
+    require(severity >= 1 and severity <= 5, "Severity must be between 1 and 5");
+    require(message.size() > 0, "Alert message cannot be empty");
+    
+    val target_portfolio = portfolio @ { .portfolio_id == portfolio_id };
+    
+    create portfolio_alert (
+        portfolio = target_portfolio,
+        alert_type = alert_type,
+        message = message,
+        alert_data = alert_data,
+        severity = severity,
+        is_read = false,
+        created_at = op_context.last_block_time
+    );
+}
+
+operation mark_alert_as_read(
+    alert_id: rowid,
+    portfolio_id: text
+) {
+    val target_portfolio = portfolio @ { .portfolio_id == portfolio_id };
+    require(target_portfolio.owner_address == op_context.get_signers()[0].to_hex(), "Unauthorized: only owner can mark alerts as read");
+    
+    val target_alert = portfolio_alert @ { .alert_id == alert_id, .portfolio == target_portfolio };
+    
+    update target_alert (
+        is_read = true,
+        acknowledged_at = op_context.last_block_time
+    );
+}
+
+// ===== OPERAÇÕES DE MÉTRICAS =====
+
+operation save_risk_metrics(
+    portfolio_id: text,
+    volatility: decimal,
+    var_95: decimal,
+    var_99: decimal,
+    sharpe_ratio: decimal,
+    max_drawdown: decimal,
+    correlation_score: decimal
+) {
+    val target_portfolio = portfolio @ { .portfolio_id == portfolio_id };
+    val current_time = op_context.last_block_time;
+    
+    create risk_metrics (
+        portfolio = target_portfolio,
+        calculated_at = current_time,
+        volatility = volatility,
+        var_95 = var_95,
+        var_99 = var_99,
+        sharpe_ratio = sharpe_ratio,
+        max_drawdown = max_drawdown,
+        correlation_score = correlation_score
+    );
+}
+
+operation record_defi_transaction(
+    portfolio_id: text,
+    tx_hash: text,
+    protocol: text,
+    action_type: text,
+    token_in: text?,
+    token_out: text?,
+    amount_in: decimal?,
+    amount_out: decimal?,
+    gas_used: integer?,
+    gas_price: decimal?,
+    block_number: integer?,
+    timestamp: timestamp
+) {
+    val target_portfolio = portfolio @ { .portfolio_id == portfolio_id };
+    require(target_portfolio.owner_address == op_context.get_signers()[0].to_hex(), "Unauthorized: only owner can record transactions");
+    require(tx_hash.size() > 0, "Transaction hash cannot be empty");
+    
+    // Verificar se transação já foi registrada
+    require(empty(defi_transaction @? { .tx_hash == tx_hash }), "Transaction already recorded");
+    
+    create defi_transaction (
+        tx_hash = tx_hash,
+        portfolio = target_portfolio,
+        protocol = protocol,
+        action_type = action_type,
+        token_in = token_in,
+        token_out = token_out,
+        amount_in = amount_in,
+        amount_out = amount_out,
+        gas_used = gas_used,
+        gas_price = gas_price,
+        block_number = block_number,
+        timestamp = timestamp,
+        created_at = op_context.last_block_time
+    );
+}
+
+// ===== QUERIES =====
+
+query get_portfolio(portfolio_id: text) {
+    return portfolio @? { .portfolio_id == portfolio_id } (
+        portfolio_id = .portfolio_id,
+        owner_address = .owner_address,
+        name = .name,
+        description = .description,
+        total_value = .total_value,
+        risk_score = .risk_score,
+        created_at = .created_at,
+        last_updated = .last_updated
+    );
+}
+
+query get_portfolios_by_owner(owner_address: text) {
+    return portfolio @* { .owner_address == owner_address } (
+        portfolio_id = .portfolio_id,
+        name = .name,
+        description = .description,
+        total_value = .total_value,
+        risk_score = .risk_score,
+        last_updated = .last_updated
+    );
+}
+
+query get_portfolio_assets(portfolio_id: text) {
+    val target_portfolio = portfolio @ { .portfolio_id == portfolio_id };
+    
+    return portfolio_asset @* { .portfolio == target_portfolio } (
+        asset_symbol = .asset_symbol,
+        asset_address = .asset_address,
+        amount = .amount,
+        value_usd = .value_usd,
+        last_price = .last_price,
+        weight_percentage = .weight_percentage,
+        updated_at = .updated_at
+    );
+}
+
+query get_portfolio_alerts(portfolio_id: text, limit: integer = 100) {
+    val target_portfolio = portfolio @ { .portfolio_id == portfolio_id };
+    
+    return portfolio_alert @* { .portfolio == target_portfolio } (
+        alert_id = .alert_id,
+        alert_type = .alert_type,
+        message = .message,
+        alert_data = .alert_data,
+        severity = .severity,
+        is_read = .is_read,
+        created_at = .created_at
+    ) limit limit;
+}
+
+query get_unread_alerts(portfolio_id: text) {
+    val target_portfolio = portfolio @ { .portfolio_id == portfolio_id };
+    
+    return portfolio_alert @* { .portfolio == target_portfolio, .is_read == false } (
+        alert_id = .alert_id,
+        alert_type = .alert_type,
+        message = .message,
+        severity = .severity,
+        created_at = .created_at
+    );
+}
+
+query get_latest_risk_metrics(portfolio_id: text) {
+    val target_portfolio = portfolio @ { .portfolio_id == portfolio_id };
+    
+    return risk_metrics @? { .portfolio == target_portfolio } (
+        @sort_desc .calculated_at,
+        volatility = .volatility,
+        var_95 = .var_95,
+        var_99 = .var_99,
+        sharpe_ratio = .sharpe_ratio,
+        max_drawdown = .max_drawdown,
+        correlation_score = .correlation_score,
+        calculated_at = .calculated_at
+    ) limit 1;
+}
+
+query get_defi_transactions(portfolio_id: text, limit: integer = 50) {
+    val target_portfolio = portfolio @ { .portfolio_id == portfolio_id };
+    
+    return defi_transaction @* { .portfolio == target_portfolio } (
+        @sort_desc .timestamp,
+        tx_hash = .tx_hash,
+        protocol = .protocol,
+        action_type = .action_type,
+        token_in = .token_in,
+        token_out = .token_out,
+        amount_in = .amount_in,
+        amount_out = .amount_out,
+        gas_used = .gas_used,
+        gas_price = .gas_price,
+        block_number = .block_number,
+        timestamp = .timestamp
+    ) limit limit;
+}
+
+query get_portfolio_summary(portfolio_id: text) {
+    val target_portfolio = portfolio @? { .portfolio_id == portfolio_id };
+    
+    if (target_portfolio == null) return null;
+    
+    val asset_count = portfolio_asset @* { .portfolio == target_portfolio }.size();
+    val unread_alerts_count = portfolio_alert @* { .portfolio == target_portfolio, .is_read == false }.size();
+    val latest_metrics = risk_metrics @? { .portfolio == target_portfolio } (@sort_desc .calculated_at) limit 1;
+    
+    return (
+        portfolio_id = target_portfolio.portfolio_id,
+        name = target_portfolio.name,
+        owner_address = target_portfolio.owner_address,
+        total_value = target_portfolio.total_value,
+        risk_score = target_portfolio.risk_score,
+        asset_count = asset_count,
+        unread_alerts_count = unread_alerts_count,
+        last_updated = target_portfolio.last_updated,
+        latest_volatility = if (latest_metrics != null) latest_metrics.volatility else null
+    );
+}
+
+// ===== UTILITY QUERIES =====
+
+query get_total_portfolios() {
+    return portfolio @* { } .size();
+}
+
+query get_total_alerts() {
+    return portfolio_alert @* { } .size();
+}
+
+query get_portfolios_by_risk_score(min_risk: decimal, max_risk: decimal) {
+    return portfolio @* { .risk_score >= min_risk, .risk_score <= max_risk } (
+        portfolio_id = .portfolio_id,
+        name = .name,
+        owner_address = .owner_address,
+        risk_score = .risk_score,
+        total_value = .total_value
+    );
+}
+
+query search_portfolios_by_name(search_term: text) {
+    return portfolio @* { .name.upper_case().contains(search_term.upper_case()) } (
+        portfolio_id = .portfolio_id,
+        name = .name,
+        owner_address = .owner_address,
+        total_value = .total_value,
+        risk_score = .risk_score
+    );
+} 

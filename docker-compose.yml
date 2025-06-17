@@ -68,6 +68,11 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3001
+      - LOG_LEVEL=debug
+      - CORS_ORIGIN=*
+      - RATE_LIMIT_WINDOW_MS=900000
+      - RATE_LIMIT_MAX_REQUESTS=100
+      - ELIZAOS_API_KEY=sk_test_elizaos_key
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - AI_PROVIDER=${AI_PROVIDER}
       - AI_MODEL_RISK=${AI_MODEL_RISK}
@@ -80,8 +85,14 @@ services:
       - BACKEND_URL=http://backend:8002
       - REDIS_URL=redis://redis:6379
       - ETHEREUM_RPC_URL=http://anvil:8545
+      - POLYGON_RPC_URL=https://polygon-mumbai.infura.io/v3/your-key
+      - BSC_RPC_URL=https://data-seed-prebsc-1-s1.binance.org:8545
+      - AVALANCHE_RPC_URL=https://api.avax-test.network/ext/bc/C/rpc
       - CHAINLINK_API_KEY=${CHAINLINK_API_KEY}
-      - LOG_LEVEL=debug
+      - CACHE_TTL=5
+      - CACHE_CHECK_PERIOD=1
+      - OPENAI_MODEL=gpt-4-turbo-preview
+      - ANTHROPIC_MODEL=claude-3-opus-20240229
     depends_on:
       - backend
       - chromia-node
@@ -110,26 +121,47 @@ services:
       retries: 5
       
   chromia-node:
-    image: nginx:alpine
+    build:
+      context: ./chromia
+      dockerfile: Dockerfile
     ports:
-      - "7740:80"
+      - "7740:7740"
+      - "7741:7741"
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=chromia
+      - POSTGRES_PASSWORD=chromia_password
+      - POSTGRES_DB=chromia
+      - NODE_ENV=development
+      - DEBUG=true
+      - LOG_LEVEL=DEBUG
     volumes:
-      - ./chromia/mock:/usr/share/nginx/html:ro
+      - ./chromia/config:/app/config:ro
+      - ./chromia/src:/app/src:ro
+      - chromia_data:/app/data
+      - chromia_logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - riskguardian-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+      test: ["CMD-SHELL", "curl -f http://localhost:7740/api/v1/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   redis:
     image: redis:7-alpine
+    command: redis-server /usr/local/etc/redis/redis.conf
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
     networks:
       - riskguardian-network
     restart: unless-stopped
@@ -138,6 +170,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+      start_period: 10s
 
   # ✅ ANVIL FUNCIONANDO - SÓ HEALTH CHECK CORRIGIDO
   anvil:
@@ -199,6 +232,8 @@ volumes:
   postgres_data:
     driver: local
   chromia_data:
+    driver: local
+  chromia_logs:
     driver: local
   redis_data:
     driver: local

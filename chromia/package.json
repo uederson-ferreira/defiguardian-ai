@@ -1,0 +1,77 @@
+{
+    "name": "riskguardian-chromia-node",
+    "version": "1.0.0",
+    "description": "RiskGuardian Chromia/Postchain Node for DeFi Risk Management",
+    "main": "src/index.js",
+    "scripts": {
+        "start": "./start-chromia.sh",
+        "dev": "./start-chromia.sh --dev",
+        "build": "echo 'Building Rell contracts...' && mkdir -p dist",
+        "clean": "rm -rf dist/ logs/*",
+        "logs": "tail -f logs/postchain.log",
+        "logs:error": "tail -f logs/postchain-errors.log",
+        "health": "curl -f http://localhost:7740/api/v1/health || exit 1",
+        "status": "curl -s http://localhost:7740/api/v1/status | jq .",
+        "test": "echo 'Running Chromia node tests...'",
+        "stop": "pkill -f postchain || true"
+    },
+    "keywords": [
+        "chromia",
+        "postchain",
+        "blockchain",
+        "defi",
+        "risk-management",
+        "portfolio",
+        "rell"
+    ],
+    "author": "RiskGuardian Team",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/riskguardian/riskguardian-ai.git"
+    },
+    "bugs": {
+        "url": "https://github.com/riskguardian/riskguardian-ai/issues"
+    },
+    "homepage": "https://github.com/riskguardian/riskguardian-ai#readme",
+    "engines": {
+        "node": ">=16.0.0"
+    },
+    "os": [
+        "linux",
+        "darwin"
+    ],
+    "dependencies": {
+        "axios": "^1.6.0",
+        "dotenv": "^16.3.1"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.1"
+    },
+    "chromia": {
+        "nodeVersion": "0.10.8",
+        "postchainVersion": "3.8.0",
+        "rellVersion": "0.10.8",
+        "network": "development",
+        "blockchainRID": "78967baa4768cbcef11c508326ffb13a956689fcb6dc3ba17f4b895cbb1577a3"
+    },
+    "postchain": {
+        "database": {
+            "driver": "postgresql",
+            "host": "postgres",
+            "port": 5432,
+            "database": "chromia",
+            "username": "chromia",
+            "schema": "chromia"
+        },
+        "node": {
+            "api_port": 7740,
+            "network_port": 7741,
+            "node_id": "riskguardian-node-001"
+        },
+        "blockchain": {
+            "name": "riskguardian-chain",
+            "main_module": "portfolio"
+        }
+    }
+}
