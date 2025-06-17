@@ -3,12 +3,17 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Install pnpm globally
+RUN npm install -g pnpm
+
 # Install Python and build dependencies for node-gyp
 RUN apk add --no-cache python3 make g++ git
 
-# Install dependencies
-COPY package*.json ./
-RUN npm install
+# Copy package files first (for better caching)
+COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies with pnpm
+RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY . .
@@ -17,4 +22,4 @@ COPY . .
 EXPOSE 3000
 
 # Development command with hot reload
-CMD ["npm", "run", "dev"]
+CMD ["pnpm", "dev"]

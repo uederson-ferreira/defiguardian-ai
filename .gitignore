@@ -194,6 +194,9 @@ deployments/optimism/
 # deployments/anvil/
 # deployments/goerli/
 
+Old-frontend
+frontend riskguardian-dashboard
+
 # Contract verification
 verify/
 etherscan/

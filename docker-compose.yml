@@ -7,13 +7,15 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
-      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_API_URL=http://localhost:8002  # ✅ PORTA CORRIGIDA
       - NEXT_PUBLIC_CHROMIA_URL=http://localhost:7740
       - NEXT_PUBLIC_ETHEREUM_RPC=http://localhost:8545
       - NEXT_PUBLIC_CHAIN_ID=31337
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      - /app/.next
+      - /app/.pnpm-store  # ✅ Cache pnpm
     depends_on:
       - backend
     networks:
@@ -25,10 +27,10 @@ services:
       context: ./backend
       dockerfile: Dockerfile.dev
     ports:
-      - "8001:8001"
+      - "8002:8002"  # ✅ PORTA CORRIGIDA (era 8001)
     environment:
       - NODE_ENV=development
-      - PORT=8001
+      - PORT=8002  # ✅ PORTA CORRIGIDA
       - CHROMIA_URL=http://chromia-node:7740
       - REDIS_URL=redis://redis:6379
       - ETHEREUM_RPC_URL=https://sepolia.drpc.org
@@ -54,7 +56,7 @@ services:
       chromia-node:
         condition: service_healthy
       anvil:
-        condition: service_healthy  # ✅ AGORA FUNCIONARÁ!
+        condition: service_healthy
     networks:
       - riskguardian-network
     restart: unless-stopped
@@ -77,7 +79,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - CHROMIA_URL=http://chromia-node:7740
-      - BACKEND_URL=http://backend:8002
+      - BACKEND_URL=http://backend:8002  # ✅ PORTA CORRIGIDA
       - REDIS_URL=redis://redis:6379
       - ETHEREUM_RPC_URL=http://anvil:8545
       - CHAINLINK_API_KEY=${CHAINLINK_API_KEY}
@@ -139,17 +141,14 @@ services:
       timeout: 5s
       retries: 3
 
-  # ✅ ANVIL FUNCIONANDO - SÓ HEALTH CHECK CORRIGIDO
   anvil:
     image: ghcr.io/foundry-rs/foundry:latest
-    # ✅ ENTRYPOINT PERFEITO! (funcionou 100%)
     entrypoint: ["anvil", "--host", "0.0.0.0", "--port", "8545", "--chain-id", "31337", "--accounts", "10", "--balance", "10000", "--gas-limit", "30000000", "--block-time", "2"]
     ports:
       - "8545:8545"
     networks:
       - riskguardian-network
     restart: unless-stopped
-    # ✅ HEALTH CHECK SIMPLES (sem ferramentas externas)
     healthcheck:
       test: ["CMD-SHELL", "ps aux | grep '[a]nvil' | grep -v grep || exit 1"]
       interval: 15s
@@ -192,8 +191,6 @@ services:
         condition: service_healthy
     networks:
       - riskguardian-network
-    # profiles:
-    #   - tools
         
 volumes:
   postgres_data:
