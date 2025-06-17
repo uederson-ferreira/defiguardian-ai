@@ -26,53 +26,53 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
-        version: "0.8.19",
+        version: "0.8.20",
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200
-          }
-        }
-      }
-    ]
+            runs: 200,
+          },
+        },
+      },
+    ],
   },
   networks: {
     mainnet: {
       url: `https://eth-mainnet.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
       accounts: [process.env.PRIVATE_KEY || ""],
-      chainId: 1
+      chainId: 1,
     },
     sepolia: {
       url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
       accounts: [process.env.PRIVATE_KEY || ""],
-      chainId: 11155111
+      chainId: 11155111,
     },
     fuji: {
       url: "https://api.avax-test.network/ext/bc/C/rpc",
       accounts: [process.env.PRIVATE_KEY || ""],
-      chainId: 43113
-    }
+      chainId: 43113,
+    },
   },
   etherscan: {
     apiKey: {
       sepolia: process.env.ETHERSCAN_API_KEY || "",
-      avalancheFujiTestnet: process.env.SNOWTRACE_API_KEY || ""
-    }
+      avalancheFujiTestnet: process.env.SNOWTRACE_API_KEY || "",
+    },
   },
   paths: {
     sources: "./contracts",
     tests: "./test",
     cache: "./cache",
-    artifacts: "./artifacts"
+    artifacts: "./artifacts",
   },
   gasReporter: {
     enabled: true,
-    currency: "USD"
+    currency: "USD",
   },
   typechain: {
     outDir: "typechain-types",
-    target: "ethers-v5"
-  }
+    target: "ethers-v5",
+  },
 };
 
-export default config; 
+export default config;

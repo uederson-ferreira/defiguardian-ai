@@ -10,6 +10,11 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "RiskGuardian AI",
   description: "AI-powered DeFi risk management platform",
+  icons: {
+    icon: "/shield-favicon.svg",
+    shortcut: "/shield-favicon.svg",
+    apple: "/shield-favicon.svg",
+  },
 };
 
 export default function RootLayout({

@@ -35,6 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false)
+  const [isBackendAvailable, setIsBackendAvailable] = useState(true)
 
   // Check for existing session on mount
   useEffect(() => {
@@ -46,25 +47,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const token = localStorage.getItem('auth_token')
       const address = localStorage.getItem('wallet_address')
 
-      if (token && address) {
-        // Verify token with backend
-        const response = await fetch('http://localhost:8002/api/auth/profile', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
+      if (address) {
+        // Primeiro, definimos o usuário com o endereço da carteira
+        // independentemente do backend
+        setUser({ address })
+        
+        // Se tiver token, tentamos verificar com o backend
+        if (token) {
+          try {
+            const response = await fetch('http://localhost:8002/api/auth/profile', {
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            })
 
-        if (response.ok) {
-          setUser({ address })
-          setIsAuthenticated(true)
-          console.log('✅ Session restored for:', address)
-        } else {
-          // Invalid token, clear storage
-          localStorage.removeItem('auth_token')
-          localStorage.removeItem('wallet_address')
+            if (response.ok) {
+              setIsAuthenticated(true)
+              console.log('✅ Session restored for:', address)
+            } else {
+              // Token inválido, limpar apenas o token
+              localStorage.removeItem('auth_token')
+              setIsBackendAvailable(true)
+            }
+          } catch (error: unknown) {
+            console.error('Backend check failed:', error)
+            // Problema com o backend, mas mantemos o usuário conectado
+            setIsBackendAvailable(false)
+            localStorage.removeItem('auth_token')
+          }
         }
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Session check failed:', error)
       // Clear any invalid session data
       localStorage.removeItem('auth_token')
@@ -79,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Open wallet selection modal instead of directly connecting
       setIsWalletModalOpen(true)
       return null
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('❌ Wallet connection failed:', error)
       throw error
     }
@@ -87,28 +100,65 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function connectWithWallet(walletType: string): Promise<string | null> {
     try {
-      console.log(`🔄 Connecting with ${walletType}...`)
+      console.log(`🔄 Conectando com ${walletType}...`)
       
       // Handle different wallet types
       if (walletType === 'metamask') {
-        if (!window.ethereum?.isMetaMask) {
-          alert('MetaMask not found! Please install MetaMask to continue.')
+        // Verificar se o MetaMask está instalado
+        if (!window.ethereum) {
+          console.error('❌ Ethereum provider não encontrado')
+          alert('MetaMask não encontrado! Por favor, instale o MetaMask para continuar.')
           return null
         }
         
-        console.log('🦊 Requesting MetaMask connection...')
-        
-        const accounts = await window.ethereum.request({
-          method: 'eth_requestAccounts',
-        })
-
-        if (accounts.length === 0) {
-          throw new Error('No accounts found')
+        if (!window.ethereum.isMetaMask) {
+          console.error('❌ MetaMask não encontrado, mas outro provider ethereum está disponível')
+          alert('MetaMask não encontrado! Por favor, instale o MetaMask para continuar.')
+          return null
         }
-
-        const address = accounts[0]
-        console.log('✅ Wallet connected:', address)
-        return address
+        
+        console.log('🦊 Solicitando conexão do MetaMask...')
+        console.log('Provider ethereum:', window.ethereum)
+        
+        try {
+          // Verificar a rede atual
+          const chainId = await window.ethereum.request({ method: 'eth_chainId' })
+          console.log('🔗 Chain ID atual:', chainId)
+          
+          // Solicitar contas
+          console.log('Solicitando contas...')
+          const accounts = await window.ethereum.request({
+            method: 'eth_requestAccounts',
+          })
+      
+          console.log('Contas retornadas:', accounts)
+      
+          if (!accounts || accounts.length === 0) {
+            throw new Error('Nenhuma conta encontrada')
+          }
+      
+          const address = accounts[0]
+          console.log('✅ Carteira conectada:', address)
+          
+          // Atualizar o estado do usuário imediatamente após conectar a carteira
+          setUser({ address })
+          localStorage.setItem('wallet_address', address)
+          
+          return address
+        } catch (metamaskError: any) {
+          console.error('Erro específico do MetaMask:', metamaskError)
+          
+          // Tratamento específico para erros comuns do MetaMask
+          if (metamaskError.code === 4001) {
+            alert('Você rejeitou a conexão com o MetaMask. Por favor, tente novamente e aprove a conexão.')
+          } else if (metamaskError.code === -32002) {
+            alert('Já existe uma solicitação de conexão pendente no MetaMask. Por favor, abra a extensão e aprove a conexão.')
+          } else {
+            alert(`Erro ao conectar com MetaMask: ${metamaskError.message || 'Erro desconhecido'}`)
+          }
+          
+          return null
+        }
       } 
       else if (walletType === 'brave') {
         if (!window.ethereum) {
@@ -128,6 +178,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const address = accounts[0]
         console.log('✅ Wallet connected:', address)
+        
+        // Atualizar o estado do usuário imediatamente após conectar a carteira
+        setUser({ address })
+        localStorage.setItem('wallet_address', address)
+        
         return address
       }
       else if (walletType === 'coinbase') {
@@ -148,6 +203,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const address = accounts[0]
         console.log('✅ Wallet connected:', address)
+        
+        // Atualizar o estado do usuário imediatamente após conectar a carteira
+        setUser({ address })
+        localStorage.setItem('wallet_address', address)
+        
         return address
       }
       else if (walletType === 'walletconnect') {
@@ -175,15 +235,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const address = accounts[0]
         console.log('✅ Wallet connected:', address)
+        
+        // Atualizar o estado do usuário imediatamente após conectar a carteira
+        setUser({ address })
+        localStorage.setItem('wallet_address', address)
+        
         return address
       }
       else {
         alert('Unsupported wallet type')
         return null
       }
-    } catch (error) {
-      console.error('❌ Wallet connection failed:', error)
-      throw error
+    } catch (error: unknown) {
+      console.error('❌ Falha na conexão da carteira:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      alert(`Falha na conexão da carteira: ${errorMessage}`);
+      return null
     }
   }
 
@@ -204,7 +271,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const data = await response.json()
       return data
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Failed to get profile:', error)
       return null
     }
@@ -212,67 +279,114 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function login(address: string): Promise<boolean> {
     try {
-      console.log('🔐 Starting login process for:', address)
+      console.log('🔐 Iniciando processo de login para:', address)
 
-      // 1. Request nonce from backend
-      const nonceResponse = await fetch('http://localhost:8002/api/auth/nonce', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ address }),
-      })
-
-      if (!nonceResponse.ok) {
-        throw new Error('Failed to get nonce')
-      }
-
-      const { data } = await nonceResponse.json()
-      const { message } = data
-
-      console.log('📝 Signing message:', message)
-
-      // 2. Sign message with MetaMask
-      const signature = await window.ethereum?.request({
-        method: 'personal_sign',
-        params: [message, address],
-      })
-
-      console.log('✍️ Message signed')
-
-      // 3. Send signature to backend for verification
-      const loginResponse = await fetch('http://localhost:8002/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          address,
-          signature,
-          message,
-        }),
-      })
-
-      const loginData = await loginResponse.json()
-
-      if (loginData.success) {
-        // Store token and address
-        localStorage.setItem('auth_token', loginData.token)
-        localStorage.setItem('wallet_address', address)
+      try {
+        // Verificar se o backend está disponível antes de tentar login
+        const healthCheck = await fetch('http://localhost:8002/health')
+          .then(res => res.ok)
+          .catch(() => false)
         
-        // Update context state
-        setUser({ address })
-        setIsAuthenticated(true)
+        if (!healthCheck) {
+          console.log('⚠️ Backend não está disponível. Continuando apenas com a carteira conectada.')
+          setIsBackendAvailable(false)
+          return true // Retorna true mesmo sem backend para permitir uso da aplicação
+        }
         
-        console.log('✅ Login successful!')
-        return true
-      } else {
-        throw new Error(loginData.error || 'Login failed')
+        setIsBackendAvailable(true)
+        
+        // 1. Request nonce from backend
+        console.log('Solicitando nonce do backend em http://localhost:8002/api/auth/nonce')
+        const nonceResponse = await fetch('http://localhost:8002/api/auth/nonce', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ address }),
+        })
+        
+        console.log('Resposta do nonce recebida:', nonceResponse.status, nonceResponse.statusText)
+    
+        if (!nonceResponse.ok) {
+          const errorData = await nonceResponse.json().catch(() => ({
+            error: 'Não foi possível ler o erro do servidor'
+          }));
+          console.error('Erro na resposta do nonce:', errorData)
+          throw new Error(`Falha ao obter nonce: ${nonceResponse.status} ${nonceResponse.statusText} ${errorData.error || ''}`)
+        }
+    
+        const responseData = await nonceResponse.json()
+        console.log('Dados da resposta do nonce:', responseData)
+        
+        if (!responseData.data || !responseData.data.message) {
+          throw new Error('Formato de resposta inválido do servidor: message não encontrada')
+        }
+        
+        const { data } = responseData
+        const { message } = data
+    
+        console.log('📝 Assinando mensagem:', message)
+    
+        // 2. Sign message with wallet
+        if (!window.ethereum) {
+          throw new Error('Carteira não está disponível para assinar a mensagem')
+        }
+        
+        const signature = await window.ethereum.request({
+          method: 'personal_sign',
+          params: [message, address],
+        })
+    
+        console.log('✍️ Mensagem assinada')
+    
+        // 3. Send signature to backend for verification
+        console.log('Enviando assinatura para verificação...')
+        const loginResponse = await fetch('http://localhost:8002/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            address,
+            signature,
+            message,
+          }),
+        })
+        
+        console.log('Resposta de login recebida:', loginResponse.status, loginResponse.statusText)
+    
+        const loginData = await loginResponse.json()
+        console.log('Dados da resposta de login:', loginData)
+    
+        if (loginData.success) {
+          // Store token and address
+          localStorage.setItem('auth_token', loginData.token)
+          localStorage.setItem('wallet_address', address)
+          
+          // Update context state
+          setUser({ address })
+          setIsAuthenticated(true)
+          
+          console.log('✅ Login bem-sucedido!')
+          return true
+        } else {
+          throw new Error(loginData.error || 'Falha no login')
+        }
+      } catch (fetchError: any) {
+        console.error('Erro de conexão com o backend:', fetchError)
+        
+        // Verificar se é um erro de rede
+        if (fetchError.message && fetchError.message.includes('Failed to fetch')) {
+          console.log('⚠️ Backend não está disponível. Continuando apenas com a carteira conectada.')
+          setIsBackendAvailable(false)
+          return true // Retorna true mesmo sem backend para permitir uso da aplicação
+        }
+        
+        throw new Error(`Erro de conexão com o backend: ${fetchError.message || 'Servidor indisponível'}`)
       }
-
-    } catch (error) {
-      console.error('❌ Login failed:', error)
-      alert('Login failed. Please try again.')
+    } catch (error: any) {
+      console.error('❌ Falha no login:', error)
+      alert(`Falha no login: ${error.message || 'Erro desconhecido'}. Você pode continuar usando o aplicativo com funcionalidades limitadas.`)
       return false
     }
   }
@@ -291,7 +405,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               'Content-Type': 'application/json'
             }
           })
-        } catch (error) {
+        } catch (error: unknown) {
           console.error('Error during logout:', error)
         }
       }
@@ -306,7 +420,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       console.log('✅ Logout successful')
       
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Logout error:', error)
       // Force logout anyway
       localStorage.clear()
@@ -336,8 +450,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         onSelectWallet={async (walletType: string): Promise<void> => {
           const address = await connectWithWallet(walletType);
           if (address) {
-            await login(address);
+            try {
+              // Tentamos fazer login com o backend, mas não bloqueamos o uso do app
+              await login(address);
+            } catch (error) {
+              console.error('Erro ao fazer login com o backend:', error);
+              // Continuamos mesmo com erro no backend
+            }
           }
+          setIsWalletModalOpen(false);
           return;
         }}
       />
