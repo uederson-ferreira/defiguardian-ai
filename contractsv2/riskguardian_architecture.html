@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RiskGuardian AI V2 - Diagramas Técnicos</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            background: #ecf0f1;
+            border-radius: 12px;
+            padding: 5px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px 10px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .tab.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .diagram-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        /* SVG Styles */
+        .contract-box {
+            fill: #3498db;
+            stroke: #2980b9;
+            stroke-width: 2;
+            rx: 8;
+        }
+
+        .contract-box.core { fill: #e74c3c; stroke: #c0392b; }
+        .contract-box.automation { fill: #f39c12; stroke: #e67e22; }
+        .contract-box.hedge { fill: #27ae60; stroke: #229954; }
+        .contract-box.data { fill: #9b59b6; stroke: #8e44ad; }
+        .contract-box.external { fill: #34495e; stroke: #2c3e50; }
+
+        .contract-text {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 12px;
+            font-weight: bold;
+            fill: white;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .contract-desc {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 10px;
+            fill: white;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .connection-line {
+            stroke: #3498db;
+            stroke-width: 2;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+
+        .connection-line.bidirectional {
+            stroke: #e74c3c;
+            stroke-dasharray: 5,5;
+        }
+
+        .connection-line.data-flow {
+            stroke: #f39c12;
+            stroke-width: 3;
+        }
+
+        .layer-label {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            fill: #2c3e50;
+            text-anchor: middle;
+        }
+
+        .flow-step {
+            fill: #3498db;
+            stroke: #2980b9;
+            stroke-width: 2;
+            rx: 25;
+        }
+
+        .flow-text {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 12px;
+            font-weight: bold;
+            fill: white;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .legend {
+            background: white;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        .user-journey {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .journey-step {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #fff;
+        }
+
+        .interactions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .interaction-card {
+            background: linear-gradient(135deg, #ff7675, #fd79a8);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .deployment-flow {
+            background: #ecf0f1;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .diagram-container {
+                padding: 15px;
+            }
+        }
+
+        /* Animation for interactive elements */
+        .contract-box {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .contract-box:hover {
+            filter: brightness(1.1);
+            transform: scale(1.05);
+        }
+
+        .info-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            z-index: 1000;
+            max-width: 500px;
+            display: none;
+        }
+
+        .info-panel.show {
+            display: block;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏗️ RiskGuardian AI V2 - Diagramas Técnicos</h1>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('architecture')">🏛️ Arquitetura</div>
+            <div class="tab" onclick="showTab('dataflow')">🔄 Fluxo de Dados</div>
+            <div class="tab" onclick="showTab('interactions')">🔗 Interações</div>
+            <div class="tab" onclick="showTab('userjourney')">👤 Jornada do Usuário</div>
+            <div class="tab" onclick="showTab('deployment')">🚀 Deployment</div>
+        </div>
+
+        <!-- Architecture Diagram -->
+        <div id="architecture" class="tab-content active">
+            <div class="diagram-container">
+                <h3 style="text-align: center; margin-bottom: 30px;">🏛️ Arquitetura Completa do Sistema</h3>
+                <svg width="100%" height="800" viewBox="0 0 1400 800">
+                    <!-- Definitions for arrows and patterns -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#3498db" />
+                        </marker>
+                        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#ecf0f1" stroke-width="1"/>
+                        </pattern>
+                    </defs>
+                    
+                    <!-- Background grid -->
+                    <rect width="100%" height="100%" fill="url(#grid)" />
+                    
+                    <!-- Layer Labels -->
+                    <text x="100" y="40" class="layer-label">External Data</text>
+                    <text x="100" y="180" class="layer-label">Core Contracts</text>
+                    <text x="100" y="400" class="layer-label">Automation</text>
+                    <text x="100" y="600" class="layer-label">Hedge Strategies</text>
+                    
+                    <!-- External Data Layer -->
+                    <rect x="250" y="60" width="120" height="60" class="contract-box external" onclick="showInfo('chainlink')"/>
+                    <text x="310" y="85" class="contract-text">Chainlink</text>
+                    <text x="310" y="100" class="contract-desc">Price Feeds</text>
+                    
+                    <rect x="400" y="60" width="120" height="60" class="contract-box external" onclick="showInfo('protocols')"/>
+                    <text x="460" y="85" class="contract-text">DeFi Protocols</text>
+                    <text x="460" y="100" class="contract-desc">Data Sources</text>
+                    
+                    <rect x="550" y="60" width="120" height="60" class="contract-box external" onclick="showInfo('providers')"/>
+                    <text x="610" y="85" class="contract-text">Risk Providers</text>
+                    <text x="610" y="100" class="contract-desc">External APIs</text>
+                    
+                    <!-- Core Contracts Layer -->
+                    <rect x="250" y="200" width="120" height="80" class="contract-box core" onclick="showInfo('registry')"/>
+                    <text x="310" y="230" class="contract-text">RiskRegistry</text>
+                    <text x="310" y="250" class="contract-desc">Protocol Registry</text>
+                    <text x="310" y="265" class="contract-desc">Risk Metrics</text>
+                    
+                    <rect x="400" y="200" width="120" height="80" class="contract-box core" onclick="showInfo('oracle')"/>
+                    <text x="460" y="230" class="contract-text">RiskOracle</text>
+                    <text x="460" y="250" class="contract-desc">Data Aggregation</text>
+                    <text x="460" y="265" class="contract-desc">Risk Calculation</text>
+                    
+                    <rect x="550" y="200" width="120" height="80" class="contract-box core" onclick="showInfo('analyzer')"/>
+                    <text x="610" y="230" class="contract-text">Portfolio</text>
+                    <text x="610" y="245" class="contract-text">Analyzer</text>
+                    <text x="610" y="265" class="contract-desc">Risk Analysis</text>
+                    
+                    <!-- Automation Layer -->
+                    <rect x="200" y="420" width="140" height="80" class="contract-box automation" onclick="showInfo('master')"/>
+                    <text x="270" y="450" class="contract-text">RiskGuardian</text>
+                    <text x="270" y="465" class="contract-text">Master</text>
+                    <text x="270" y="485" class="contract-desc">Central Coordinator</text>
+                    
+                    <rect x="370" y="420" width="120" height="80" class="contract-box automation" onclick="showInfo('alerts')"/>
+                    <text x="430" y="450" class="contract-text">AlertSystem</text>
+                    <text x="430" y="470" class="contract-desc">Smart Alerts</text>
+                    <text x="430" y="485" class="contract-desc">Notifications</text>
+                    
+                    <rect x="520" y="420" width="120" height="80" class="contract-box automation" onclick="showInfo('insurance')"/>
+                    <text x="580" y="450" class="contract-text">RiskInsurance</text>
+                    <text x="580" y="470" class="contract-desc">Insurance Pool</text>
+                    <text x="580" y="485" class="contract-desc">Claims</text>
+                    
+                    <!-- Hedge Strategies Layer -->
+                    <rect x="150" y="620" width="110" height="80" class="contract-box hedge" onclick="showInfo('stoploss')"/>
+                    <text x="205" y="650" class="contract-text">StopLoss</text>
+                    <text x="205" y="665" class="contract-text">Hedge</text>
+                    <text x="205" y="685" class="contract-desc">Auto Stop Loss</text>
+                    
+                    <rect x="290" y="620" width="110" height="80" class="contract-box hedge" onclick="showInfo('rebalance')"/>
+                    <text x="345" y="650" class="contract-text">Rebalance</text>
+                    <text x="345" y="665" class="contract-text">Hedge</text>
+                    <text x="345" y="685" class="contract-desc">Portfolio Balance</text>
+                    
+                    <rect x="430" y="620" width="110" height="80" class="contract-box hedge" onclick="showInfo('volatility')"/>
+                    <text x="485" y="650" class="contract-text">Volatility</text>
+                    <text x="485" y="665" class="contract-text">Hedge</text>
+                    <text x="485" y="685" class="contract-desc">Volatility Shield</text>
+                    
+                    <rect x="570" y="620" width="110" height="80" class="contract-box hedge" onclick="showInfo('crosschain')"/>
+                    <text x="625" y="650" class="contract-text">CrossChain</text>
+                    <text x="625" y="665" class="contract-text">Hedge</text>
+                    <text x="625" y="685" class="contract-desc">Multi-Chain</text>
+                    
+                    <!-- User Interface -->
+                    <rect x="800" y="300" width="150" height="100" class="contract-box" style="fill: #16a085; stroke: #138d75;"/>
+                    <text x="875" y="340" class="contract-text">Frontend</text>
+                    <text x="875" y="355" class="contract-text">Interface</text>
+                    <text x="875" y="375" class="contract-desc">Web3 dApp</text>
+                    <text x="875" y="385" class="contract-desc">Dashboard</text>
+                    
+                    <!-- Connection Lines -->
+                    <!-- External to Core -->
+                    <path d="M 310 120 L 310 200" class="connection-line data-flow"/>
+                    <path d="M 460 120 L 460 200" class="connection-line data-flow"/>
+                    <path d="M 610 120 L 610 200" class="connection-line data-flow"/>
+                    
+                    <!-- Core to Automation -->
+                    <path d="M 310 280 L 270 420" class="connection-line"/>
+                    <path d="M 460 280 L 430 420" class="connection-line"/>
+                    <path d="M 610 280 L 580 420" class="connection-line"/>
+                    
+                    <!-- Automation to Hedges -->
+                    <path d="M 270 500 L 205 620" class="connection-line"/>
+                    <path d="M 270 500 L 345 620" class="connection-line"/>
+                    <path d="M 270 500 L 485 620" class="connection-line"/>
+                    <path d="M 270 500 L 625 620" class="connection-line"/>
+                    
+                    <!-- Frontend connections -->
+                    <path d="M 800 350 L 640 240" class="connection-line bidirectional"/>
+                    <path d="M 800 350 L 640 460" class="connection-line bidirectional"/>
+                </svg>
+            </div>
+            
+            <div class="legend">
+                <h4>📋 Legenda dos Componentes</h4>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #e74c3c;"></div>
+                    <span><strong>Core Contracts:</strong> Contratos fundamentais do sistema</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #f39c12;"></div>
+                    <span><strong>Automation:</strong> Sistemas de automação e alertas</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #27ae60;"></div>
+                    <span><strong>Hedge Strategies:</strong> Estratégias de proteção</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #34495e;"></div>
+                    <span><strong>External Data:</strong> Fontes externas de dados</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Flow Diagram -->
+        <div id="dataflow" class="tab-content">
+            <div class="diagram-container">
+                <h3 style="text-align: center; margin-bottom: 30px;">🔄 Fluxo de Dados em Tempo Real</h3>
+                <svg width="100%" height="600" viewBox="0 0 1200 600">
+                    <!-- Flow Steps -->
+                    <rect x="50" y="50" width="150" height="60" class="flow-step"/>
+                    <text x="125" y="85" class="flow-text">1. Data Collection</text>
+                    
+                    <rect x="250" y="50" width="150" height="60" class="flow-step"/>
+                    <text x="325" y="85" class="flow-text">2. Risk Aggregation</text>
+                    
+                    <rect x="450" y="50" width="150" height="60" class="flow-step"/>
+                    <text x="525" y="85" class="flow-text">3. Portfolio Analysis</text>
+                    
+                    <rect x="650" y="50" width="150" height="60" class="flow-step"/>
+                    <text x="725" y="85" class="flow-text">4. Alert Processing</text>
+                    
+                    <rect x="850" y="50" width="150" height="60" class="flow-step"/>
+                    <text x="925" y="85" class="flow-text">5. Hedge Execution</text>
+                    
+                    <!-- Flow Arrows -->
+                    <path d="M 200 80 L 240 80" class="connection-line data-flow"/>
+                    <path d="M 400 80 L 440 80" class="connection-line data-flow"/>
+                    <path d="M 600 80 L 640 80" class="connection-line data-flow"/>
+                    <path d="M 800 80 L 840 80" class="connection-line data-flow"/>
+                    
+                    <!-- Detailed Flow Boxes -->
+                    <!-- Data Sources -->
+                    <rect x="30" y="150" width="90" height="50" class="contract-box external"/>
+                    <text x="75" y="180" class="contract-desc">Chainlink</text>
+                    
+                    <rect x="130" y="150" width="90" height="50" class="contract-box external"/>
+                    <text x="175" y="180" class="contract-desc">Protocols</text>
+                    
+                    <!-- Oracle Processing -->
+                    <rect x="230" y="150" width="190" height="80" class="contract-box core"/>
+                    <text x="325" y="175" class="contract-text">RiskOracle</text>
+                    <text x="325" y="195" class="contract-desc">• Aggregate Risk Data</text>
+                    <text x="325" y="210" class="contract-desc">• Weight by Provider</text>
+                    <text x="325" y="225" class="contract-desc">• Calculate Overall Risk</text>
+                    
+                    <!-- Portfolio Analysis -->
+                    <rect x="450" y="150" width="150" height="80" class="contract-box core"/>
+                    <text x="525" y="175" class="contract-text">Portfolio Analysis</text>
+                    <text x="525" y="195" class="contract-desc">• User Positions</text>
+                    <text x="525" y="210" class="contract-desc">• Risk Weighting</text>
+                    <text x="525" y="225" class="contract-desc">• Diversification</text>
+                    
+                    <!-- Alert System -->
+                    <rect x="630" y="150" width="170" height="80" class="contract-box automation"/>
+                    <text x="715" y="175" class="contract-text">Alert System</text>
+                    <text x="715" y="195" class="contract-desc">• Check Thresholds</text>
+                    <text x="715" y="210" class="contract-desc">• Priority Calculation</text>
+                    <text x="715" y="225" class="contract-desc">• User Notifications</text>
+                    
+                    <!-- Hedge Execution -->
+                    <rect x="830" y="150" width="170" height="150" class="contract-box hedge"/>
+                    <text x="915" y="175" class="contract-text">Hedge Master</text>
+                    <text x="915" y="200" class="contract-desc">• Stop Loss</text>
+                    <text x="915" y="220" class="contract-desc">• Rebalancing</text>
+                    <text x="915" y="240" class="contract-desc">• Volatility Shield</text>
+                    <text x="915" y="260" class="contract-desc">• Cross-Chain</text>
+                    <text x="915" y="280" class="contract-desc">• Emergency Actions</text>
+                    
+                    <!-- Data Flow Lines -->
+                    <path d="M 75 200 L 325 150" class="connection-line data-flow"/>
+                    <path d="M 175 200 L 325 150" class="connection-line data-flow"/>
+                    <path d="M 420 190 L 450 190" class="connection-line data-flow"/>
+                    <path d="M 600 190 L 630 190" class="connection-line data-flow"/>
+                    <path d="M 800 190 L 830 190" class="connection-line data-flow"/>
+                    
+                    <!-- Automation Loop -->
+                    <path d="M 915 300 Q 1050 350 950 450 Q 850 500 125 450 Q 50 420 125 380" 
+                          class="connection-line" style="stroke: #e74c3c; stroke-dasharray: 10,5;"/>
+                    <text x="600" y="480" style="font-size: 14px; fill: #e74c3c; font-weight: bold;">
+                        🔄 Continuous Monitoring Loop (5 min intervals)
+                    </text>
+                    
+                    <!-- Real-time indicators -->
+                    <circle cx="125" cy="120" r="8" fill="#2ecc71" opacity="0.8">
+                        <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="325" cy="120" r="8" fill="#2ecc71" opacity="0.8">
+                        <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="525" cy="120" r="8" fill="#2ecc71" opacity="0.8">
+                        <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="725" cy="120" r="8" fill="#2ecc71" opacity="0.8">
+                        <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                    <circle cx="925" cy="120" r="8" fill="#2ecc71" opacity="0.8">
+                        <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+            </div>
+            
+            <div class="user-journey">
+                <h4>⚡ Características do Fluxo de Dados</h4>
+                <div class="journey-step">
+                    <strong>🕐 Real-Time Processing:</strong> Dados atualizados a cada 5 minutos via Chainlink Automation
+                </div>
+                <div class="journey-step">
+                    <strong>🔄 Continuous Loop:</strong> Sistema monitora constantemente sem intervenção manual
+                </div>
+                <div class="journey-step">
+                    <strong>⚡ Gas Optimized:</strong> Execução eficiente com limites de gas por operação
+                </div>
+                <div class="journey-step">
+                    <strong>🛡️ Emergency Mode:</strong> Pausas automáticas em caso de risco extremo
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactions Diagram -->
+        <div id="interactions" class="tab-content">
+            <div class="diagram-container">
+                <h3 style="text-align: center; margin-bottom: 30px;">🔗 Mapa de Interações Entre Contratos</h3>
+                
+                <div class="interactions-grid">
+                    <div class="interaction-card">
+                        <h4>📊 RiskRegistry ↔ PortfolioAnalyzer</h4>
+                        <p><strong>Função:</strong> getProtocol()</p>
+                        <p><strong>Dados:</strong> Risk metrics, protocol info</p>
+                        <p><strong>Frequência:</strong> A cada cálculo de risco</p>
+                    </div>
+                    
+                    <div class="interaction-card">
+                        <h4>🔮 RiskOracle ↔ AlertSystem</h4>
+                        <p><strong>Função:</strong> getAggregatedRisk()</p>
+                        <p><strong>Dados:</strong> Real-time risk scores</p>
+                        <p><strong>Frequência:</strong> Continuous monitoring</p>
+                    </div>
+                    
+                    <div class="interaction-card">
+                        <h4>🤖 RiskGuardianMaster ↔ Hedges</h4>
+                        <p><strong>Função:</strong> executeHedge()</p>
+                        <p><strong>Dados:</strong> Execution commands</p>
+                        <p><strong>Frequência:</strong> When threshold exceeded</p>
+                    </div>
+                    
+                    <div class="interaction-card">
+                        <h4>🔗 Chainlink ↔ All Contracts</h4>
+                        <p><strong>Função:</strong> latestRoundData()</p>
+                        <p><strong>Dados:</strong> Price feeds, automation</p>
+                        <p><strong>Frequência:</strong> Real-time updates</p>
+                    </div>
+                    
+                    <div class="interaction-card">
+                        <h4>🏦 RiskInsurance ↔ PortfolioAnalyzer</h4>
+                        <p><strong>Função:</strong> getPortfolioAnalysis()</p>
+                        <p><strong>Dados:</strong> Portfolio risk level</p>
+                        <p><strong>Frequência:</strong> Claim validation</p>
+                    </div>
+                    
+                    <div class="interaction-card">
+                        <h4>🚨 AlertSystem ↔ Users</h4>
+                        <p><strong>Função:</strong> createSubscription()</p>
+                        <p><strong>Dados:</strong> Alert preferences</p>
+                        <p><strong>Frequência:</strong> User-defined thresholds</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Journey -->
+        <div id="userjourney" class="tab-content">
+            <div class="user-journey">
+                <h3>👤 Jornada Completa do Usuário</h3>
+                
+                <div class="journey-step">
+                    <strong>1. 🚀 Onboarding</strong><br>
+                    • Conecta carteira Web3<br>
+                    • Configura preferências de risco<br>
+                    • Define thresholds de alerta
+                </div>
+                
+                <div class="journey-step">
+                    <strong>2. 📊 Portfolio Setup</strong><br>
+                    • Adiciona posições DeFi existentes<br>
+                    • Sistema calcula risco inicial<br>
+                    • Score de diversificação gerado
+                </div>
+                
+                <div class="journey-step">
+                    <strong>3. 🔔 Alert Configuration</strong><br>
+                    • Define tipos de alerta desejados<br>
+                    • Configura cooldowns personalizados<br>
+                    • Escolhe canais de notificação
+                </div>
+                
+                <div class="journey-step">
+                    <strong>4. 🛡️ Hedge Strategy Selection</strong><br>
+                    • Escolhe estratégias de proteção<br>
+                    • Define parâmetros de stop loss<br>
+                    • Configura rebalanceamento automático
+                </div>
+                
+                <div class="journey-step">
+                    <strong>5. 🏦 Insurance Setup (Opcional)</strong><br>
+                    • Cria apólice de seguro<br>
+                    • Define cobertura e threshold<br>
+                    • Paga prêmio calculado automaticamente
+                </div>
+                
+                <div class="journey-step">
+                    <strong>6. ⚡ Automated Protection</strong><br>
+                    • Sistema monitora 24/7<br>
+                    • Alertas automáticos quando necessário<br>
+                    • Hedges executados automaticamente
+                </div>
+                
+                <div class="journey-step">
+                    <strong>7. 📈 Ongoing Management</strong><br>
+                    • Dashboard com métricas em tempo real<br>
+                    • Histórico de execuções de hedge<br>
+                    • Ajustes de configuração quando necessário
+                </div>
+            </div>
+        </div>
+
+        <!-- Deployment Diagram -->
+        <div id="deployment" class="tab-content">
+            <div class="deployment-flow">
+                <h3 style="text-align: center; margin-bottom: 30px;">🚀 Pipeline de Deployment</h3>
+                
+                <svg width="100%" height="500" viewBox="0 0 1200 500">
+                    <!-- Networks -->
+                    <rect x="50" y="50" width="200" height="80" class="contract-box" style="fill: #3498db;"/>
+                    <text x="150" y="85" class="contract-text">1. Local Development</text>
+                    <text x="150" y="105" class="contract-desc">Anvil + Foundry</text>
+                    
+                    <rect x="300" y="50" width="200" height="80" class="contract-box" style="fill: #f39c12;"/>
+                    <text x="400" y="85" class="contract-text">2. Sepolia Testnet</text>
+                    <text x="400" y="105" class="contract-desc">Public Testing</text>
+                    
+                    <rect x="550" y="50" width="200" height="80" class="contract-box" style="fill: #27ae60;"/>
+                    <text x="650" y="85" class="contract-text">3. Mainnet</text>
+                    <text x="650" y="105" class="contract-desc">Production</text>
+                    
+                    <!-- Deploy Scripts -->
+                    <rect x="50" y="180" width="180" height="60" class="contract-box automation"/>
+                    <text x="140" y="215" class="contract-text">DeployContratosV2.s.sol</text>
+                    
+                    <rect x="250" y="180" width="180" height="60" class="contract-box automation"/>
+                    <text x="340" y="215" class="contract-text">SetupRealData.s.sol</text>
+                    
+                    <rect x="450" y="180" width="180" height="60" class="contract-box automation"/>
+                    <text x="540" y="215" class="contract-text">UpdateConfigurations.s.sol</text>
+                    
+                    <rect x="650" y="180" width="180" height="60" class="contract-box automation"/>
+                    <text x="740" y="215" class="contract-text">VerifyDeployment.s.sol</text>
+                    
+                    <!-- Emergency Scripts -->
+                    <rect x="200" y="300" width="180" height="60" class="contract-box" style="fill: #e74c3c;"/>
+                    <text x="290" y="335" class="contract-text">EmergencyActions.s.sol</text>
+                    
+                    <!-- Testing Suite -->
+                    <rect x="50" y="400" width="150" height="60" class="contract-box" style="fill: #9b59b6;"/>
+                    <text x="125" y="430" class="contract-text">Integration Tests</text>
+                    <text x="125" y="445" class="contract-desc">32 Test Files</text>
+                    
+                    <rect x="220" y="400" width="150" height="60" class="contract-box" style="fill: #9b59b6;"/>
+                    <text x="295" y="430" class="contract-text">Gas Optimization</text>
+                    <text x="295" y="445" class="contract-desc">Performance Tests</text>
+                    
+                    <rect x="390" y="400" width="150" height="60" class="contract-box" style="fill: #9b59b6;"/>
+                    <text x="465" y="430" class="contract-text">Emergency Tests</text>
+                    <text x="465" y="445" class="contract-desc">Crisis Scenarios</text>
+                    
+                    <!-- Flow arrows -->
+                    <path d="M 250 90 L 290 90" class="connection-line"/>
+                    <path d="M 500 90 L 540 90" class="connection-line"/>
+                    
+                    <path d="M 140 130 L 140 170" class="connection-line"/>
+                    <path d="M 340 130 L 340 170" class="connection-line"/>
+                    <path d="M 540 130 L 540 170" class="connection-line"/>
+                    <path d="M 740 130 L 740 170" class="connection-line"/>
+                    
+                    <path d="M 230 210 L 240 210" class="connection-line"/>
+                    <path d="M 430 210 L 440 210" class="connection-line"/>
+                    <path d="M 630 210 L 640 210" class="connection-line"/>
+                </svg>
+                
+                <div style="margin-top: 30px;">
+                    <h4>📋 Comandos de Deployment</h4>
+                    <div style="background: #2c3e50; color: #ecf0f1; padding: 20px; border-radius: 10px; font-family: monospace;">
+                        <div># 1. Deploy inicial</div>
+                        <div>forge script script/DeployContratosV2.s.sol --rpc-url sepolia --broadcast</div>
+                        <br>
+                        <div># 2. Setup de dados reais</div>
+                        <div>forge script script/SetupRealData.s.sol --rpc-url sepolia --broadcast</div>
+                        <br>
+                        <div># 3. Configurações pós-deploy</div>
+                        <div>forge script script/UpdateConfigurations.s.sol --rpc-url sepolia --broadcast</div>
+                        <br>
+                        <div># 4. Verificação completa</div>
+                        <div>forge script script/VerifyDeployment.s.sol --rpc-url sepolia</div>
+                        <br>
+                        <div># 5. Emergency (se necessário)</div>
+                        <div>forge script script/EmergencyActions.s.sol --rpc-url sepolia --broadcast</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info Panel -->
+    <div class="overlay" onclick="hideInfo()"></div>
+    <div class="info-panel">
+        <button class="close-btn" onclick="hideInfo()">×</button>
+        <div id="info-content"></div>
+    </div>
+
+    <script>
+        const contractInfo = {
+            chainlink: {
+                title: "🔗 Chainlink Integration",
+                content: `
+                    <h4>Price Feeds:</h4>
+                    <ul>
+                        <li>ETH/USD, BTC/USD, USDC/USD</li>
+                        <li>13+ token feeds for Mainnet</li>
+                        <li>Real-time price updates</li>
+                    </ul>
+                    <h4>Automation:</h4>
+                    <ul>
+                        <li>checkUpkeep() - Verifica necessidade</li>
+                        <li>performUpkeep() - Executa ações</li>
+                        <li>Interval: 5 minutos</li>
+                    </ul>
+                    <h4>CCIP:</h4>
+                    <ul>
+                        <li>Cross-chain messaging</li>
+                        <li>Multi-chain hedge strategies</li>
+                    </ul>
+                `
+            },
+            registry: {
+                title: "📚 RiskRegistry",
+                content: `
+                    <h4>Funcionalidades:</h4>
+                    <ul>
+                        <li>Registro central de protocolos DeFi</li>
+                        <li>Métricas de risco (0-10000 basis points)</li>
+                        <li>Categorização por tipo (DEX, Lending, etc)</li>
+                        <li>Sistema de whitelist</li>
+                    </ul>
+                    <h4>Métricas Tracked:</h4>
+                    <ul>
+                        <li>Volatility Score (30% weight)</li>
+                        <li>Liquidity Score (25% weight)</li>
+                        <li>Smart Contract Score (25% weight)</li>
+                        <li>Governance Score (20% weight)</li>
+                    </ul>
+                `
+            },
+            oracle: {
+                title: "🔮 RiskOracle",
+                content: `
+                    <h4>Data Aggregation:</h4>
+                    <ul>
+                        <li>Múltiplas fontes de dados</li>
+                        <li>Weighted average por reputação</li>
+                        <li>Freshness validation (24h)</li>
+                        <li>Historical data (30 entries)</li>
+                    </ul>
+                    <h4>Risk Providers:</h4>
+                    <ul>
+                        <li>Weight-based contribution</li>
+                        <li>Reputation scoring</li>
+                        <li>Accuracy tracking</li>
+                    </ul>
+                `
+            },
+            master: {
+                title: "🤖 RiskGuardianMaster",
+                content: `
+                    <h4>Central Coordination:</h4>
+                    <ul>
+                        <li>Chainlink Automation integration</li>
+                        <li>Multi-strategy execution</li>
+                        <li>Gas optimization</li>
+                        <li>Emergency controls</li>
+                    </ul>
+                    <h4>Managed Strategies:</h4>
+                    <ul>
+                        <li>Stop Loss Hedge</li>
+                        <li>Rebalance Hedge</li>
+                        <li>Volatility Hedge</li>
+                        <li>Cross-Chain Hedge</li>
+                    </ul>
+                `
+            },
+            stoploss: {
+                title: "🛡️ StopLossHedge",
+                content: `
+                    <h4>Auto Stop Loss:</h4>
+                    <ul>
+                        <li>Price-based triggers</li>
+                        <li>Slippage protection</li>
+                        <li>Expiration management</li>
+                        <li>Multi-token support</li>
+                    </ul>
+                    <h4>Configuration:</h4>
+                    <ul>
+                        <li>Custom stop prices</li>
+                        <li>Slippage tolerance (max 5%)</li>
+                        <li>Order expiration</li>
+                    </ul>
+                `
+            }
+        };
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function showInfo(contractId) {
+            const info = contractInfo[contractId];
+            if (!info) return;
+            
+            document.getElementById('info-content').innerHTML = `
+                <h3>${info.title}</h3>
+                ${info.content}
+            `;
+            
+            document.querySelector('.overlay').classList.add('show');
+            document.querySelector('.info-panel').classList.add('show');
+        }
+
+        function hideInfo() {
+            document.querySelector('.overlay').classList.remove('show');
+            document.querySelector('.info-panel').classList.remove('show');
+        }
+
+        // Add click listeners to all contract boxes
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-generate info for contracts not defined
+            document.querySelectorAll('.contract-box').forEach(box => {
+                if (!box.onclick) {
+                    box.style.cursor = 'pointer';
+                    box.addEventListener('click', function() {
+                        const text = this.querySelector('.contract-text');
+                        if (text) {
+                            alert(`📋 ${text.textContent}\n\nClique nos contratos com informações detalhadas para saber mais!`);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

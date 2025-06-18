@@ -188,7 +188,7 @@ deployments/optimism/
 */.gitmodules
 .env.bak
 */.env.bak
-contractsv2/
+
 contratosv2
 
 # Keep local/test deployments for reference
