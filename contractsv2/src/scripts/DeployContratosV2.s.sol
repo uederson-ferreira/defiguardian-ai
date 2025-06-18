@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+//src/scripts/DeployContratosV2.s.sol
+
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
 
-// Import dos contratos principais - corrigir caminhos
+import "../core/ContractRegistry.sol";
+
 import "../core/RiskRegistry.sol";
 import "../core/RiskOracle.sol";
 import "../core/PortfolioRiskAnalyzer.sol";
@@ -51,7 +54,16 @@ contract DeployContratosV2 is Script {
         console.log("Deployer:", deployer);
         console.log("");
 
-        vm.startBroadcast(deployer);
+        vm.startBroadcast();
+        ContractRegistry registry = new ContractRegistry();
+        //RiskRegistry riskRegistry = new RiskRegistry();
+        //RiskOracle riskOracle = new RiskOracle();
+        PortfolioRiskAnalyzer analyzer = new PortfolioRiskAnalyzer(address(registry));
+        //AlertSystem alertSystem = new AlertSystem(address(address(registry)));
+
+        registry.setContract(keccak256("RiskRegistry"), address(riskRegistry));
+        registry.setContract(keccak256("RiskOracle"), address(riskOracle));
+        registry.setContract(keccak256("PortfolioRiskAnalyzer"), address(analyzer));
 
         // 1. Deploy dos contratos principais
         _deployCore();

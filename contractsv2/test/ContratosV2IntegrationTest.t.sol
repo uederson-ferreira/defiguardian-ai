@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+//test/ContratosV2IntegrationTest.t.sol
+
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
 
@@ -104,6 +106,18 @@ contract ContratosV2IntegrationTest is Test {
         // Fund test users
         vm.deal(user1, 10 ether);
         vm.deal(user2, 10 ether);
+    }
+
+    function testStopLossSwapFailure() public {
+        // Simular falha no Uniswap
+        vm.mockCall(
+            uniswapRouter,
+            abi.encodeWithSelector(ISwapRouter.exactInputSingle.selector),
+            abi.encodeWithSignature("Error(string)", "Swap failed")
+        );
+        vm.expectEmit(true, true, false, true);
+        emit StopLossFailed(user, orderId, "Swap failed");
+        stopLossHedge.executeStopLoss(user, orderId);
     }
 
     function _deployContracts() internal {
@@ -454,4 +468,23 @@ contract ContratosV2IntegrationTest is Test {
         
         console.log("Data consistency test completed successfully");
     }
+
+    function testUnifiedRiskCalculation() public {
+    uint256 volatility = 6000;
+    uint256 liquidity = 5000;
+    uint256 smartContract = 7000;
+    uint256 governance = 4000;
+    uint256 external = 3000;
+
+    riskRegistry.registerProtocol(protocolAddress, "Test", "Lending", volatility, liquidity, smartContract, governance);
+    (, , , DataTypes.RiskMetrics memory metrics, ) = riskRegistry.protocols(protocolAddress);
+    uint256 expectedRisk = RiskCalculations.calculateOverallRisk(volatility, liquidity, smartContract, governance, 0);
+    assertEq(metrics.overallRisk, expectedRisk, "RiskRegistry risk calculation mismatch");
+
+    riskOracle.addRiskProvider(providerAddress, 90);
+    riskOracle.submitRiskData(protocolAddress, volatility, liquidity, smartContract, governance, external);
+    (, , , , , uint256 oracleRisk, ) = riskOracle.getAggregatedRisk(protocolAddress);
+    expectedRisk = RiskCalculations.calculateOverallRisk(volatility, liquidity, smartContract, governance, external);
+    assertEq(oracleRisk, expectedRisk, "RiskOracle risk calculation mismatch");
+}
 }

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+//src/interfaces/IRiskInsurance.sol
+
 // ========== IRiskInsurance.sol ==========
 interface IRiskInsurance {
     struct InsurancePolicy {

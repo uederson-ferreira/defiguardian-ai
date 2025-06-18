@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+//src/scripts/NetworkConfig.s.sol
+
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
+import {MockUniswapV3Router} from "../../test/mocks/MockUniswapV3Router.sol";
 
 /**
  * @title NetworkConfig
@@ -140,6 +143,12 @@ contract NetworkConfig is Script {
     
     function isCCIPSupported(uint256 chainId) external view returns (bool) {
         return ccipConfigs[chainId].isSupported;
+    }
+
+    function getSepoliaConfig() public returns (NetworkConfig memory) {
+    return NetworkConfig({
+        uniswapV3Router: address(new MockUniswapV3Router())
+    });
     }
 }
 

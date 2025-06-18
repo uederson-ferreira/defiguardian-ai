@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+//src/interfaces/IPortfolioAnalyzer.sol
+
 // ========== IPortfolioAnalyzer.sol ==========
 interface IPortfolioAnalyzer {
     struct Position {
@@ -18,7 +20,7 @@ interface IPortfolioAnalyzer {
         bool isValid;
     }
     function riskRegistry() external view returns (address);
-    
+
     function addPosition(address _protocol, address _token, uint256 _amount) external;
     function removePosition(uint256 _positionIndex) external;
     function calculatePortfolioRisk(address _user) external view returns (uint256);

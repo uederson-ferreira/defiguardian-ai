@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+//src/config/Addresses.sol
+
 // ========== Addresses.sol ==========
 library Addresses {
     
@@ -41,13 +43,19 @@ library Addresses {
     }
     
     // ========== SEPOLIA TESTNET ADDRESSES ==========
+    // 🔴 SUBSTITUIR ESTA SEÇÃO COMPLETA:
     
     struct SepoliaProtocols {
         address uniswapV3Factory;      // 0x0227628f3F023bb0B980b67D528571c95c6DaC1c
         address uniswapV3Router;       // 0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E
         address aaveV3Pool;            // 0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951
         address aaveV3PoolProvider;    // 0x012bAC54348C0E635dCAc9D5FB99f06F24136C9A
-        // Note: Limited DeFi protocols on Sepolia, may need to deploy mocks
+        // ✅ ADICIONAR ESTES:
+        address compoundV3Mock;        // Deploy via SepoliaSetup
+        address lidoMock;              // Deploy via SepoliaSetup
+        address curveMock;             // Deploy via SepoliaSetup
+        address balancerMock;          // Deploy via SepoliaSetup
+        address yearnMock;             // Deploy via SepoliaSetup
     }
     
     struct SepoliaTokens {
@@ -56,6 +64,47 @@ library Addresses {
         address DAI;                   // 0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357
         address LINK;                  // 0x779877A7B0D9E8603169DdbD7836e478b4624789
         address UNI;                   // 0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984
+        // ✅ ADICIONAR ESTES:
+        address WBTC_MOCK;             // Mock token address
+        address USDT_MOCK;             // Mock token address
+        address AAVE_MOCK;             // Mock token address
+        address COMP_MOCK;             // Mock token address
+        address CRV_MOCK;              // Mock token address
+        address LDO_MOCK;              // Mock token address
+    }
+    
+    // ========== GETTER FUNCTIONS ========== (TAMBÉM ATUALIZAR)
+    
+    function getSepoliaProtocols() internal pure returns (SepoliaProtocols memory) {
+        return SepoliaProtocols({
+            uniswapV3Factory: 0x0227628f3F023bb0B980b67D528571c95c6DaC1c,
+            uniswapV3Router: 0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E,
+            aaveV3Pool: 0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951,
+            aaveV3PoolProvider: 0x012bAC54348C0E635dCAc9D5FB99f06F24136C9A,
+            // ✅ ADICIONAR ESTES:
+            compoundV3Mock: address(0), // Será preenchido pelo SepoliaSetup
+            lidoMock: address(0),       // Será preenchido pelo SepoliaSetup
+            curveMock: address(0),      // Será preenchido pelo SepoliaSetup
+            balancerMock: address(0),   // Será preenchido pelo SepoliaSetup
+            yearnMock: address(0)       // Será preenchido pelo SepoliaSetup
+        });
+    }
+    
+    function getSepoliaTokens() internal pure returns (SepoliaTokens memory) {
+        return SepoliaTokens({
+            WETH: 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14,
+            USDC: 0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8,
+            DAI: 0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357,
+            LINK: 0x779877A7B0D9E8603169DdbD7836e478b4624789,
+            UNI: 0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984,
+            // ✅ ADICIONAR ESTES:
+            WBTC_MOCK: address(0),      // Será preenchido se necessário
+            USDT_MOCK: address(0),      // Será preenchido se necessário
+            AAVE_MOCK: address(0),      // Será preenchido se necessário
+            COMP_MOCK: address(0),      // Será preenchido se necessário
+            CRV_MOCK: address(0),       // Será preenchido se necessário
+            LDO_MOCK: address(0)        // Será preenchido se necessário
+        });
     }
     
     // ========== GETTER FUNCTIONS ==========
@@ -93,25 +142,6 @@ library Addresses {
             CVX: 0x4e3FBD56CD56c3e72c1403e103b45Db9da5B9D2B,
             LDO: 0x5A98FcBEA516Cf06857215779Fd812CA3beF1B32,
             LINK: 0x514910771AF9Ca656af840dff83E8264EcF986CA
-        });
-    }
-    
-    function getSepoliaProtocols() internal pure returns (SepoliaProtocols memory) {
-        return SepoliaProtocols({
-            uniswapV3Factory: 0x0227628f3F023bb0B980b67D528571c95c6DaC1c,
-            uniswapV3Router: 0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E,
-            aaveV3Pool: 0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951,
-            aaveV3PoolProvider: 0x012bAC54348C0E635dCAc9D5FB99f06F24136C9A
-        });
-    }
-    
-    function getSepoliaTokens() internal pure returns (SepoliaTokens memory) {
-        return SepoliaTokens({
-            WETH: 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14,
-            USDC: 0x94a9D9AC8a22534E3FaCa9F4e7F2E2cf85d5E4C8,
-            DAI: 0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357,
-            LINK: 0x779877A7B0D9E8603169DdbD7836e478b4624789,
-            UNI: 0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984
         });
     }
 }

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+//src/core/ContractRegistry.sol
+
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract ContractRegistry is Ownable {

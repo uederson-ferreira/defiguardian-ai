@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+//test/GasOptimization.t.sol
+
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
 import "../src/core/RiskRegistry.sol";

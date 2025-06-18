@@ -1,10 +1,31 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+//src/hedging/StopLossHedge.sol
+
 import "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "../config/Addresses.sol";
+import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+
+
+// ✅ CORREÇÃO: Interface para Uniswap V3 (simplificada para hackathon)
+interface ISwapRouter {
+    struct ExactInputSingleParams {
+        address tokenIn;
+        address tokenOut;
+        uint24 fee;
+        address recipient;
+        uint256 deadline;
+        uint256 amountIn;
+        uint256 amountOutMinimum;
+        uint160 sqrtPriceLimitX96;
+    }
+
+    function exactInputSingle(ExactInputSingleParams calldata params) external payable returns (uint256 amountOut);
+}
 
 /**
  * @title StopLossHedge
@@ -12,6 +33,27 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * @notice Allows users to configure automatic stop loss for their assets
  */
 contract StopLossHedge is ReentrancyGuard, Ownable {
+    
+    // ✅ CORREÇÃO: Remover dependências problemáticas e usar endereços hardcoded para demo
+    ISwapRouter public immutable uniswapRouter;
+    address public immutable weth;
+
+    constructor() Ownable(msg.sender) {
+        // ✅ CORREÇÃO: Para Sepolia, usar endereços específicos ou detectar automaticamente
+        if (block.chainid == 11155111) {
+            // Sepolia
+            uniswapRouter = ISwapRouter(0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E);
+            weth = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
+        } else if (block.chainid == 1) {
+            // Mainnet
+            uniswapRouter = ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
+            weth = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+        } else {
+            // Local/outras redes - usar placeholders
+            uniswapRouter = ISwapRouter(address(0));
+            weth = address(0);
+        }
+    }
     
     struct StopLossOrder {
         address user;           // User who created the order
@@ -65,16 +107,20 @@ contract StopLossHedge is ReentrancyGuard, Ownable {
         uint256 indexed orderId
     );
     
+    event StopLossFailed(
+        address indexed user,
+        uint256 indexed orderId,
+        string reason
+    );
+    
     event TokenConfigured(
         address indexed token,
         address indexed priceFeed,
         uint256 minAmount
     );
     
-    constructor() Ownable(msg.sender) {}
-    
     /**
-     * @dev Configures a token to be used in the system
+     * @dev ✅ CORREÇÃO: Configura token com validações robustas
      */
     function configureToken(
         address token,
@@ -83,6 +129,16 @@ contract StopLossHedge is ReentrancyGuard, Ownable {
     ) external onlyOwner {
         require(token != address(0), "Invalid token address");
         require(priceFeed != address(0), "Invalid price feed address");
+        require(priceFeed.code.length > 0, "Price feed must be contract");
+        
+        // ✅ VALIDAÇÃO: Testar se é price feed válido
+        try AggregatorV3Interface(priceFeed).latestRoundData() returns (
+            uint80, int256 price, uint256, uint256, uint80
+        ) {
+            require(price > 0, "Price feed returning invalid data");
+        } catch {
+            revert("Invalid Chainlink price feed");
+        }
         
         if (!tokenConfigs[token].isSupported) {
             supportedTokens.push(token);
@@ -98,7 +154,7 @@ contract StopLossHedge is ReentrancyGuard, Ownable {
     }
     
     /**
-     * @dev Creates a stop loss order
+     * @dev ✅ CORREÇÃO: Creates stop loss order com validações
      */
     function createStopLoss(
         address token,
@@ -112,6 +168,11 @@ contract StopLossHedge is ReentrancyGuard, Ownable {
         require(amount >= tokenConfigs[token].minAmount, "Amount below minimum");
         require(slippage <= maxSlippage, "Slippage too high");
         require(expirationTime > block.timestamp, "Invalid expiration time");
+        require(expirationTime <= block.timestamp + 365 days, "Expiration too far"); // ✅ NOVO
+        
+        // ✅ VALIDAÇÃO: Verificar preço atual vs stop price
+        uint256 currentPrice = getCurrentPrice(token);
+        require(stopPrice < currentPrice, "Stop price must be below current price");
         
         // Checks if the user has the tokens
         IERC20 tokenContract = IERC20(token);
@@ -141,32 +202,62 @@ contract StopLossHedge is ReentrancyGuard, Ownable {
     }
     
     /**
-     * @dev Executes a stop loss order (called by automation)
+     * @dev ✅ CORREÇÃO: Executes stop loss order com tratamento de erros
      */
-    function executeStopLoss(
-        address user,
-        uint256 orderId
-    ) external nonReentrant {
+    function executeStopLoss(address user, uint256 orderId) external nonReentrant {
         StopLossOrder storage order = stopLossOrders[user][orderId];
         require(order.isActive, "Order not active");
         require(block.timestamp <= order.expiresAt, "Order expired");
         
-        // Checks the current price
-        uint256 currentPrice = getCurrentPrice(order.token);
-        require(currentPrice <= order.stopPrice, "Stop price not reached");
+        // ✅ VALIDAÇÃO: Verificar se execução é necessária
+        (bool needsExecution, uint256 currentPrice) = checkStopLossExecution(user, orderId);
+        require(needsExecution, "Stop loss conditions not met");
         
-        // Calculates the minimum acceptable price with slippage
-        uint256 minPrice = (order.stopPrice * (BASIS_POINTS - order.slippage)) / BASIS_POINTS;
-        require(currentPrice >= minPrice, "Price below slippage tolerance");
-        
-        // Deactivates the order
         order.isActive = false;
         
-        // Here the real selling logic would be implemented
-        // For simplicity, we'll just return the tokens to the user
-        IERC20(order.token).transfer(order.user, order.amount);
+        // ✅ CORREÇÃO: Tratamento robusto de swap com fallback
+        if (address(uniswapRouter) != address(0) && weth != address(0)) {
+            // Try to execute swap via Uniswap
+            try this._executeSwap(order, currentPrice) {
+                emit StopLossExecuted(user, orderId, order.token, order.amount, currentPrice);
+            } catch Error(string memory reason) {
+                // ✅ FALLBACK: Se swap falhar, devolver tokens
+                IERC20(order.token).transfer(order.user, order.amount);
+                emit StopLossFailed(user, orderId, reason);
+            }
+        } else {
+            // ✅ FALLBACK: Em redes sem Uniswap, apenas devolver tokens
+            IERC20(order.token).transfer(order.user, order.amount);
+            emit StopLossExecuted(user, orderId, order.token, order.amount, currentPrice);
+        }
+    }
+    
+    /**
+     * @dev ✅ NOVA FUNÇÃO: Swap externo para tratamento de erros
+     */
+    function _executeSwap(StopLossOrder memory order, uint256 currentPrice) external {
+        require(msg.sender == address(this), "Only self");
         
-        emit StopLossExecuted(user, orderId, order.token, order.amount, currentPrice);
+        // Calculate minimum output com slippage
+        uint256 expectedOutput = (order.amount * currentPrice) / (10 ** 18); // Assuming 18 decimals
+        uint256 minAmountOut = expectedOutput * (BASIS_POINTS - order.slippage) / BASIS_POINTS;
+        
+        // Approve token for swap
+        IERC20(order.token).approve(address(uniswapRouter), order.amount);
+        
+        // Execute swap
+        ISwapRouter.ExactInputSingleParams memory params = ISwapRouter.ExactInputSingleParams({
+            tokenIn: order.token,
+            tokenOut: weth,
+            fee: 3000, // 0.3% fee tier
+            recipient: order.user,
+            deadline: block.timestamp + 300, // 5 minutes
+            amountIn: order.amount,
+            amountOutMinimum: minAmountOut,
+            sqrtPriceLimitX96: 0
+        });
+        
+        uniswapRouter.exactInputSingle(params);
     }
     
     /**
@@ -192,8 +283,9 @@ contract StopLossHedge is ReentrancyGuard, Ownable {
         require(tokenConfigs[token].isSupported, "Token not supported");
         
         AggregatorV3Interface priceFeed = tokenConfigs[token].priceFeed;
-        (, int256 price, , , ) = priceFeed.latestRoundData();
+        (, int256 price, , uint256 updatedAt, ) = priceFeed.latestRoundData();
         require(price > 0, "Invalid price from feed");
+        require(block.timestamp - updatedAt <= 3600, "Price data too old"); // ✅ NOVO: Max 1h old
         
         return uint256(price);
     }
@@ -204,15 +296,20 @@ contract StopLossHedge is ReentrancyGuard, Ownable {
     function checkStopLossExecution(
         address user,
         uint256 orderId
-    ) external view returns (bool needsExecution, uint256 currentPrice) {
+    ) public view returns (bool needsExecution, uint256 currentPrice) {
         StopLossOrder memory order = stopLossOrders[user][orderId];
         
         if (!order.isActive || block.timestamp > order.expiresAt) {
             return (false, 0);
         }
         
-        currentPrice = getCurrentPrice(order.token);
-        needsExecution = currentPrice <= order.stopPrice;
+        try this.getCurrentPrice(order.token) returns (uint256 price) {
+            currentPrice = price;
+            needsExecution = currentPrice <= order.stopPrice;
+        } catch {
+            // Se não conseguir obter preço, não executar
+            return (false, 0);
+        }
         
         return (needsExecution, currentPrice);
     }
@@ -226,7 +323,8 @@ contract StopLossHedge is ReentrancyGuard, Ownable {
         
         // Counts active orders
         for (uint256 i = 0; i < totalOrders; i++) {
-            if (stopLossOrders[user][i].isActive) {
+            if (stopLossOrders[user][i].isActive && 
+                block.timestamp <= stopLossOrders[user][i].expiresAt) {
                 activeCount++;
             }
         }
@@ -236,7 +334,8 @@ contract StopLossHedge is ReentrancyGuard, Ownable {
         uint256 index = 0;
         
         for (uint256 i = 0; i < totalOrders; i++) {
-            if (stopLossOrders[user][i].isActive) {
+            if (stopLossOrders[user][i].isActive && 
+                block.timestamp <= stopLossOrders[user][i].expiresAt) {
                 activeOrders[index] = stopLossOrders[user][i];
                 index++;
             }
@@ -246,9 +345,27 @@ contract StopLossHedge is ReentrancyGuard, Ownable {
     }
     
     /**
+     * @dev ✅ NOVA FUNÇÃO: Get active orders count (para RiskGuardianMaster)
+     */
+    function getUserActiveOrdersCount(address user) external view returns (uint256) {
+        uint256 totalOrders = userOrderCount[user];
+        uint256 activeCount = 0;
+        
+        for (uint256 i = 0; i < totalOrders; i++) {
+            if (stopLossOrders[user][i].isActive && 
+                block.timestamp <= stopLossOrders[user][i].expiresAt) {
+                activeCount++;
+            }
+        }
+        
+        return activeCount;
+    }
+    
+    /**
      * @dev Updates the execution fee
      */
     function updateExecutionFee(uint256 newFee) external onlyOwner {
+        require(newFee <= 0.01 ether, "Fee too high"); // ✅ NOVO: limite máximo
         executionFee = newFee;
     }
     
@@ -256,6 +373,16 @@ contract StopLossHedge is ReentrancyGuard, Ownable {
      * @dev Withdraws collected fees
      */
     function withdrawFees() external onlyOwner {
-        payable(owner()).transfer(address(this).balance);
+        uint256 balance = address(this).balance;
+        require(balance > 0, "No fees to withdraw");
+        payable(owner()).transfer(balance);
+    }
+    
+    /**
+     * @dev Emergency function to recover stuck tokens
+     */
+    function emergencyRecoverToken(address token, uint256 amount) external onlyOwner {
+        require(token != address(0), "Invalid token");
+        IERC20(token).transfer(owner(), amount);
     }
 }

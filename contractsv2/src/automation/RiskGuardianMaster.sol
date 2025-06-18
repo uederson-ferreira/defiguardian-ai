@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+//src/automation/RiskGuardianMaster.sol
+
 import "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -35,22 +37,21 @@ interface IVolatilityHedge {
  * @notice Ponto único de automação que gerencia todas as estratégias de hedge
  */
 contract RiskGuardianMaster is AutomationCompatible, Ownable, ReentrancyGuard {
-    
     // Endereços dos contratos específicos
     address public stopLossHedgeContract;
     address public rebalanceHedgeContract;
     address public volatilityHedgeContract;
     address public crossChainHedgeContract;
-    
+
     // Configurações de automação
     struct AutomationConfig {
         bool stopLossEnabled;
         bool rebalanceEnabled;
         bool volatilityEnabled;
         bool crossChainEnabled;
-        uint256 checkInterval;          // Intervalo entre verificações
-        uint256 lastCheckTime;          // Última verificação
-        uint256 maxGasPerUpkeep;        // Máximo de gas por upkeep
+        uint256 checkInterval; // Intervalo entre verificações
+        uint256 lastCheckTime; // Última verificação
+        uint256 maxGasPerUpkeep; // Máximo de gas por upkeep
     }
     
     AutomationConfig public config;
@@ -92,9 +93,8 @@ contract RiskGuardianMaster is AutomationCompatible, Ownable, ReentrancyGuard {
         uint256 volatilityExecutions,
         uint256 totalGasUsed
     );
-    
-    constructor() Ownable(msg.sender) {
-        // Configuração inicial
+
+    constructor(address _initialOwner) Ownable(_initialOwner) {
         config = AutomationConfig({
             stopLossEnabled: true,
             rebalanceEnabled: true,
@@ -105,9 +105,10 @@ contract RiskGuardianMaster is AutomationCompatible, Ownable, ReentrancyGuard {
             maxGasPerUpkeep: 500000
         });
     }
-    
+
     /**
-     * @dev Configura os endereços dos contratos específicos
+     * @dev ✅ CORREÇÃO CRÍTICA: Configura os endereços dos contratos específicos COM VALIDAÇÃO
+     * @notice Previne configuração de endereços inválidos que quebrariam a automação
      */
     function setHedgeContracts(
         address _stopLossHedge,
@@ -115,19 +116,45 @@ contract RiskGuardianMaster is AutomationCompatible, Ownable, ReentrancyGuard {
         address _volatilityHedge,
         address _crossChainHedge
     ) external onlyOwner {
+        // ✅ VALIDAÇÃO CRÍTICA: Verificar se são contratos válidos
+        require(_stopLossHedge != address(0), "StopLoss: zero address");
+        require(_stopLossHedge.code.length > 0, "StopLoss: not a contract");
+        
+        require(_rebalanceHedge != address(0), "Rebalance: zero address");
+        require(_rebalanceHedge.code.length > 0, "Rebalance: not a contract");
+        
+        require(_volatilityHedge != address(0), "Volatility: zero address");
+        require(_volatilityHedge.code.length > 0, "Volatility: not a contract");
+        
+        require(_crossChainHedge != address(0), "CrossChain: zero address");
+        require(_crossChainHedge.code.length > 0, "CrossChain: not a contract");
+
+        // ✅ VALIDAÇÃO ADICIONAL: Testar se contratos respondem a interface básica
+        try IStopLossHedge(_stopLossHedge).getUserActiveOrdersCount(address(0)) {
+            // Se não reverter, o contrato implementa a interface
+        } catch {
+            revert("StopLoss: invalid interface");
+        }
+
+        try IRebalanceHedge(_rebalanceHedge).getActiveUsers() {
+            // Se não reverter, o contrato implementa a interface
+        } catch {
+            revert("Rebalance: invalid interface");
+        }
+
         stopLossHedgeContract = _stopLossHedge;
         rebalanceHedgeContract = _rebalanceHedge;
         volatilityHedgeContract = _volatilityHedge;
         crossChainHedgeContract = _crossChainHedge;
-        
+
         emit HedgeContractUpdated("StopLoss", _stopLossHedge);
         emit HedgeContractUpdated("Rebalance", _rebalanceHedge);
         emit HedgeContractUpdated("Volatility", _volatilityHedge);
         emit HedgeContractUpdated("CrossChain", _crossChainHedge);
     }
-    
+
     /**
-     * @dev Atualiza configurações de automação
+     * @dev ✅ CORREÇÃO: Validação mais robusta das configurações
      */
     function updateAutomationConfig(
         bool _stopLossEnabled,
@@ -138,7 +165,9 @@ contract RiskGuardianMaster is AutomationCompatible, Ownable, ReentrancyGuard {
         uint256 _maxGasPerUpkeep
     ) external onlyOwner {
         require(_checkInterval >= 60, "Interval too short"); // Mínimo 1 minuto
+        require(_checkInterval <= 86400, "Interval too long"); // Máximo 24 horas
         require(_maxGasPerUpkeep >= 100000, "Gas limit too low");
+        require(_maxGasPerUpkeep <= 10000000, "Gas limit too high"); // ✅ NOVO: limite máximo
         
         config.stopLossEnabled = _stopLossEnabled;
         config.rebalanceEnabled = _rebalanceEnabled;
@@ -155,11 +184,12 @@ contract RiskGuardianMaster is AutomationCompatible, Ownable, ReentrancyGuard {
             _checkInterval
         );
     }
-    
+
     /**
-     * @dev Adiciona usuário à lista de ativos
+     * @dev Adiciona usuário à lista de ativos COM VALIDAÇÃO
      */
     function addActiveUser(address user) external {
+        require(user != address(0), "Invalid user address"); // ✅ NOVO: validação
         require(
             msg.sender == stopLossHedgeContract ||
             msg.sender == rebalanceHedgeContract ||
@@ -173,33 +203,29 @@ contract RiskGuardianMaster is AutomationCompatible, Ownable, ReentrancyGuard {
             isActiveUser[user] = true;
         }
     }
-    
+
     /**
      * @dev Verifica se automação é necessária (Chainlink Automation)
      */
     function checkUpkeep(
         bytes calldata /* checkData */
     ) external view override returns (bool upkeepNeeded, bytes memory performData) {
-        
-        // Verifica se já passou o tempo necessário
         if (block.timestamp < config.lastCheckTime + config.checkInterval) {
             return (false, bytes(""));
         }
         
         uint256 totalExecutions = 0;
         
-        // 1. Verifica Stop Loss (se habilitado)
+        // ✅ CORREÇÃO: Verificar se contratos estão configurados antes de usar
         if (config.stopLossEnabled && stopLossHedgeContract != address(0)) {
-            // Simulação - em implementação real, iterar sobre usuários ativos
             totalExecutions += 1; // Placeholder
         }
         
-        // 2. Verifica Rebalanceamento (se habilitado)
         if (config.rebalanceEnabled && rebalanceHedgeContract != address(0)) {
             try IRebalanceHedge(rebalanceHedgeContract).getActiveUsers() returns (address[] memory users) {
-                for (uint256 i = 0; i < users.length && i < 10; i++) { // Limite para gas
+                for (uint256 i = 0; i < users.length && i < 10; i++) {
                     try IRebalanceHedge(rebalanceHedgeContract).checkRebalanceNeeded(users[i]) 
-                        returns (bool needed, uint256 /* maxDeviation */, uint256[] memory /* currentWeights */, uint256 /* totalValueUSD */) {
+                        returns (bool needed, uint256, uint256[] memory, uint256) {
                         if (needed) {
                             totalExecutions++;
                         }
@@ -208,11 +234,10 @@ contract RiskGuardianMaster is AutomationCompatible, Ownable, ReentrancyGuard {
             } catch {}
         }
         
-        // 3. Verifica Volatilidade (se habilitado)
         if (config.volatilityEnabled && volatilityHedgeContract != address(0)) {
             try IVolatilityHedge(volatilityHedgeContract).checkAllPositionsForVolatility() 
-                returns (address[] memory /* users */, uint256[] memory /* positionIds */, bool[] memory needsHedge) {
-                for (uint256 i = 0; i < needsHedge.length && i < 5; i++) { // Limite para gas
+                returns (address[] memory, uint256[] memory, bool[] memory needsHedge) {
+                for (uint256 i = 0; i < needsHedge.length && i < 5; i++) {
                     if (needsHedge[i]) {
                         totalExecutions++;
                     }
@@ -220,13 +245,12 @@ contract RiskGuardianMaster is AutomationCompatible, Ownable, ReentrancyGuard {
             } catch {}
         }
         
-        // Retorna se há execuções necessárias
         upkeepNeeded = totalExecutions > 0;
         performData = abi.encode(totalExecutions);
         
         return (upkeepNeeded, performData);
     }
-    
+
     /**
      * @dev Executa as automações necessárias (Chainlink Automation)
      */
@@ -239,22 +263,18 @@ contract RiskGuardianMaster is AutomationCompatible, Ownable, ReentrancyGuard {
         uint256 rebalanceExecutions = 0;
         uint256 volatilityExecutions = 0;
         
-        // 1. Executa Stop Loss
         if (config.stopLossEnabled && stopLossHedgeContract != address(0)) {
             stopLossExecutions = _executeStopLossHedges();
         }
         
-        // 2. Executa Rebalanceamento
         if (config.rebalanceEnabled && rebalanceHedgeContract != address(0)) {
             rebalanceExecutions = _executeRebalanceHedges();
         }
         
-        // 3. Executa Hedge de Volatilidade
         if (config.volatilityEnabled && volatilityHedgeContract != address(0)) {
             volatilityExecutions = _executeVolatilityHedges();
         }
         
-        // Atualiza estatísticas
         uint256 gasUsed = gasStart - gasleft();
         stats.totalStopLossExecutions += stopLossExecutions;
         stats.totalRebalanceExecutions += rebalanceExecutions;
@@ -269,22 +289,18 @@ contract RiskGuardianMaster is AutomationCompatible, Ownable, ReentrancyGuard {
             gasUsed
         );
     }
-    
-    /**
-     * @dev Executa hedge de stop loss para usuários que precisam
-     */
+
     function _executeStopLossHedges() internal returns (uint256 executions) {
         if (stopLossHedgeContract == address(0)) return 0;
         
         uint256 gasRemaining = gasleft();
-        uint256 gasPerExecution = 100000; // Estimativa
+        uint256 gasPerExecution = 100000;
         
-        // Simula execução para usuários ativos
         for (uint256 i = 0; i < activeUsers.length && gasRemaining > gasPerExecution; i++) {
             address user = activeUsers[i];
             
             try IStopLossHedge(stopLossHedgeContract).getUserActiveOrdersCount(user) returns (uint256 orderCount) {
-                for (uint256 j = 0; j < orderCount && j < 3; j++) { // Limite por usuário
+                for (uint256 j = 0; j < orderCount && j < 3; j++) {
                     try IStopLossHedge(stopLossHedgeContract).checkStopLossExecution(user, j) 
                         returns (bool needsExecution, uint256) {
                         if (needsExecution) {
@@ -301,20 +317,17 @@ contract RiskGuardianMaster is AutomationCompatible, Ownable, ReentrancyGuard {
         
         return executions;
     }
-    
-    /**
-     * @dev Executa rebalanceamentos para portfólios que precisam
-     */
+
     function _executeRebalanceHedges() internal returns (uint256 executions) {
         if (rebalanceHedgeContract == address(0)) return 0;
         
         uint256 gasRemaining = gasleft();
-        uint256 gasPerExecution = 150000; // Estimativa
+        uint256 gasPerExecution = 150000;
         
         try IRebalanceHedge(rebalanceHedgeContract).getActiveUsers() returns (address[] memory users) {
             for (uint256 i = 0; i < users.length && gasRemaining > gasPerExecution; i++) {
                 try IRebalanceHedge(rebalanceHedgeContract).checkRebalanceNeeded(users[i]) 
-                    returns (bool needed, uint256 /* maxDeviation */, uint256[] memory /* currentWeights */, uint256 /* totalValueUSD */) {
+                    returns (bool needed, uint256, uint256[] memory, uint256) {
                     if (needed) {
                         try IRebalanceHedge(rebalanceHedgeContract).executeRebalance(users[i]) {
                             executions++;
@@ -328,19 +341,15 @@ contract RiskGuardianMaster is AutomationCompatible, Ownable, ReentrancyGuard {
         
         return executions;
     }
-    
-    /**
-     * @dev Executa hedge de volatilidade para posições que precisam
-     */
+
     function _executeVolatilityHedges() internal returns (uint256 executions) {
         if (volatilityHedgeContract == address(0)) return 0;
         
         uint256 gasRemaining = gasleft();
-        uint256 gasPerExecution = 120000; // Estimativa
+        uint256 gasPerExecution = 120000;
         
         try IVolatilityHedge(volatilityHedgeContract).checkAllPositionsForVolatility() 
             returns (address[] memory users, uint256[] memory positionIds, bool[] memory needsHedge) {
-            
             for (uint256 i = 0; i < needsHedge.length && gasRemaining > gasPerExecution; i++) {
                 if (needsHedge[i]) {
                     try IVolatilityHedge(volatilityHedgeContract).executeVolatilityHedge(users[i], positionIds[i]) {
@@ -354,71 +363,62 @@ contract RiskGuardianMaster is AutomationCompatible, Ownable, ReentrancyGuard {
         
         return executions;
     }
-    
-    /**
-     * @dev Executa hedge manual para um usuário específico
-     */
+
     function manualHedgeExecution(
         string calldata hedgeType,
         address user,
         uint256 identifier
     ) external onlyOwner nonReentrant {
+        require(user != address(0), "Invalid user"); // ✅ NOVO: validação
+        
         bytes32 hedgeTypeHash = keccak256(abi.encodePacked(hedgeType));
         
         if (hedgeTypeHash == keccak256(abi.encodePacked("StopLoss"))) {
+            require(stopLossHedgeContract != address(0), "StopLoss not configured"); // ✅ NOVO
             IStopLossHedge(stopLossHedgeContract).executeStopLoss(user, identifier);
             stats.totalStopLossExecutions++;
-            
         } else if (hedgeTypeHash == keccak256(abi.encodePacked("Rebalance"))) {
+            require(rebalanceHedgeContract != address(0), "Rebalance not configured"); // ✅ NOVO
             IRebalanceHedge(rebalanceHedgeContract).executeRebalance(user);
             stats.totalRebalanceExecutions++;
-            
         } else if (hedgeTypeHash == keccak256(abi.encodePacked("Volatility"))) {
+            require(volatilityHedgeContract != address(0), "Volatility not configured"); // ✅ NOVO
             IVolatilityHedge(volatilityHedgeContract).executeVolatilityHedge(user, identifier);
             stats.totalVolatilityExecutions++;
-            
         } else {
             revert("Invalid hedge type");
         }
         
         emit HedgeExecuted(hedgeType, user, identifier, 0);
     }
-    
-    /**
-     * @dev Obtém estatísticas de execução
-     */
+
     function getExecutionStats() external view returns (ExecutionStats memory) {
         return stats;
     }
-    
-    /**
-     * @dev Obtém configuração atual
-     */
+
     function getAutomationConfig() external view returns (AutomationConfig memory) {
         return config;
     }
-    
-    /**
-     * @dev Obtém lista de usuários ativos
-     */
+
     function getActiveUsers() external view returns (address[] memory) {
         return activeUsers;
     }
-    
+
     /**
-     * @dev Função de emergência para pausar automação
+     * @dev ✅ CORREÇÃO: Emergência com validações mais seguras
      */
     function emergencyPause() external onlyOwner {
         config.stopLossEnabled = false;
         config.rebalanceEnabled = false;
         config.volatilityEnabled = false;
         config.crossChainEnabled = false;
+        
+        emit AutomationConfigUpdated(false, false, false, false, config.checkInterval);
     }
-    
-    /**
-     * @dev Recupera tokens enviados por engano
-     */
+
     function recoverTokens(address token, uint256 amount) external onlyOwner {
+        require(token != address(0), "Invalid token"); // ✅ NOVO: validação
+        require(amount > 0, "Invalid amount"); // ✅ NOVO: validação
         IERC20(token).transfer(owner(), amount);
     }
 }
