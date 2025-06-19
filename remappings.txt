@@ -1,6 +1,0 @@
-@chainlink/contracts/=node_modules/@chainlink/contracts/
-@chainlink/contracts-ccip/=node_modules/@chainlink/contracts-ccip/
-@openzeppelin/contracts/=node_modules/@openzeppelin/contracts/
-@openzeppelin/contracts-upgradeable/=node_modules/@openzeppelin/contracts-upgradeable/
-@openzeppelin/=node_modules/@openzeppelin/
-@chainlink/=node_modules/@chainlink/ 

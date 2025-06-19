@@ -191,6 +191,12 @@ deployments/optimism/
 
 contratosv2
 
+lib/
+*/lib
+/lib/v3-core/
+/lib/v3-periphery/
+
+
 # Keep local/test deployments for reference
 # deployments/localhost/
 # deployments/anvil/
