@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
-//src/scripts/VerifyDeployment.s.sol
+//src/script/VerifyDeployment.s.sol
 
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
@@ -14,7 +14,7 @@ import "../interfaces/IAlertSystem.sol";
 
 /**
  * @title VerifyDeployment
- * @dev Script robusto para verificar deployment sem depender de métodos não-padrão
+ * @dev Script robusto para verificar deployment sem depender de metodos nao-padrao
  */
 contract VerifyDeployment is Script {
     
@@ -152,9 +152,9 @@ contract VerifyDeployment is Script {
     function _verifyIntegrations(DeploymentInfo memory info) internal view {
         console.log("Checking integrations...");
         
-        // ✅ MÉTODO ROBUSTO: Usar interface baixo-nível para verificar
+        // Metodo robusto: Usar interface baixo-nivel para verificar
         if (info.riskRegistry != address(0) && info.portfolioAnalyzer != address(0)) {
-            // Tentar chamada baixo-nível para verificar se contratos são compatíveis
+            // Tentar chamada baixo-nivel para verificar se contratos sao compativeis
             (bool success, ) = info.portfolioAnalyzer.staticcall(
                 abi.encodeWithSignature("riskRegistry()")
             );
@@ -200,9 +200,9 @@ contract VerifyDeployment is Script {
             }
         }
         
-        // ✅ VERIFICAÇÃO MAIS ROBUSTA: Tentar diferentes métodos
+        // Verificacao mais robusta: Tentar diferentes metodos
         if (info.riskOracle != address(0)) {
-            // Método 1: Tentar verificar se contrato responde a chamadas básicas
+            // Metodo 1: Tentar verificar se contrato responde a chamadas basicas
             (bool success, ) = info.riskOracle.staticcall(
                 abi.encodeWithSignature("isRiskDataFresh(address)", address(0))
             );
@@ -326,6 +326,8 @@ contract VerifyDeployment is Script {
         if (block.chainid == 11155111) return "Sepolia Testnet";
         if (block.chainid == 137) return "Polygon Mainnet";
         if (block.chainid == 42161) return "Arbitrum One";
+        if (block.chainid == 43113) return "Avalanche Fuji";
+        if (block.chainid == 43114) return "Avalanche Mainnet";
         if (block.chainid == 31337) return "Local Anvil";
         return "Unknown Network";
     }

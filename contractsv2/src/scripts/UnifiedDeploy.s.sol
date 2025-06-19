@@ -6,28 +6,30 @@ pragma solidity ^0.8.20;
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
 
-// ✅ CORREÇÃO: Imports corrigidos
-import "../src/core/ContractRegistry.sol";
-import "../src/core/RiskRegistry.sol";
-import "../src/core/RiskOracle.sol";
-import "../src/core/PortfolioRiskAnalyzer.sol";
-import "../src/automation/AlertSystem.sol";
-import "../src/hedging/StopLossHedge.sol";
-import "../src/hedging/RebalanceHedge.sol";
-import "../src/hedging/VolatilityHedge.sol";
-import "../src/hedging/CrossChainHedge.sol";
-import "../src/automation/RiskGuardianMaster.sol";
-import "../src/insurance/RiskInsurance.sol";
-import "../src/mocks/SepoliaMocks.sol";
+// CORREÇÃO: Imports corrigidos
+import "../core/ContractRegistry.sol";
+import "../core/RiskRegistry.sol";
+import "../core/RiskOracle.sol";
+import "../core/PortfolioRiskAnalyzer.sol";
+import "../automation/AlertSystem.sol";
+import "../hedging/StopLossHedge.sol";
+import "../hedging/RebalanceHedge.sol";
+import "../hedging/VolatilityHedge.sol";
+import "../hedging/CrossChainHedge.sol";
+import "../automation/RiskGuardianMaster.sol";
+import "../insurance/RiskInsurance.sol";
+
+// Importando apenas o arquivo que contém SepoliaSetup
+import "../../test/mocks/SepoliaSetup.sol";
 
 /**
  * @title UnifiedDeploy
- * @dev ✅ SCRIPT CRÍTICO: Deploy completo e validado para hackathon
+ * @dev SCRIPT CRÍTICO: Deploy completo e validado para hackathon
  * @notice Deploy único que funciona em qualquer rede com validações robustas
  */
 contract UnifiedDeploy is Script {
     
-    // ✅ CORREÇÃO: Contratos com validação de deployment
+    // CORREÇÃO: Contratos com validação de deployment
     ContractRegistry public contractRegistry;
     RiskRegistry public riskRegistry;
     RiskOracle public riskOracle;
@@ -40,7 +42,7 @@ contract UnifiedDeploy is Script {
     RiskGuardianMaster public riskGuardianMaster;
     RiskInsurance public riskInsurance;
     
-    // ✅ NOVO: Mocks para Sepolia
+    // NOVO: Mocks para Sepolia
     SepoliaSetup public sepoliaSetup;
     
     // Deployment info
@@ -59,52 +61,52 @@ contract UnifiedDeploy is Script {
         isMainnet = chainId == 1;
         isLocal = chainId == 31337;
         
-        console.log("🚀 === RISKGUARDIAN AI V2 - UNIFIED DEPLOY ===");
-        console.log("✅ Correções aplicadas: Validações + Mocks + Cálculos unificados");
+        console.log("=== RISKGUARDIAN AI V2 - UNIFIED DEPLOY ===");
+        console.log("Correcoes aplicadas: Validacoes + Mocks + Calculos unificados");
         console.log("Network:", networkName);
         console.log("Chain ID:", chainId);
         console.log("Deployer:", deployer);
         console.log("Available ETH:", deployer.balance / 1e18, "ETH");
         console.log("");
 
-        // ✅ VALIDAÇÃO: Verificar balance suficiente
+        // VALIDAÇÃO: Verificar balance suficiente
         uint256 requiredETH = isSepolia ? 0.5 ether : (isMainnet ? 2 ether : 0.1 ether);
         require(deployer.balance >= requiredETH, "Insufficient ETH for deployment");
 
         vm.startBroadcast(deployer);
 
         // 1. Deploy core infrastructure
-        console.log("📋 STEP 1: Deploying Core Infrastructure...");
+        console.log("STEP 1: Deploying Core Infrastructure...");
         _deployCore();
         
         // 2. Deploy hedge contracts
-        console.log("🛡️ STEP 2: Deploying Hedge Strategies...");
+        console.log("STEP 2: Deploying Hedge Strategies...");
         _deployHedgeContracts();
         
         // 3. Deploy automation
-        console.log("🤖 STEP 3: Deploying Automation System...");
+        console.log("STEP 3: Deploying Automation System...");
         _deployAutomation();
         
         // 4. Deploy insurance
-        console.log("🏥 STEP 4: Deploying Insurance System...");
+        console.log("STEP 4: Deploying Insurance System...");
         _deployInsurance();
         
         // 5. Deploy mocks if Sepolia
         if (isSepolia) {
-            console.log("🧪 STEP 5: Deploying Sepolia Mocks...");
+            console.log("STEP 5: Deploying Sepolia Mocks...");
             _deploySepoliaMocks();
         }
         
         // 6. Configure integrations
-        console.log("🔗 STEP 6: Configuring Integrations...");
+        console.log("STEP 6: Configuring Integrations...");
         _configureIntegrations();
         
         // 7. Setup data
-        console.log("📊 STEP 7: Setting Up Initial Data...");
+        console.log("STEP 7: Setting Up Initial Data...");
         _setupInitialData();
         
         // 8. Final validation
-        console.log("✅ STEP 8: Final Validation...");
+        console.log("STEP 8: Final Validation...");
         _validateDeployment();
 
         vm.stopBroadcast();
@@ -112,12 +114,12 @@ contract UnifiedDeploy is Script {
         // 9. Print deployment info
         _printDeploymentSummary();
         
-        console.log("🎉 === DEPLOYMENT COMPLETED SUCCESSFULLY ===");
-        console.log("🎯 System is ready for hackathon demo!");
+        console.log("=== DEPLOYMENT COMPLETED SUCCESSFULLY ===");
+        console.log("System is ready for hackathon demo!");
     }
 
     /**
-     * @dev ✅ STEP 1: Deploy core infrastructure with validation
+     * @dev STEP 1: Deploy core infrastructure with validation
      */
     function _deployCore() internal {
         // 1. Contract Registry (central registry)
@@ -145,17 +147,17 @@ contract UnifiedDeploy is Script {
         alertSystem = new AlertSystem(address(contractRegistry));
         _validateContract(address(alertSystem), "AlertSystem");
         
-        // ✅ NOVO: Register contracts in registry
+        // NOVO: Register contracts in registry
         contractRegistry.setContract(keccak256("RiskRegistry"), address(riskRegistry));
         contractRegistry.setContract(keccak256("RiskOracle"), address(riskOracle));
         contractRegistry.setContract(keccak256("PortfolioRiskAnalyzer"), address(portfolioAnalyzer));
         contractRegistry.setContract(keccak256("AlertSystem"), address(alertSystem));
         
-        console.log("   ✅ Core infrastructure deployed and registered");
+        console.log("   Core infrastructure deployed and registered");
     }
 
     /**
-     * @dev ✅ STEP 2: Deploy hedge contracts with network-specific config
+     * @dev STEP 2: Deploy hedge contracts with network-specific config
      */
     function _deployHedgeContracts() internal {
         // 1. Stop Loss Hedge
@@ -181,43 +183,43 @@ contract UnifiedDeploy is Script {
             crossChainHedge = new CrossChainHedge(ccipRouter, linkToken);
             _validateContract(address(crossChainHedge), "CrossChainHedge");
         } else {
-            console.log("   ⚠️ CrossChainHedge skipped (CCIP not supported)");
+            console.log("CrossChainHedge skipped (CCIP not supported)");
         }
         
-        console.log("   ✅ Hedge contracts deployed");
+        console.log("   Hedge contracts deployed");
     }
 
     /**
-     * @dev ✅ STEP 3: Deploy automation with validation
+     * @dev STEP 3: Deploy automation with validation
      */
     function _deployAutomation() internal {
         console.log("   Deploying RiskGuardianMaster...");
         riskGuardianMaster = new RiskGuardianMaster(deployer);
         _validateContract(address(riskGuardianMaster), "RiskGuardianMaster");
         
-        console.log("   ✅ Automation system deployed");
+        console.log("   Automation system deployed");
     }
 
     /**
-     * @dev ✅ STEP 4: Deploy insurance with validation
+     * @dev STEP 4: Deploy insurance with validation
      */
     function _deployInsurance() internal {
         console.log("   Deploying RiskInsurance...");
         riskInsurance = new RiskInsurance(address(portfolioAnalyzer));
         _validateContract(address(riskInsurance), "RiskInsurance");
         
-        // ✅ NOVO: Add initial funds to insurance pool
+        // NOVO: Add initial funds to insurance pool
         uint256 initialPool = isSepolia ? 1 ether : (isLocal ? 10 ether : 0);
         if (initialPool > 0) {
             riskInsurance.addToPool{value: initialPool}();
-            console.log("   💰 Added", initialPool / 1e18, "ETH to insurance pool");
+            console.log("Added", initialPool / 1e18, "ETH to insurance pool");
         }
         
-        console.log("   ✅ Insurance system deployed");
+        console.log("   Insurance system deployed");
     }
 
     /**
-     * @dev ✅ STEP 5: Deploy Sepolia mocks
+     * @dev STEP 5: Deploy Sepolia mocks
      */
     function _deploySepoliaMocks() internal {
         console.log("   Deploying SepoliaSetup...");
@@ -233,17 +235,17 @@ contract UnifiedDeploy is Script {
         console.log("   Setting up realistic risk data...");
         sepoliaSetup.setupRealisticRiskData(address(riskRegistry));
         
-        console.log("   ✅ Sepolia mocks deployed and configured");
+        console.log("   Sepolia mocks deployed and configured");
     }
 
     /**
-     * @dev ✅ STEP 6: Configure integrations with validation
+     * @dev STEP 6: Configure integrations with validation
      */
     function _configureIntegrations() internal {
         // 1. Configure RiskGuardianMaster with hedge contracts
         if (address(crossChainHedge) == address(0)) {
             // Use placeholder for networks without CCIP
-            crossChainHedge = CrossChainHedge(address(1));
+            crossChainHedge = CrossChainHedge(payable(address(1)));
         }
         
         console.log("   Configuring RiskGuardianMaster...");
@@ -270,11 +272,11 @@ contract UnifiedDeploy is Script {
         // 4. Add deployer as risk provider
         riskOracle.addRiskProvider(deployer, "Primary Risk Provider", 10000);
         
-        console.log("   ✅ Integrations configured");
+        console.log("   Integrations configured");
     }
 
     /**
-     * @dev ✅ STEP 7: Setup initial data
+     * @dev STEP 7: Setup initial data
      */
     function _setupInitialData() internal {
         if (isMainnet) {
@@ -285,7 +287,7 @@ contract UnifiedDeploy is Script {
             _setupLocalData();
         }
         
-        console.log("   ✅ Initial data configured");
+        console.log("   Initial data configured");
     }
 
     /**
@@ -302,7 +304,7 @@ contract UnifiedDeploy is Script {
         riskRegistry.registerProtocol(0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2, "Aave V3", "lending");
         riskRegistry.updateRiskMetrics(0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2, 3500, 2500, 2000, 3000);
         
-        console.log("   📋 Registered 2 mainnet protocols");
+        console.log("   Registered 2 mainnet protocols");
     }
 
     /**
@@ -318,7 +320,7 @@ contract UnifiedDeploy is Script {
         riskRegistry.registerProtocol(0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951, "Aave V3 (Sepolia)", "lending");
         riskRegistry.updateRiskMetrics(0x6Ae43d3271ff6888e7Fc43Fd7321a503ff738951, 3500, 2500, 2000, 3000);
         
-        console.log("   📋 Registered 2 real + 5 mock protocols");
+        console.log("   Registered 2 real + 5 mock protocols");
     }
 
     /**
@@ -334,11 +336,11 @@ contract UnifiedDeploy is Script {
         riskRegistry.registerProtocol(0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2, "Aave V3 (Mock)", "lending");
         riskRegistry.updateRiskMetrics(0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2, 3500, 2500, 2000, 3000);
         
-        console.log("   📋 Registered 2 local mock protocols");
+        console.log("   Registered 2 local mock protocols");
     }
 
     /**
-     * @dev ✅ STEP 8: Validate entire deployment
+     * @dev STEP 8: Validate entire deployment
      */
     function _validateDeployment() internal view {
         console.log("   Running deployment validation...");
@@ -364,7 +366,7 @@ contract UnifiedDeploy is Script {
         // Validate integrations
         require(contractRegistry.getContract(keccak256("RiskRegistry")) == address(riskRegistry), "Registry integration failed");
         
-        console.log("   ✅ All validations passed");
+        console.log("   All validations passed");
     }
 
     /**
@@ -372,12 +374,13 @@ contract UnifiedDeploy is Script {
      */
     function _printDeploymentSummary() internal view {
         console.log("");
-        console.log("📋 === DEPLOYMENT SUMMARY ===");
-        console.log("Network:", networkName, "(Chain ID:", chainId, ")");
+        console.log("=== DEPLOYMENT SUMMARY ===");
+        console.log("Network:", networkName);
+        console.log("Chain ID:", chainId);
         console.log("Deployer:", deployer);
         console.log("");
         
-        console.log("📊 CORE CONTRACTS:");
+        console.log("CORE CONTRACTS:");
         console.log("   ContractRegistry:      ", address(contractRegistry));
         console.log("   RiskRegistry:          ", address(riskRegistry));
         console.log("   RiskOracle:            ", address(riskOracle));
@@ -385,23 +388,23 @@ contract UnifiedDeploy is Script {
         console.log("   AlertSystem:           ", address(alertSystem));
         console.log("");
         
-        console.log("🛡️ HEDGE CONTRACTS:");
+        console.log("HEDGE CONTRACTS:");
         console.log("   StopLossHedge:         ", address(stopLossHedge));
         console.log("   RebalanceHedge:        ", address(rebalanceHedge));
         console.log("   VolatilityHedge:       ", address(volatilityHedge));
         console.log("   CrossChainHedge:       ", address(crossChainHedge));
         console.log("");
         
-        console.log("🤖 AUTOMATION:");
+        console.log("AUTOMATION:");
         console.log("   RiskGuardianMaster:    ", address(riskGuardianMaster));
         console.log("");
         
-        console.log("🏥 INSURANCE:");
+        console.log("INSURANCE:");
         console.log("   RiskInsurance:         ", address(riskInsurance));
         console.log("");
         
         if (isSepolia && address(sepoliaSetup) != address(0)) {
-            console.log("🧪 SEPOLIA MOCKS:");
+            console.log("SEPOLIA MOCKS:");
             console.log("   SepoliaSetup:          ", address(sepoliaSetup));
             console.log("   Compound V3 Mock:      ", sepoliaSetup.getMockProtocol("compound"));
             console.log("   Lido Mock:             ", sepoliaSetup.getMockProtocol("lido"));
@@ -409,14 +412,14 @@ contract UnifiedDeploy is Script {
             console.log("");
         }
         
-        console.log("📋 NEXT STEPS:");
+        console.log("NEXT STEPS:");
         console.log("1. Copy addresses to .env file");
         console.log("2. Run integration test: forge script script/examples/Integration.s.sol");
         console.log("3. Test automation: forge script script/EmergencyActions.s.sol");
         console.log("4. Start demo with sample data");
         console.log("");
         
-        console.log("🎯 SYSTEM STATUS: READY FOR DEMO!");
+        console.log("SYSTEM STATUS: READY FOR DEMO!");
     }
 
     // ===== HELPER FUNCTIONS =====

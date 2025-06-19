@@ -8,12 +8,29 @@ import "./AlertTypes.sol";
 library AlertProcessing {
     function shouldSkip(
         AlertTypes.AlertSubscription memory _subscription
-        //AlertTypes.ProcessingContext memory _context
     ) internal pure returns (bool) {
         if (!_subscription.active) {
             return true;
         }
-        // Adicionar lógica adicional, e.g., verificar se já foi processado recentemente
+        // Add additional logic, e.g., check if it was processed recently
+        return false;
+    }
+
+    function shouldSkipWithContext(
+        AlertTypes.AlertSubscription memory _subscription,
+        AlertTypes.ProcessingContext memory _context
+    ) internal view returns (bool) {
+        if (!_subscription.active) {
+            return true;
+        }
+        
+        // Context-based processing logic
+        // Example: skip if processed in current block
+        if (_context.currentBlock == block.number) {
+
+            return true;
+        }
+        
         return false;
     }
 }

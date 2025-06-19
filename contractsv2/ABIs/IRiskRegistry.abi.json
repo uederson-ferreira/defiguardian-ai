@@ -1,0 +1,240 @@
+[
+  {
+    "type": "function",
+    "name": "getAllProtocols",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address[]",
+        "internalType": "address[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getProtocol",
+    "inputs": [
+      {
+        "name": "_protocolAddress",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct DataTypes.Protocol",
+        "components": [
+          {
+            "name": "name",
+            "type": "string",
+            "internalType": "string"
+          },
+          {
+            "name": "protocolAddress",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "category",
+            "type": "string",
+            "internalType": "string"
+          },
+          {
+            "name": "tvl",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "riskMetrics",
+            "type": "tuple",
+            "internalType": "struct DataTypes.RiskMetrics",
+            "components": [
+              {
+                "name": "volatilityScore",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "liquidityScore",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "smartContractScore",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "governanceScore",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "overallRisk",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "lastUpdated",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "isActive",
+                "type": "bool",
+                "internalType": "bool"
+              }
+            ]
+          },
+          {
+            "name": "isWhitelisted",
+            "type": "bool",
+            "internalType": "bool"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "protocols",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "name",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "protocolAddress",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "category",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "tvl",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "riskMetrics",
+        "type": "tuple",
+        "internalType": "struct DataTypes.RiskMetrics",
+        "components": [
+          {
+            "name": "volatilityScore",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "liquidityScore",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "smartContractScore",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "governanceScore",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "overallRisk",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "lastUpdated",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "isActive",
+            "type": "bool",
+            "internalType": "bool"
+          }
+        ]
+      },
+      {
+        "name": "isWhitelisted",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "registerProtocol",
+    "inputs": [
+      {
+        "name": "_protocolAddress",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "_name",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "_category",
+        "type": "string",
+        "internalType": "string"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "updateRiskMetrics",
+    "inputs": [
+      {
+        "name": "_protocolAddress",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "_volatility",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_liquidity",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_smartContract",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_governance",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  }
+]

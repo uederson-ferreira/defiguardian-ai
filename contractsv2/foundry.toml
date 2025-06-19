@@ -11,7 +11,7 @@ script = "script"
 solc_version = "0.8.20"
 optimizer = true
 optimizer_runs = 200
-via_ir = false
+via_ir = true
 bytecode_hash = "none"
 cbor_metadata = false
 
@@ -19,6 +19,8 @@ cbor_metadata = false
 remappings = [
     "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
     "@chainlink/contracts/=lib/chainlink-brownie-contracts/contracts/",
+    "@uniswap/v3-periphery/=lib/v3-periphery/",
+    "@uniswap/v3-core/=lib/v3-core/",
     "forge-std/=lib/forge-std/src/"
 ]
 
@@ -36,6 +38,8 @@ sepolia = "https://sepolia.infura.io/v3/"
 goerli = "https://goerli.infura.io/v3/"
 polygon = "https://polygon-mainnet.infura.io/v3/"
 arbitrum = "https://arbitrum-mainnet.infura.io/v3/"
+avalanche_fuji = "https://api.avax-test.network/ext/bc/C/rpc"
+avalanche_mainnet = "https://api.avax.network/ext/bc/C/rpc"
 anvil = "http://localhost:8545"
 
 # Configurações de etherscan para verificação
@@ -44,6 +48,8 @@ mainnet = { key = "${ETHERSCAN_API_KEY}" }
 sepolia = { key = "${ETHERSCAN_API_KEY}" }
 polygon = { key = "${POLYGONSCAN_API_KEY}" }
 arbitrum = { key = "${ARBISCAN_API_KEY}" }
+avalanche_fuji = { key = "${SNOWTRACE_API_KEY}", url = "https://api-testnet.snowtrace.io/api" }
+avalanche_mainnet = { key = "${SNOWTRACE_API_KEY}", url = "https://api.snowtrace.io/api" }
 
 # Profile para build otimizado
 [profile.build]

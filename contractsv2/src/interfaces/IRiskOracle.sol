@@ -3,18 +3,20 @@ pragma solidity ^0.8.20;
 
 //src/interfaces/IRiskOracle.sol
 
+import "../libraries/DataTypes.sol";
 // ========== IRiskOracle.sol ==========
 interface IRiskOracle {
-    struct RiskData {
-        uint256 volatilityRisk;
-        uint256 liquidityRisk;
-        uint256 smartContractRisk;
-        uint256 governanceRisk;
-        uint256 externalRisk;
-        uint256 timestamp;
-        address reporter;
-        bool isValid;
-    }
+    // struct RiskData {
+    //     uint256 volatilityRisk;
+    //     uint256 liquidityRisk;
+    //     uint256 smartContractRisk;
+    //     uint256 governanceRisk;
+    //     uint256 externalRisk;
+    //     uint256 overallRisk; 
+    //     uint256 timestamp;
+    //     address reporter;
+    //     bool isValid;
+    // }
 
     function getAggregatedRisk(address _protocol) external view returns (
         uint256 volatilityRisk,
@@ -33,7 +35,7 @@ interface IRiskOracle {
     // ✅ MÉTODOS FALTANDO ADICIONADOS:
     function getAllProviders() external view returns (address[] memory);
     function setRiskThreshold(address _protocol, uint256 _threshold) external;
-    function getRiskHistory(address _protocol) external view returns (RiskData[] memory);
+    function getRiskHistory(address _protocol) external view returns (DataTypes.RiskData[] memory);
     function getRiskTrend(address _protocol) external view returns (int256);
     function updateProvider(address _provider, uint256 _newWeight, uint256 _newReputation) external;
     function deactivateProvider(address _provider) external;

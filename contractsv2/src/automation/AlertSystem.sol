@@ -47,9 +47,16 @@ contract AlertSystem is IAlertSystem, Ownable, ReentrancyGuard, Pausable {
         AlertTypes.AlertType internalType = AlertTypes.AlertType(uint256(_alertType));
         // Use default priority and email settings
         AlertTypes.AlertPriority priority = AlertTypes.AlertPriority.MEDIUM;
-        AlertValidation.validateSubscriptionParams(internalType, _protocol, _threshold, priority);
+        
+        // Fixed: Use correct function signature with proper parameters
+        AlertValidation.validateSubscriptionParams(_protocol, _threshold);
+        
         IRiskRegistry riskRegistryInstance = getRiskRegistry();
-        riskRegistryInstance.protocols(_protocol); // Validate protocol exists
+        
+        // Check if protocol exists - simplified validation
+        (string memory name,,,,,) = riskRegistryInstance.protocols(_protocol);
+        require(bytes(name).length > 0, "Protocol not registered");
+        
         AlertTypes.UserPreferences memory preferences = AlertTypes.UserPreferences({
             emailEnabled: true,
             telegramEnabled: false,
@@ -78,12 +85,12 @@ contract AlertSystem is IAlertSystem, Ownable, ReentrancyGuard, Pausable {
 
     function checkUserAlerts(address _user) external override nonReentrant whenNotPaused {
         AlertTypes.AlertSubscription[] memory subscriptions = userSubscriptions[_user];
-        // Remove unused variable riskOracleInstance
-        // Removed unused portfolioAnalyzerInstance variable
-        AlertTypes.ProcessingContext memory context = AlertTypes.createProcessingContext();
+        
+        // Fixed: Use correct function signature without context parameter
+        //AlertTypes.ProcessingContext memory context = AlertTypes.createProcessingContext();
 
         for (uint256 i = 0; i < subscriptions.length; i++) {
-            if (AlertProcessing.shouldSkip(subscriptions[i], context)) {
+            if (AlertProcessing.shouldSkip(subscriptions[i])) {
                 continue;
             }
             bool triggered = false;
@@ -113,9 +120,8 @@ contract AlertSystem is IAlertSystem, Ownable, ReentrancyGuard, Pausable {
     }
 
     function _processRiskThreshold(
-    AlertTypes.AlertSubscription memory _sub
-    ) internal view
-returns (bool) {
+        AlertTypes.AlertSubscription memory _sub
+    ) internal view returns (bool) {
         try getRiskOracle().getAggregatedRisk(_sub.protocol) returns (
             uint256,
             uint256,
@@ -185,5 +191,19 @@ returns (bool) {
     
     function getPortfolioAnalyzer() internal view returns (IPortfolioAnalyzer) {
         return IPortfolioAnalyzer(contractRegistry.getContract(PORTFOLIO_ANALYZER));
+    }
+
+    /**
+     * @dev Pause the contract (only owner)
+     */
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    /**
+     * @dev Unpause the contract (only owner)
+     */
+    function unpause() external onlyOwner {
+        _unpause();
     }
 }

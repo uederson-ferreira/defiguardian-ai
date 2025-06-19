@@ -10,6 +10,7 @@ import "../src/core/PortfolioRiskAnalyzer.sol";
 import "../src/insurance/RiskInsurance.sol";
 import "../src/core/RiskOracle.sol";
 import "../src/automation/AlertSystem.sol";
+import "../src/core/ContractRegistry.sol";
 
 /**
  * @title MockAggregator
@@ -87,14 +88,22 @@ contract GasOptimizationTest is Test {
         
         // Deploy all contracts
         riskRegistry = new RiskRegistry();
-        portfolioAnalyzer = new PortfolioRiskAnalyzer(address(riskRegistry));
-        riskInsurance = new RiskInsurance(address(portfolioAnalyzer));
         riskOracle = new RiskOracle();
-        alertSystem = new AlertSystem(
-            address(riskOracle),
-            address(portfolioAnalyzer),
-            address(riskRegistry)
-        );
+        
+        // Create contract registry and register all contracts
+        ContractRegistry contractRegistry = new ContractRegistry();
+        bytes32 RISK_REGISTRY = keccak256("RiskRegistry");
+        bytes32 RISK_ORACLE = keccak256("RiskOracle");
+        bytes32 PORTFOLIO_ANALYZER = keccak256("PortfolioRiskAnalyzer");
+        
+        contractRegistry.setContract(RISK_REGISTRY, address(riskRegistry));
+        contractRegistry.setContract(RISK_ORACLE, address(riskOracle));
+        
+        portfolioAnalyzer = new PortfolioRiskAnalyzer(address(contractRegistry));
+        contractRegistry.setContract(PORTFOLIO_ANALYZER, address(portfolioAnalyzer));
+        
+        riskInsurance = new RiskInsurance(address(portfolioAnalyzer));
+        alertSystem = new AlertSystem(address(contractRegistry));
         
         // Setup basic data with unique names
         riskRegistry.registerProtocol(protocol1, "SetupTestProtocol1", "lending");
@@ -324,7 +333,7 @@ contract GasOptimizationTest is Test {
         // Test createSubscription gas usage
         uint256 gasBefore = gasleft();
         alertSystem.createSubscription(
-            AlertTypes.AlertType.RISK_THRESHOLD, // Properly using enum type
+            IAlertSystem.AlertType.RISK_THRESHOLD, // Properly using enum type
             protocol1,
             7000
         );

@@ -8,10 +8,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../config/Addresses.sol";
-import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+// Definição da interface ISwapRouter diretamente no arquivo
 
-
-// ✅ CORREÇÃO: Interface para Uniswap V3 (simplificada para hackathon)
 interface ISwapRouter {
     struct ExactInputSingleParams {
         address tokenIn;
@@ -39,20 +37,28 @@ contract StopLossHedge is ReentrancyGuard, Ownable {
     address public immutable weth;
 
     constructor() Ownable(msg.sender) {
-        // ✅ CORREÇÃO: Para Sepolia, usar endereços específicos ou detectar automaticamente
+        // Inicialização de variáveis imutáveis sem condicionais
+        // Determinando os endereços corretos com base na chain ID
+        address routerAddress;
+        address wethAddress;
+        
         if (block.chainid == 11155111) {
             // Sepolia
-            uniswapRouter = ISwapRouter(0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E);
-            weth = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
+            routerAddress = 0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E;
+            wethAddress = 0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14;
         } else if (block.chainid == 1) {
             // Mainnet
-            uniswapRouter = ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564);
-            weth = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+            routerAddress = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
+            wethAddress = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
         } else {
             // Local/outras redes - usar placeholders
-            uniswapRouter = ISwapRouter(address(0));
-            weth = address(0);
+            routerAddress = address(0);
+            wethAddress = address(0);
         }
+        
+        // Inicialização das variáveis imutáveis fora dos blocos condicionais
+        uniswapRouter = ISwapRouter(routerAddress);
+        weth = wethAddress;
     }
     
     struct StopLossOrder {

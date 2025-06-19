@@ -1,0 +1,348 @@
+# Foundry build artifacts
+out/
+cache/
+artifacts/
+typechain/
+
+# Foundry broadcast logs
+broadcast/
+
+# Node.js dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.staging
+.secret
+secrets.json
+mnemonic.txt
+private-key.txt
+
+# Hardhat files (if using)
+cache_hardhat/
+artifacts_hardhat/
+
+# Truffle files (if using)
+build/
+
+# Remix IDE files
+.workspaces/
+
+# VS Code settings
+.vscode/
+*.code-workspace
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+*.exe
+*.msi
+*.msm
+*.msp
+desktop.ini
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Coverage reports
+coverage/
+coverage.json
+*.lcov
+.nyc_output
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Gas reports
+gas-report.txt
+.gas-snapshot
+
+# Slither reports
+slither-report.json
+slither-report.txt
+
+# Mythril reports
+mythril-report.json
+mythril-report.txt
+
+# Solhint cache
+.solhint.json
+
+# Echidna files
+.echidna/
+
+# Manticore files
+.manticore/
+
+# MythX files
+.mythx/
+
+# Deployment artifacts (sensitive)
+deployments/mainnet/
+deployments/polygon/
+deployments/arbitrum/
+*.deployment.json
+
+# Local network data
+ganache/
+geth/
+parity/
+
+# Python virtual environments (if using Python tools)
+venv/
+env/
+ENV/
+.venv/
+.env/
+.ENV/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# pytest cache
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+dist/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Documentation builds
+docs/_build/
+site/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Editor temporary files
+*.kate-swp
+.*.swp
+.*.swo
+
+# Vim
+*.un~
+Session.vim
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Archive files
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Redis dumps
+dump.rdb
+
+# Certificate files
+*.pem
+*.crt
+*.key
+*.p12
+*.pfx
+
+# Local configuration overrides
+config.local.json
+.config/
+
+# Test vectors and fixtures (if large)
+test-vectors/
+fixtures/large/
+
+# Profiling data
+*.prof
+
+# IDE-specific files
+.project
+.settings/
+.classpath
+.factorypath
+
+# Solidity compiler cache
+.solcache/
+
+# ABIs (if auto-generated)
+abis/generated/
+
+# Flattened contracts
+flattened/
+
+# Security analysis reports
+security-reports/
+
+# Frontend build artifacts (if applicable)
+build/
+dist/
+.next/
+.nuxt/
+public/build/
+
+# Package manager files
+pnpm-lock.yaml
+.pnpm-store/
+
+# Yarn 2+
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# Local Netlify folder
+.netlify
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Temporary folders
+tmp/
+temp/
+
+# OS generated files
+ehthumbs.db
+Thumbs.db
+
+# JetBrains IDEs
+.idea/
+*.iml
+out/
+gen/
+
+# Eclipse
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+.recommenders
+.project
+.externalToolBuilders/
+*.launch
+.pydevproject
+.cproject
+.autotools
+.factorypath
+.buildpath
+.target
+.tern-project
+.texlipse
+.springBeans
+.recommenders/
+.apt_generated/
+.cache-main
+.scala_dependencies
+.worksheet
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+# Local History for Visual Studio
+.localhistory/
+
+# BeatPulse healthcheck temp database
+healthchecksdb
+
+# Backup folder for Package Reference Convert tool in Visual Studio 2017
+MigrationBackup/
+/lib/v3-core/
+/lib/v3-periphery/
+/lib/

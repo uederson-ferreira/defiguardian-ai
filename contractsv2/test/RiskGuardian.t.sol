@@ -6,6 +6,7 @@ pragma solidity ^0.8.19;
 import "forge-std/Test.sol";
 import "forge-std/console.sol";
 import "../src/core/RiskRegistry.sol";
+import "../src/core/ContractRegistry.sol";
 import "../src/core/PortfolioRiskAnalyzer.sol";
 import "../src/insurance/RiskInsurance.sol";
 
@@ -80,7 +81,7 @@ contract RiskRegistryTest is Test {
         
         riskRegistry.registerProtocol(protocol1, "Uniswap V3", "dex");
         
-        RiskRegistry.Protocol memory protocol = riskRegistry.getProtocol(protocol1);
+        DataTypes.Protocol memory protocol = riskRegistry.getProtocol(protocol1);
         assertEq(protocol.name, "Uniswap V3");
         assertEq(protocol.protocolAddress, protocol1);
         assertEq(protocol.category, "dex");
@@ -133,7 +134,7 @@ contract RiskRegistryTest is Test {
         vm.startPrank(owner);
         riskRegistry.updateRiskMetrics(protocol1, 8000, 6000, 4000, 7000);
         
-        RiskRegistry.Protocol memory protocol = riskRegistry.getProtocol(protocol1);
+        DataTypes.Protocol memory protocol = riskRegistry.getProtocol(protocol1);
         assertEq(protocol.riskMetrics.volatilityScore, 8000);
         assertEq(protocol.riskMetrics.liquidityScore, 6000);
         assertEq(protocol.riskMetrics.smartContractScore, 4000);
@@ -155,7 +156,7 @@ contract RiskRegistryTest is Test {
         vm.startPrank(assessor1);
         riskRegistry.updateRiskMetrics(protocol1, 7000, 7000, 7000, 7000);
         
-        RiskRegistry.Protocol memory protocol = riskRegistry.getProtocol(protocol1);
+        DataTypes.Protocol memory protocol = riskRegistry.getProtocol(protocol1);
         assertEq(protocol.riskMetrics.overallRisk, 7000);
         vm.stopPrank();
     }
@@ -234,6 +235,7 @@ contract RiskRegistryTest is Test {
  */
 contract PortfolioRiskAnalyzerTest is Test {
     RiskRegistry public riskRegistry;
+    ContractRegistry public contractRegistry;
     PortfolioRiskAnalyzer public portfolioAnalyzer;
     MockAggregator public ethPriceFeed;
     MockAggregator public btcPriceFeed;
@@ -254,7 +256,13 @@ contract PortfolioRiskAnalyzerTest is Test {
         
         // Deploy contracts
         riskRegistry = new RiskRegistry();
-        portfolioAnalyzer = new PortfolioRiskAnalyzer(address(riskRegistry));
+        contractRegistry = new ContractRegistry();
+        
+        // Register RiskRegistry in ContractRegistry
+        bytes32 RISK_REGISTRY = keccak256("RiskRegistry");
+        contractRegistry.setContract(RISK_REGISTRY, address(riskRegistry));
+        
+        portfolioAnalyzer = new PortfolioRiskAnalyzer(address(contractRegistry));
         
         // Setup price feeds
         ethPriceFeed = new MockAggregator(2000e8, 8); // $2000 ETH
@@ -424,6 +432,7 @@ contract PortfolioRiskAnalyzerTest is Test {
  */
 contract RiskInsuranceTest is Test {
     RiskRegistry public riskRegistry;
+    ContractRegistry public contractRegistry;
     PortfolioRiskAnalyzer public portfolioAnalyzer;
     RiskInsurance public riskInsurance;
     MockAggregator public ethPriceFeed;
@@ -442,7 +451,13 @@ contract RiskInsuranceTest is Test {
         
         // Deploy contracts
         riskRegistry = new RiskRegistry();
-        portfolioAnalyzer = new PortfolioRiskAnalyzer(address(riskRegistry));
+        contractRegistry = new ContractRegistry();
+        
+        // Register RiskRegistry in ContractRegistry
+        bytes32 RISK_REGISTRY = keccak256("RiskRegistry");
+        contractRegistry.setContract(RISK_REGISTRY, address(riskRegistry));
+        
+        portfolioAnalyzer = new PortfolioRiskAnalyzer(address(contractRegistry));
         riskInsurance = new RiskInsurance(address(portfolioAnalyzer));
         
         // Setup price feed
@@ -755,6 +770,7 @@ contract RiskInsuranceTest is Test {
  */
 contract IntegrationTest is Test {
     RiskRegistry public riskRegistry;
+    ContractRegistry public contractRegistry;
     PortfolioRiskAnalyzer public portfolioAnalyzer;
     RiskInsurance public riskInsurance;
     MockAggregator public ethPriceFeed;
@@ -775,7 +791,13 @@ contract IntegrationTest is Test {
         
         // Deploy all contracts
         riskRegistry = new RiskRegistry();
-        portfolioAnalyzer = new PortfolioRiskAnalyzer(address(riskRegistry));
+        contractRegistry = new ContractRegistry();
+        
+        // Register RiskRegistry in ContractRegistry
+        bytes32 RISK_REGISTRY = keccak256("RiskRegistry");
+        contractRegistry.setContract(RISK_REGISTRY, address(riskRegistry));
+        
+        portfolioAnalyzer = new PortfolioRiskAnalyzer(address(contractRegistry));
         riskInsurance = new RiskInsurance(address(portfolioAnalyzer));
         
         // Setup price feed
@@ -867,7 +889,7 @@ contract IntegrationTest is Test {
         portfolioAnalyzer.addPosition(aave, ETH_TOKEN, 1e18);
         
         uint256 portfolioRisk = portfolioAnalyzer.calculatePortfolioRisk(trader);
-        RiskRegistry.Protocol memory protocol = riskRegistry.getProtocol(aave);
+        DataTypes.Protocol memory protocol = riskRegistry.getProtocol(aave);
         
         // Portfolio risk should be close to protocol risk (single position, no diversification)
         uint256 protocolRisk = protocol.riskMetrics.overallRisk;

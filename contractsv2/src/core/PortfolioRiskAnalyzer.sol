@@ -20,25 +20,18 @@ contract PortfolioRiskAnalyzer is IPortfolioAnalyzer, Ownable, ReentrancyGuard {
     ContractRegistry public immutable contractRegistry;
     bytes32 private constant RISK_REGISTRY = keccak256("RiskRegistry");
 
-    mapping(address => DataTypes.Position[]) private _userPositions;
+    mapping(address => DataTypes.Position[]) private userPositions;
     mapping(address => AggregatorV3Interface) public priceFeeds;
 
     event PositionAdded(address indexed user, address protocol, address token, uint256 amount);
     event PositionRemoved(address indexed user, uint256 positionId);
     event PriceFeedUpdated(address indexed token, address priceFeed);
 
-    constructor(address _portfolioAnalyzer) Ownable(msg.sender) {
-        require(_portfolioAnalyzer != address(0), "Invalid portfolio analyzer");
-        require(_portfolioAnalyzer.code.length > 0, "Portfolio analyzer must be contract");
+    constructor(address _contractRegistry) Ownable(msg.sender) {
+        require(_contractRegistry != address(0), "Invalid contract registry");
+        require(_contractRegistry.code.length > 0, "Contract registry must be contract");
         
-        // ✅ VALIDAÇÃO: Testar se implementa interface necessária
-        try IPortfolioAnalyzer(_portfolioAnalyzer).getPortfolioAnalysis(address(0)) {
-            // Se não reverter, implementa a interface corretamente
-        } catch {
-            // Isso é esperado (endereço zero), mas mostra que a interface existe
-        }
-        
-        portfolioAnalyzer = PortfolioRiskAnalyzer(_portfolioAnalyzer);
+        contractRegistry = ContractRegistry(_contractRegistry);
     }
 
     function addPosition(
@@ -47,15 +40,18 @@ contract PortfolioRiskAnalyzer is IPortfolioAnalyzer, Ownable, ReentrancyGuard {
         uint256 _amount
     ) external override nonReentrant {
         require(_amount > 0, "Amount must be positive");
-        IRiskRegistry riskRegistry = IRiskRegistry(contractRegistry.getContract(RISK_REGISTRY));
-        (,address protocolAddr,,,,) = riskRegistry.protocols(_protocol);
-        require(protocolAddr != address(0), "Protocol not registered");
-        require(priceFeeds[_token] != AggregatorV3Interface(address(0)), "Price feed not set");
+        IRiskRegistry registry = IRiskRegistry(contractRegistry.getContract(RISK_REGISTRY));
+        
+        // Check if protocol is registered
+        (string memory name,,,,,) = registry.protocols(_protocol);
+        require(bytes(name).length > 0, "Protocol not registered");
+        require(address(priceFeeds[_token]) != address(0), "Price feed not set");
 
         userPositions[msg.sender].push(DataTypes.Position({
             protocol: _protocol,
             token: _token,
             amount: _amount,
+            value: _calculateTokenValue(_token, _amount),
             timestamp: block.timestamp
         }));
 
@@ -63,7 +59,7 @@ contract PortfolioRiskAnalyzer is IPortfolioAnalyzer, Ownable, ReentrancyGuard {
     }
 
     function removePosition(uint256 _positionId) external override nonReentrant {
-        require(_positionId < userPositions[msg.sender].length, "Invalid position ID");
+        require(_positionId < userPositions[msg.sender].length, "Invalid position index");
         userPositions[msg.sender][_positionId] = userPositions[msg.sender][userPositions[msg.sender].length - 1];
         userPositions[msg.sender].pop();
         emit PositionRemoved(msg.sender, _positionId);
@@ -74,7 +70,7 @@ contract PortfolioRiskAnalyzer is IPortfolioAnalyzer, Ownable, ReentrancyGuard {
         require(_priceFeed != address(0), "Invalid price feed address");
         require(_priceFeed.code.length > 0, "Price feed must be a contract");
         
-        // ✅ VALIDAÇÃO CRÍTICA: Testar se é um price feed Chainlink válido
+        // Validate if it's a valid Chainlink price feed
         try AggregatorV3Interface(_priceFeed).latestRoundData() returns (
             uint80, int256 price, uint256, uint256, uint80
         ) {
@@ -87,45 +83,92 @@ contract PortfolioRiskAnalyzer is IPortfolioAnalyzer, Ownable, ReentrancyGuard {
         emit PriceFeedUpdated(_token, _priceFeed);
     }
 
-    function calculatePortfolioRisk(address _user) external view override returns (
-        uint256 totalValue,
-        uint256 overallRisk,
-        uint256 diversificationScore
-    ) {
+    function calculatePortfolioRisk(address _user) external view override returns (uint256) {
         DataTypes.Position[] memory positions = userPositions[_user];
         if (positions.length == 0) {
-            return (0, 0, 0);
+            return 0;
         }
 
+        uint256 totalValue = 0;
         uint256 totalRisk = 0;
-        IRiskRegistry riskRegistry = IRiskRegistry(contractRegistry.getContract(RISK_REGISTRY));
+        IRiskRegistry registry = IRiskRegistry(contractRegistry.getContract(RISK_REGISTRY));
 
         for (uint256 i = 0; i < positions.length; i++) {
             DataTypes.Position memory position = positions[i];
-            (, , , DataTypes.RiskMetrics memory metrics, ) = riskRegistry.protocols(position.protocol);
-            uint256 tokenValue = PriceFeeds.getValueInUSD(position.token, position.amount, priceFeeds[position.token]);
+            
+            // Get protocol risk metrics
+            (,,,, DataTypes.RiskMetrics memory metrics,) = registry.protocols(position.protocol);
+            
+            uint256 tokenValue = _calculateTokenValue(position.token, position.amount);
             totalValue += tokenValue;
             totalRisk += metrics.overallRisk * tokenValue;
         }
 
-        overallRisk = totalValue > 0 ? totalRisk / totalValue : 0;
-        diversificationScore = RiskCalculations.calculateDiversificationScore(positions);
+        uint256 overallRisk = totalValue > 0 ? totalRisk / totalValue : 0;
+        
+        // Apply diversification bonus
+        uint256 diversificationScore = RiskCalculations.calculateDiversificationScore(positions);
+        if (diversificationScore > 0) {
+            overallRisk = overallRisk * (10000 - diversificationScore / 10) / 10000;
+        }
 
-        return (totalValue, overallRisk, diversificationScore);
+        return overallRisk;
     }
 
     function getPortfolioAnalysis(address _user) external view override returns (
-        DataTypes.Position[] memory positions,
-        uint256 totalValue,
-        uint256 overallRisk,
-        uint256 diversificationScore
+        PortfolioAnalysis memory
     ) {
-        (totalValue, overallRisk, diversificationScore) = calculatePortfolioRisk(_user);
-        positions = userPositions[_user];
-        return (positions, totalValue, overallRisk, diversificationScore);
+        DataTypes.Position[] memory positions = userPositions[_user];
+        
+        uint256 totalValue = 0;
+        uint256 overallRisk = this.calculatePortfolioRisk(_user);
+        uint256 diversificationScore = RiskCalculations.calculateDiversificationScore(positions);
+        
+        // Calculate total value
+        for (uint256 i = 0; i < positions.length; i++) {
+            totalValue += _calculateTokenValue(positions[i].token, positions[i].amount);
+        }
+
+        return PortfolioAnalysis({
+            totalValue: totalValue,
+            overallRisk: overallRisk,
+            diversificationScore: diversificationScore,
+            timestamp: block.timestamp,
+            isValid: positions.length > 0
+        });
     }
 
-    function getUserPositions(address _user) external view override returns (DataTypes.Position[] memory) {
-        return userPositions[_user];
+    function getUserPositions(address _user) external view override returns (Position[] memory) {
+        DataTypes.Position[] memory dataPositions = userPositions[_user];
+        Position[] memory interfacePositions = new Position[](dataPositions.length);
+        
+        for (uint256 i = 0; i < dataPositions.length; i++) {
+            interfacePositions[i] = Position({
+                protocol: dataPositions[i].protocol,
+                token: dataPositions[i].token,
+                amount: dataPositions[i].amount,
+                value: dataPositions[i].value
+            });
+        }
+        
+        return interfacePositions;
+    }
+
+    function riskRegistry() external view override returns (address) {
+        return contractRegistry.getContract(RISK_REGISTRY);
+    }
+
+    function _calculateTokenValue(address _token, uint256 _amount) internal view returns (uint256) {
+        AggregatorV3Interface priceFeed = priceFeeds[_token];
+        if (address(priceFeed) == address(0)) return 0;
+        
+        try priceFeed.latestRoundData() returns (
+            uint80, int256 price, uint256, uint256, uint80
+        ) {
+            if (price <= 0) return 0;
+            return (_amount * uint256(price)) / 1e8; // Assuming 8 decimals for price feed
+        } catch {
+            return 0;
+        }
     }
 }

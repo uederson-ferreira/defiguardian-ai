@@ -145,10 +145,15 @@ contract NetworkConfig is Script {
         return ccipConfigs[chainId].isSupported;
     }
 
-    function getSepoliaConfig() public returns (NetworkConfig memory) {
-    return NetworkConfig({
-        uniswapV3Router: address(new MockUniswapV3Router())
-    });
+    // Definindo a estrutura para configuração específica de Sepolia
+    struct SepoliaConfig {
+        address uniswapV3Router;
+    }
+    
+    function getSepoliaConfig() public returns (SepoliaConfig memory) {
+        return SepoliaConfig({
+            uniswapV3Router: address(new MockUniswapV3Router())
+        });
     }
 }
 

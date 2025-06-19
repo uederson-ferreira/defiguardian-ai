@@ -240,7 +240,7 @@ contract SepoliaSetup {
         require(riskRegistryAddr != address(0), "Invalid registry");
         
         // Usar interface para registrar protocolos
-        IRiskRegistry registry = IRiskRegistry(riskRegistryAddr);
+        ISepoliaRiskRegistry registry = ISepoliaRiskRegistry(riskRegistryAddr);
         
         // Registrar Compound Mock
         registry.registerProtocol(
@@ -281,7 +281,7 @@ contract SepoliaSetup {
     /**
      * @dev ✅ FUNÇÃO UTILITÁRIA: Configurar price feeds no PortfolioAnalyzer
      */
-    function configurePriceFeedsInAnalyzer(address analyzerAddr) external {
+    function configurePriceFeedsInAnalyzer(address analyzerAddr) external view{
         require(msg.sender == deployer, "Only deployer");
         require(isSetup, "Setup first");
         require(analyzerAddr != address(0), "Invalid analyzer");
@@ -308,7 +308,7 @@ contract SepoliaSetup {
         require(msg.sender == deployer, "Only deployer");
         require(isSetup, "Setup first");
         
-        IRiskRegistry registry = IRiskRegistry(riskRegistryAddr);
+        ISepoliaRiskRegistry registry = ISepoliaRiskRegistry(riskRegistryAddr);
         
         // Configurar riscos realistas para cada protocolo
         
@@ -359,8 +359,8 @@ contract SepoliaSetup {
     }
 }
 
-// Interface necessária
-interface IRiskRegistry {
+// Interface necessária para mocks
+interface ISepoliaRiskRegistry {
     function registerProtocol(address _protocolAddress, string memory _name, string memory _category) external;
     function updateRiskMetrics(address _protocolAddress, uint256 _volatility, uint256 _liquidity, uint256 _smartContract, uint256 _governance) external;
 }

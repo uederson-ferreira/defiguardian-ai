@@ -1,21 +1,16 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 //src/libraries/RiskCalculations.sol
 
-import {DataTypes} from "../libraries/DataTypes.sol";
-/**
- * @title RiskCalculations
- * @dev Library for risk calculations
- */
+import "./DataTypes.sol";
+
 library RiskCalculations {
-    using DataTypes for *;
-    
-/**
-     * @dev Fórmula unificada para cálculo de risco
-     * @notice Padronizado em todo o sistema para consistência
-     * Pesos: Volatility 30%, Liquidity 25%, Smart Contract 25%, Governance 20%
-     * External Risk é opcional (usado apenas no Oracle para dados externos)
+    /**
+     * @dev Unified risk calculation formula used across the system
+     * @notice Standardized throughout the system for consistency
+     * Weights: Volatility 30%, Liquidity 25%, Smart Contract 25%, Governance 20%
+     * External Risk is optional (used only in Oracle for external data)
      */
     function calculateOverallRisk(
         uint256 volatilityRisk,
@@ -24,16 +19,16 @@ library RiskCalculations {
         uint256 governanceRisk,
         uint256 externalRisk
     ) internal pure returns (uint256) {
-        // ✅ FÓRMULA UNIFICADA - Mesmo peso usado em RiskRegistry e RiskOracle
+        // Unified formula - Same weights used in RiskRegistry and RiskOracle
         if (externalRisk == 0) {
-            // Versão para RiskRegistry (sem external risk)
+            // Version for RiskRegistry (without external risk)
             return (volatilityRisk * 3000 + 
                     liquidityRisk * 2500 + 
                     smartContractRisk * 2500 + 
                     governanceRisk * 2000) / DataTypes.BASIS_POINTS;
         } else {
-            // Versão para RiskOracle (com external risk)
-            // Redistribuir pesos quando external risk está presente
+            // Version for RiskOracle (with external risk)
+            // Redistribute weights when external risk is present
             return (volatilityRisk * 2500 + 
                     liquidityRisk * 2000 + 
                     smartContractRisk * 2500 + 
@@ -43,7 +38,7 @@ library RiskCalculations {
     }
 
     /**
-     * @dev ✅ Versão simplificada para RiskRegistry
+     * @dev Simplified version for RiskRegistry
      */
     function calculateRegistryRisk(
         uint256 volatilityRisk,
@@ -55,7 +50,7 @@ library RiskCalculations {
     }
 
     /**
-     * @dev ✅ NOVA FUNÇÃO: Versão completa para RiskOracle
+     * @dev Complete version for RiskOracle
      */
     function calculateOracleRisk(
         uint256 volatilityRisk,
@@ -66,156 +61,43 @@ library RiskCalculations {
     ) internal pure returns (uint256) {
         return calculateOverallRisk(volatilityRisk, liquidityRisk, smartContractRisk, governanceRisk, externalRisk);
     }
-    
+
     /**
-     * @dev Calculates volatility risk based on price history
-     */
-    function calculateVolatilityRisk(uint256[] memory priceHistory) internal pure returns (uint256) {
-        if (priceHistory.length < 2) return 5000; // Medium risk by default
-        
-        uint256 volatility = _calculateStandardDeviation(priceHistory);
-        uint256 mean = _calculateMean(priceHistory);
-        
-        if (mean == 0) return 5000;
-        
-        uint256 coefficientOfVariation = (volatility * DataTypes.BASIS_POINTS) / mean;
-        
-        // Normalize to 0-10000 range
-        return coefficientOfVariation > DataTypes.BASIS_POINTS ? DataTypes.BASIS_POINTS : coefficientOfVariation;
-    }
-    
-    /**
-     * @dev Calculates liquidity risk based on TVL and volume
-     */
-    function calculateLiquidityRisk(uint256 tvl, uint256 volume24h) internal pure returns (uint256) {
-        if (tvl == 0) return 9000; // High risk if there's no TVL
-        
-        uint256 liquidityRatio = (volume24h * DataTypes.BASIS_POINTS) / tvl;
-        
-        // Higher volume/TVL = lower liquidity risk
-        if (liquidityRatio >= 1000) return 1000;      // < 10% risk
-        if (liquidityRatio >= 500) return 3000;       // 30% risk  
-        if (liquidityRatio >= 100) return 5000;       // 50% risk
-        if (liquidityRatio >= 50) return 7000;        // 70% risk
-        return 9000;                                   // 90% risk
-    }
-    
-    /**
-     * @dev Calculates diversification score
+     * @dev Calculate diversification score based on positions
      */
     function calculateDiversificationScore(
-        address[] memory protocols,
-        string[] memory categories,
-        uint256[] memory values
+        DataTypes.Position[] memory positions
     ) internal pure returns (uint256) {
-        if (protocols.length <= 1) return 0;
+        if (positions.length <= 1) return 0;
         
-        uint256 uniqueProtocols = _countUniqueAddresses(protocols);
-        uint256 uniqueCategories = _countUniqueStrings(categories);
-        uint256 concentrationRisk = _calculateConcentrationRisk(values);
+        // Simple diversification: more protocols = higher score
+        uint256 baseScore = positions.length * 1000; // 1000 per protocol
         
-        uint256 protocolScore = (uniqueProtocols * 3000) / protocols.length;
-        uint256 categoryScore = (uniqueCategories * 4000) / protocols.length;
-        uint256 concentrationScore = DataTypes.BASIS_POINTS - concentrationRisk;
+        // Cap at reasonable maximum
+        if (baseScore > 5000) baseScore = 5000;
         
-        return (protocolScore + categoryScore + concentrationScore) / 3;
+        return baseScore;
     }
-    
+
     /**
-     * @dev Calculates standard deviation
+     * @dev Calculate portfolio weighted risk
      */
-    function _calculateStandardDeviation(uint256[] memory values) private pure returns (uint256) {
-        uint256 mean = _calculateMean(values);
-        uint256 squaredDiffSum = 0;
+    function calculateWeightedRisk(
+        uint256[] memory risks,
+        uint256[] memory weights
+    ) internal pure returns (uint256) {
+        require(risks.length == weights.length, "Array length mismatch");
         
-        for (uint256 i = 0; i < values.length; i++) {
-            uint256 diff = values[i] > mean ? values[i] - mean : mean - values[i];
-            squaredDiffSum += diff * diff;
-        }
+        if (risks.length == 0) return 0;
         
-        return _sqrt(squaredDiffSum / values.length);
-    }
-    
-    /**
-     * @dev Calculates mean
-     */
-    function _calculateMean(uint256[] memory values) private pure returns (uint256) {
-        uint256 sum = 0;
-        for (uint256 i = 0; i < values.length; i++) {
-            sum += values[i];
-        }
-        return sum / values.length;
-    }
-    
-    /**
-     * @dev Calculates square root
-     */
-    function _sqrt(uint256 x) private pure returns (uint256) {
-        if (x == 0) return 0;
-        uint256 z = (x + 1) / 2;
-        uint256 y = x;
-        while (z < y) {
-            y = z;
-            z = (x / z + z) / 2;
-        }
-        return y;
-    }
-    
-    /**
-     * @dev Counts unique addresses
-     */
-    function _countUniqueAddresses(address[] memory addresses) private pure returns (uint256) {
-        uint256 unique = 0;
-        for (uint256 i = 0; i < addresses.length; i++) {
-            bool isUnique = true;
-            for (uint256 j = 0; j < i; j++) {
-                if (addresses[i] == addresses[j]) {
-                    isUnique = false;
-                    break;
-                }
-            }
-            if (isUnique) unique++;
-        }
-        return unique;
-    }
-    
-    /**
-     * @dev Counts unique strings
-     */
-    function _countUniqueStrings(string[] memory strings) private pure returns (uint256) {
-        uint256 unique = 0;
-        for (uint256 i = 0; i < strings.length; i++) {
-            bool isUnique = true;
-            for (uint256 j = 0; j < i; j++) {
-                if (keccak256(bytes(strings[i])) == keccak256(bytes(strings[j]))) {
-                    isUnique = false;
-                    break;
-                }
-            }
-            if (isUnique) unique++;
-        }
-        return unique;
-    }
-    
-    /**
-     * @dev Calculates concentration risk
-     */
-    function _calculateConcentrationRisk(uint256[] memory values) private pure returns (uint256) {
-        uint256 totalValue = 0;
-        for (uint256 i = 0; i < values.length; i++) {
-            totalValue += values[i];
+        uint256 totalWeightedRisk = 0;
+        uint256 totalWeight = 0;
+        
+        for (uint256 i = 0; i < risks.length; i++) {
+            totalWeightedRisk += risks[i] * weights[i];
+            totalWeight += weights[i];
         }
         
-        if (totalValue == 0) return DataTypes.BASIS_POINTS;
-        
-        uint256 maxConcentration = 0;
-        for (uint256 i = 0; i < values.length; i++) {
-            uint256 concentration = (values[i] * DataTypes.BASIS_POINTS) / totalValue;
-            if (concentration > maxConcentration) {
-                maxConcentration = concentration;
-            }
-        }
-        
-        return maxConcentration;
+        return totalWeight > 0 ? totalWeightedRisk / totalWeight : 0;
     }
 }

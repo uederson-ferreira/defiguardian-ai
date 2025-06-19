@@ -15,6 +15,9 @@ contract RiskRegistry is IRiskRegistry, Ownable, Pausable {
 
     mapping(address => DataTypes.Protocol) public override protocols;
     mapping(address => bool) public riskAssessors;
+    mapping(string => bool) private protocolNames; // Track unique names
+    
+    address[] private allProtocols;
 
     event ProtocolRegistered(address indexed protocolAddress, string name);
     event RiskMetricsUpdated(address indexed protocolAddress, uint256 overallRisk);
@@ -22,7 +25,7 @@ contract RiskRegistry is IRiskRegistry, Ownable, Pausable {
     event RiskAssessorRemoved(address indexed assessor);
 
     modifier onlyRiskAssessor() {
-        require(riskAssessors[msg.sender], "Not a risk assessor");
+        require(riskAssessors[msg.sender], "Not authorized assessor");
         _;
     }
 
@@ -33,37 +36,34 @@ contract RiskRegistry is IRiskRegistry, Ownable, Pausable {
     function registerProtocol(
         address _protocolAddress,
         string memory _name,
-        string memory _category,
-        uint256 _initialVolatilityScore,
-        uint256 _initialLiquidityScore,
-        uint256 _initialSmartContractScore,
-        uint256 _initialGovernanceScore
+        string memory _category
     ) external override onlyOwner whenNotPaused {
-        require(_protocolAddress != address(0), "Invalid protocol address");
+        require(_protocolAddress != address(0), "Invalid address");
+        require(bytes(_name).length > 0, "Name required");
         require(protocols[_protocolAddress].protocolAddress == address(0), "Protocol already registered");
-        require(_initialVolatilityScore <= 10000 && _initialLiquidityScore <= 10000 &&
-                _initialSmartContractScore <= 10000 && _initialGovernanceScore <= 10000, "Scores must be <= 10000");
+        require(!protocolNames[_name], "Protocol name exists");
 
         DataTypes.RiskMetrics memory metrics = DataTypes.RiskMetrics({
-            volatilityScore: _initialVolatilityScore,
-            liquidityScore: _initialLiquidityScore,
-            smartContractScore: _initialSmartContractScore,
-            governanceScore: _initialGovernanceScore,
-            overallRisk: RiskCalculations.calculateRegistryRisk(
-                _initialVolatilityScore,
-                _initialLiquidityScore,
-                _initialSmartContractScore,
-                _initialGovernanceScore
-            ),
-            lastUpdated: block.timestamp
+            volatilityScore: 5000,    // Default medium risk
+            liquidityScore: 5000,
+            smartContractScore: 5000,
+            governanceScore: 5000,
+            overallRisk: 5000,
+            lastUpdated: block.timestamp,
+            isActive: true
         });
 
         protocols[_protocolAddress] = DataTypes.Protocol({
-            protocolAddress: _protocolAddress,
             name: _name,
+            protocolAddress: _protocolAddress,
             category: _category,
-            riskMetrics: metrics
+            tvl: 0,
+            riskMetrics: metrics,
+            isWhitelisted: false
         });
+
+        protocolNames[_name] = true;
+        allProtocols.push(_protocolAddress);
 
         emit ProtocolRegistered(_protocolAddress, _name);
     }
@@ -84,12 +84,11 @@ contract RiskRegistry is IRiskRegistry, Ownable, Pausable {
         protocol.riskMetrics.liquidityScore = _liquidityScore;
         protocol.riskMetrics.smartContractScore = _smartContractScore;
         protocol.riskMetrics.governanceScore = _governanceScore;
-        protocol.riskMetrics.overallRisk = RiskCalculations.calculateOverallRisk(
+        protocol.riskMetrics.overallRisk = RiskCalculations.calculateRegistryRisk(
             _volatilityScore,
             _liquidityScore,
             _smartContractScore,
-            _governanceScore,
-            0 // externalRisk não usado
+            _governanceScore
         );
         protocol.riskMetrics.lastUpdated = block.timestamp;
 
@@ -109,22 +108,19 @@ contract RiskRegistry is IRiskRegistry, Ownable, Pausable {
         emit RiskAssessorRemoved(_assessor);
     }
 
-    function getAllProtocols() external view override returns (DataTypes.Protocol[] memory) {
-        // Implementação existente
-        uint256 count = 0;
-        for (uint256 i = 0; i < 100; i++) {
-            if (protocols[address(uint160(i))].protocolAddress != address(0)) {
-                count++;
-            }
-        }
-        DataTypes.Protocol[] memory result = new DataTypes.Protocol[](count);
-        count = 0;
-        for (uint256 i = 0; i < 100; i++) {
-            if (protocols[address(uint160(i))].protocolAddress != address(0)) {
-                result[count] = protocols[address(uint160(i))];
-                count++;
-            }
-        }
-        return result;
+    function getAllProtocols() external view override returns (address[] memory) {
+        return allProtocols;
+    }
+
+    function getProtocol(address _protocolAddress) external view returns (DataTypes.Protocol memory) {
+        return protocols[_protocolAddress];
+    }
+
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
     }
 }

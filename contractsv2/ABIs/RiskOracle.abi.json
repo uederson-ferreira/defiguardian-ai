@@ -1,0 +1,652 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "addRiskProvider",
+    "inputs": [
+      {
+        "name": "_provider",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "_name",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "_weight",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "allProviders",
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "deactivateProvider",
+    "inputs": [
+      {
+        "name": "_provider",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getAggregatedRisk",
+    "inputs": [
+      {
+        "name": "_protocol",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "volatilityRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "liquidityRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "smartContractRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "governanceRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "externalRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "overallRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "timestamp",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getAllProviders",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address[]",
+        "internalType": "address[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getRiskHistory",
+    "inputs": [
+      {
+        "name": "_protocol",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple[]",
+        "internalType": "struct DataTypes.RiskData[]",
+        "components": [
+          {
+            "name": "volatilityRisk",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "liquidityRisk",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "smartContractRisk",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "governanceRisk",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "externalRisk",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "overallRisk",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "timestamp",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "reporter",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "isValid",
+            "type": "bool",
+            "internalType": "bool"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getRiskTrend",
+    "inputs": [
+      {
+        "name": "_protocol",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "int256",
+        "internalType": "int256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isRiskDataFresh",
+    "inputs": [
+      {
+        "name": "_protocol",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "owner",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "protocolRiskData",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "volatilityRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "liquidityRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "smartContractRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "governanceRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "externalRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "overallRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "timestamp",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "reporter",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "isValid",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "renounceOwnership",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "riskHistory",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "volatilityRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "liquidityRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "smartContractRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "governanceRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "externalRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "overallRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "timestamp",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "reporter",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "isValid",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "riskProviders",
+    "inputs": [
+      {
+        "name": "provider",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "name",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "providerAddress",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "weight",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "reputation",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "isActive",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "totalReports",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "accurateReports",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "riskThresholds",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "setRiskThreshold",
+    "inputs": [
+      {
+        "name": "_protocol",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "_threshold",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "submitRiskData",
+    "inputs": [
+      {
+        "name": "_protocol",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "_volatilityRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_liquidityRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_smartContractRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_governanceRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_externalRisk",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "transferOwnership",
+    "inputs": [
+      {
+        "name": "newOwner",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "updateProvider",
+    "inputs": [
+      {
+        "name": "_provider",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "_newWeight",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_newReputation",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "event",
+    "name": "OwnershipTransferred",
+    "inputs": [
+      {
+        "name": "previousOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RiskDataSubmitted",
+    "inputs": [
+      {
+        "name": "protocol",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "provider",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "overallRisk",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RiskProviderAdded",
+    "inputs": [
+      {
+        "name": "provider",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RiskProviderRemoved",
+    "inputs": [
+      {
+        "name": "provider",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RiskThresholdUpdated",
+    "inputs": [
+      {
+        "name": "protocol",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "threshold",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "OwnableInvalidOwner",
+    "inputs": [
+      {
+        "name": "owner",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "OwnableUnauthorizedAccount",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ReentrancyGuardReentrantCall",
+    "inputs": []
+  }
+]
