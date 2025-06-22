@@ -188,6 +188,7 @@ deployments/optimism/
 */.gitmodules
 .env.bak
 */.env.bak
+.env.exemplo.ANALIZAR
 
 contratosv2
 

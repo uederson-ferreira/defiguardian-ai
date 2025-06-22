@@ -104,7 +104,7 @@ services:
     restart: unless-stopped
 
   postgres:
-    image: postgres:15-alpine
+    image: ankane/pgvector:latest
     environment:
       - POSTGRES_DB=chromia
       - POSTGRES_USER=chromia

@@ -3,6 +3,12 @@ import { logger } from '../utils/logger';
 import { config } from '../config/environment';
 
 export class BlockchainService {
+  createInsurancePolicy(userAddress: string, data: any) {
+    throw new Error('Method not implemented.');
+  }
+  claimInsurance(policyId: string, userAddress: string) {
+    throw new Error('Method not implemented.');
+  }
   private provider: ethers.JsonRpcProvider | null = null;
   private riskRegistry: ethers.Contract | null = null;
   private portfolioAnalyzer: ethers.Contract | null = null;

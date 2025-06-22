@@ -61,7 +61,7 @@ export class InsuranceService {
     try {
       logger.info(`🛡️ Creating insurance policy for user: ${userId}`);
       
-      const blockchainPolicy = await blockchainService.createInsurancePolicy(userAddress, data);
+      const blockchainPolicy = blockchainService.createInsurancePolicy(userAddress, data);
       
       const policy: MockPolicy = {
         id: `policy-${Date.now()}`,
