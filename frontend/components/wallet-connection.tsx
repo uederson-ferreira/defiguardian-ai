@@ -1,3 +1,4 @@
+// frontend/src/components/wallet-connection.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -11,9 +12,6 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Wallet,
   AlertTriangle,
@@ -23,8 +21,7 @@ import {
   RefreshCw,
   Copy,
   LogOut,
-  Github,
-  Chrome,
+  Zap,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useWeb3 } from "@/contexts/Web3Provider";
@@ -67,47 +64,32 @@ export function WalletConnection({
 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [connectionStep, setConnectionStep] = useState<
-    "auth" | "wallet" | "network" | "complete"
-  >("auth");
-  const [showLogin, setShowLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+    "wallet" | "network" | "complete"
+  >("wallet");
+  const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated && web3Connected && isCorrectNetwork) {
+    if (web3Connected && isCorrectNetwork) {
       setConnectionStep("complete");
       onSuccess?.();
-    } else if (isAuthenticated && web3Connected && !isCorrectNetwork) {
+    } else if (web3Connected && !isCorrectNetwork) {
       setConnectionStep("network");
-    } else if (isAuthenticated) {
-      setConnectionStep("wallet");
     } else {
-      setConnectionStep("auth");
+      setConnectionStep("wallet");
     }
-  }, [isAuthenticated, web3Connected, isCorrectNetwork, onSuccess]);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simular login bem-sucedido
-    toast.success("Login realizado com sucesso!");
-    setConnectionStep("wallet");
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    // Simular cadastro bem-sucedido
-    toast.success("Cadastro realizado com sucesso!");
-    setConnectionStep("wallet");
-  };
+  }, [web3Connected, isCorrectNetwork, onSuccess]);
 
   const handleConnectWallet = async () => {
+    setIsConnecting(true);
     try {
       await connectWallet();
-      if (isAuthenticated) {
-        await initializeProvider();
-      }
+      await initializeProvider();
+      toast.success("Carteira conectada com sucesso!");
     } catch (error) {
       console.error("Failed to connect wallet:", error);
+      toast.error("Falha ao conectar carteira");
+    } finally {
+      setIsConnecting(false);
     }
   };
 
@@ -115,13 +97,15 @@ export function WalletConnection({
     try {
       await switchToCorrectNetwork();
       toast.success("Rede alterada com sucesso!");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to switch network:", error);
-      toast.error("Falha ao alterar rede");
+      toast.error("Falha ao trocar de rede");
     }
   };
 
   const handleRefreshBalance = async () => {
+    if (!user?.address) return;
+    
     setIsRefreshing(true);
     try {
       await getBalance();
@@ -135,8 +119,9 @@ export function WalletConnection({
   };
 
   const handleCopyAddress = () => {
-    if (user?.address) {
-      navigator.clipboard.writeText(user.address);
+    const address = user?.address;
+    if (address) {
+      navigator.clipboard.writeText(address);
       toast.success("Endereço copiado!");
     }
   };
@@ -150,13 +135,14 @@ export function WalletConnection({
     }
   };
 
-  const isLoading = authLoading || web3Loading || connecting;
+  const isLoading = authLoading || web3Loading || connecting || isConnecting;
   const hasError = authError || web3Error;
   const shortAddress = user?.address
     ? `${user.address.slice(0, 6)}...${user.address.slice(-4)}`
     : "";
 
-  if (compact && isAuthenticated && web3Connected && isCorrectNetwork) {
+  // Compact version for header
+  if (compact && web3Connected && isCorrectNetwork) {
     return (
       <div className="flex items-center gap-2">
         <Badge variant="outline" className="flex items-center gap-1">
@@ -172,148 +158,45 @@ export function WalletConnection({
     );
   }
 
-  // Tela de Autenticação
-  if (connectionStep === "auth") {
+  // Show error state
+  if (hasError && !isAuthenticated) {
     return (
       <Card className="w-full max-w-md mx-auto">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center mb-2">
-            <CheckCircle className="h-6 w-6 text-green-500" />
-          </div>
-          <CardTitle>Bem-vindo ao ChainPlayWeb3</CardTitle>
-          <CardDescription>
-            Entre ou crie sua conta para jogar
-          </CardDescription>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-red-400">
+            <AlertTriangle className="h-5 w-5" />
+            Erro de Conexão
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-            <div className="flex items-center gap-2 text-green-700">
-              <CheckCircle className="h-4 w-4" />
-              <span className="text-sm font-medium">Supabase Conectado</span>
-            </div>
-            <p className="text-xs text-green-600 mt-1">
-              Autenticação completa disponível com login social
-            </p>
-          </div>
-
-          <Tabs value={showLogin ? "login" : "register"} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger 
-                value="login" 
-                onClick={() => setShowLogin(true)}
-              >
-                Entrar
-              </TabsTrigger>
-              <TabsTrigger 
-                value="register" 
-                onClick={() => setShowLogin(false)}
-              >
-                Cadastrar
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="login" className="space-y-4">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Senha</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full">
-                  Entrar
-                </Button>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="register" className="space-y-4">
-              <form onSubmit={handleRegister} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="register-email">Email</Label>
-                  <Input
-                    id="register-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="register-password">Senha</Label>
-                  <Input
-                    id="register-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full">
-                  Entrar
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  OU CONTINUE COM
-                </span>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3 mt-4">
-              <Button variant="outline" onClick={handleLogin}>
-                <Chrome className="h-4 w-4 mr-2" />
-                Google
-              </Button>
-              <Button variant="outline" onClick={handleLogin}>
-                <Github className="h-4 w-4 mr-2" />
-                GitHub
-              </Button>
-            </div>
-            
-            <Button 
-              variant="link" 
-              className="w-full mt-4 text-sm"
-              onClick={handleLogin}
-            >
-              Continuar sem login (Demo)
-            </Button>
-          </div>
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>
+              {authError || web3Error || "Erro desconhecido"}
+            </AlertDescription>
+          </Alert>
+          <Button
+            onClick={handleConnectWallet}
+            disabled={isLoading}
+            className="w-full"
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Tentar Novamente
+          </Button>
         </CardContent>
       </Card>
     );
   }
 
+  // Main wallet connection interface
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Wallet className="h-5 w-5" />
-          Conexão da Carteira
+          <Wallet className="h-5 w-5 text-purple-400" />
+          Conectar Carteira
         </CardTitle>
         <CardDescription>
-          Conecte sua carteira para acessar o RiskGuardian
+          Conecte sua carteira para acessar recursos completos do RiskGuardian
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -323,14 +206,14 @@ export function WalletConnection({
             className={`flex h-8 w-8 items-center justify-center rounded-full ${
               connectionStep === "wallet" && isLoading
                 ? "bg-blue-100 text-blue-600"
-                : isAuthenticated
+                : web3Connected
                 ? "bg-green-100 text-green-600"
                 : "bg-gray-100 text-gray-400"
             }`}
           >
             {connectionStep === "wallet" && isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
-            ) : isAuthenticated ? (
+            ) : web3Connected ? (
               <CheckCircle className="h-4 w-4" />
             ) : (
               <span className="text-sm font-medium">1</span>
@@ -339,18 +222,19 @@ export function WalletConnection({
           <div className="flex-1">
             <p className="text-sm font-medium">Conectar Carteira</p>
             <p className="text-xs text-muted-foreground">
-              {isAuthenticated
+              {web3Connected
                 ? "Carteira conectada"
-                : "Conecte sua carteira MetaMask"}
+                : "Conecte sua carteira MetaMask ou similar"}
             </p>
           </div>
-          {!isAuthenticated && (
+          {!web3Connected && (
             <Button
               onClick={handleConnectWallet}
               disabled={isLoading}
               size="sm"
+              className="bg-purple-600 hover:bg-purple-700"
             >
-              {connecting ? (
+              {isConnecting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 "Conectar"
@@ -360,7 +244,7 @@ export function WalletConnection({
         </div>
 
         {/* Step 2: Network Check */}
-        {isAuthenticated && (
+        {web3Connected && (
           <div className="flex items-center gap-3">
             <div
               className={`flex h-8 w-8 items-center justify-center rounded-full ${
@@ -368,7 +252,7 @@ export function WalletConnection({
                   ? "bg-blue-100 text-blue-600"
                   : isCorrectNetwork
                   ? "bg-green-100 text-green-600"
-                  : "bg-yellow-100 text-yellow-600"
+                  : "bg-red-100 text-red-600"
               }`}
             >
               {connectionStep === "network" && web3Loading ? (
@@ -380,11 +264,11 @@ export function WalletConnection({
               )}
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium">Rede Correta</p>
+              <p className="text-sm font-medium">Verificar Rede</p>
               <p className="text-xs text-muted-foreground">
                 {isCorrectNetwork
-                  ? "Conectado à Avalanche Fuji"
-                  : "Altere para Avalanche Fuji"}
+                  ? `Conectado à ${CHAIN_CONFIG.chainName}`
+                  : "Rede incorreta detectada"}
               </p>
             </div>
             {!isCorrectNetwork && (
@@ -394,83 +278,116 @@ export function WalletConnection({
                 size="sm"
                 variant="outline"
               >
-                Alterar Rede
+                {web3Loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Trocar"
+                )}
               </Button>
             )}
           </div>
         )}
 
         {/* Connected State */}
-        {isAuthenticated && isCorrectNetwork && (
-          <div className="space-y-3 pt-2 border-t">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Endereço:</span>
-              <div className="flex items-center gap-1">
-                <code className="text-xs bg-muted px-2 py-1 rounded">
-                  {shortAddress}
-                </code>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCopyAddress}
-                  className="h-6 w-6 p-0"
-                >
-                  <Copy className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleViewOnExplorer}
-                  className="h-6 w-6 p-0"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                </Button>
-              </div>
+        {web3Connected && isCorrectNetwork && (
+          <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+            <div className="flex items-center gap-2 mb-3">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <span className="font-medium text-green-800 dark:text-green-200">
+                Carteira Conectada
+              </span>
             </div>
-
-            {showBalance && user?.balance && (
+            
+            <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Saldo:</span>
-                <div className="flex items-center gap-1">
-                  <span className="text-sm">
-                    {parseFloat(user.balance).toFixed(4)} AVAX
-                  </span>
+                <span className="text-gray-600 dark:text-gray-400">Endereço:</span>
+                <div className="flex items-center gap-2">
+                  <code className="text-xs bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                    {shortAddress}
+                  </code>
                   <Button
-                    variant="ghost"
                     size="sm"
-                    onClick={handleRefreshBalance}
-                    disabled={isRefreshing}
+                    variant="ghost"
+                    onClick={handleCopyAddress}
                     className="h-6 w-6 p-0"
                   >
-                    <RefreshCw
-                      className={`h-3 w-3 ${
-                        isRefreshing ? "animate-spin" : ""
-                      }`}
-                    />
+                    <Copy className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
-            )}
+              
+              {showBalance && user?.balance && (
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600 dark:text-gray-400">Saldo:</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">
+                      {parseFloat(user.balance).toFixed(4)} AVAX
+                    </span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={handleRefreshBalance}
+                      disabled={isRefreshing}
+                      className="h-6 w-6 p-0"
+                    >
+                      <RefreshCw
+                        className={`h-3 w-3 ${
+                          isRefreshing ? "animate-spin" : ""
+                        }`}
+                      />
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600 dark:text-gray-400">Rede:</span>
+                <Badge variant="secondary" className="text-xs">
+                  {CHAIN_CONFIG.chainName}
+                </Badge>
+              </div>
+            </div>
 
-            <Button
-              onClick={logout}
-              variant="outline"
-              size="sm"
-              className="w-full flex items-center gap-2"
-            >
-              <LogOut className="h-4 w-4" />
-              Desconectar
-            </Button>
+            <div className="flex gap-2 mt-4">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleViewOnExplorer}
+                className="flex-1"
+              >
+                <ExternalLink className="mr-1 h-3 w-3" />
+                Explorer
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={logout}
+                className="flex-1"
+              >
+                <LogOut className="mr-1 h-3 w-3" />
+                Desconectar
+              </Button>
+            </div>
           </div>
         )}
 
-        {/* Error Display */}
-        {hasError && (
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>{authError || web3Error}</AlertDescription>
-          </Alert>
-        )}
+        {/* Supported Wallets Info */}
+        <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-lg">
+          <p className="text-xs font-medium text-slate-700 dark:text-slate-300 mb-2">
+            Carteiras suportadas:
+          </p>
+          <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+            <div>• MetaMask, Coinbase, WalletConnect</div>
+            <div>• Rainbow, Trust Wallet, Phantom</div>
+            <div>• Injected wallets e extensões</div>
+          </div>
+        </div>
+
+        <div className="text-center">
+          <p className="text-xs text-slate-500">
+            Powered by Wagmi - Conexão segura com carteiras Web3
+          </p>
+        </div>
       </CardContent>
     </Card>
   );
