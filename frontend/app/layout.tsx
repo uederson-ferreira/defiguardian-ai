@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "../contexts/AuthContext";
+import { Web3Provider } from "../contexts/Web3Provider";
 import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "../components/theme-provider";
 
@@ -32,18 +33,20 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            {children}
-            <Toaster 
-              position="top-right"
-              toastOptions={{
-                duration: 4000,
-                style: {
-                  background: '#1e293b',
-                  color: '#f8fafc',
-                  border: '1px solid #475569'
-                }
-              }}
-            />
+            <Web3Provider>
+              {children}
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  duration: 4000,
+                  style: {
+                    background: "#1e293b",
+                    color: "#f8fafc",
+                    border: "1px solid #475569",
+                  },
+                }}
+              />
+            </Web3Provider>
           </AuthProvider>
         </ThemeProvider>
       </body>

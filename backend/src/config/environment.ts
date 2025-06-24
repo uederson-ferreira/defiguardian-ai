@@ -1,4 +1,6 @@
 import dotenv from 'dotenv';
+import { FUJI_CONTRACT_ADDRESSES, FUJI_NETWORK_CONFIG } from '../contracts/addresses/fuji-contracts';
+
 dotenv.config();
 
 export const config = {
@@ -11,19 +13,21 @@ export const config = {
   databaseUrl: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/riskguardian',
   redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
   
-  // Blockchain
+  // Blockchain - Updated to Avalanche Fuji
   blockchain: {
-    chainId: parseInt(process.env.SEPOLIA_CHAIN_ID || '11155111'),
-    rpcUrl: process.env.SEPOLIA_RPC_URL || 'https://sepolia.drpc.org',
-    riskOracleAddress: process.env.RISK_ORACLE_ADDRESS || '',
+    chainId: parseInt(process.env.FUJI_CHAIN_ID || FUJI_NETWORK_CONFIG.chainId.toString()),
+    rpcUrl: process.env.FUJI_RPC_URL || FUJI_NETWORK_CONFIG.rpcUrl,
+    riskOracleAddress: process.env.RISK_ORACLE_ADDRESS || FUJI_CONTRACT_ADDRESSES.RISK_ORACLE,
   },
   
-  // Smart Contracts
+  // Smart Contracts - Updated with Fuji addresses
   contracts: {
-    riskRegistry: process.env.RISK_REGISTRY_ADDRESS || '',
-    portfolioAnalyzer: process.env.PORTFOLIO_ANALYZER_ADDRESS || '',
-    riskInsurance: process.env.RISK_INSURANCE_ADDRESS || '',
-    alertSystem: process.env.ALERT_SYSTEM_ADDRESS || '',
+    riskRegistry: process.env.RISK_REGISTRY_ADDRESS || FUJI_CONTRACT_ADDRESSES.RISK_REGISTRY,
+    portfolioAnalyzer: process.env.PORTFOLIO_ANALYZER_ADDRESS || FUJI_CONTRACT_ADDRESSES.PORTFOLIO_ANALYZER,
+    riskInsurance: process.env.RISK_INSURANCE_ADDRESS || FUJI_CONTRACT_ADDRESSES.RISK_INSURANCE,
+    alertSystem: process.env.ALERT_SYSTEM_ADDRESS || FUJI_CONTRACT_ADDRESSES.ALERT_SYSTEM,
+    contractRegistry: process.env.CONTRACT_REGISTRY_ADDRESS || FUJI_CONTRACT_ADDRESSES.CONTRACT_REGISTRY,
+    riskGuardianMaster: process.env.RISK_GUARDIAN_MASTER_ADDRESS || FUJI_CONTRACT_ADDRESSES.RISK_GUARDIAN_MASTER,
   },
   
   // Auth - JWT expiresIn como string

@@ -50,17 +50,19 @@ export const character: Character = {
     useEmbeddings: false,
     skipMemoryEmbeddings: true,
     
-    // Configurações específicas do blockchain
+    // Configurações específicas do blockchain - Avalanche Fuji
     blockchain: {
-      network: "sepolia",
-      rpcUrl: process.env.SEPOLIA_RPC_URL || "https://sepolia.drpc.org",
-      chainId: 11155111,
+      network: "fuji",
+      rpcUrl: process.env.FUJI_RPC_URL || "https://api.avax-test.network/ext/bc/C/rpc",
+      chainId: 43113,
       contracts: {
-        riskRegistry: process.env.CONTRACT_RISK_REGISTRY || "0x1B7E83b953d6D4e3e6EB5be6039D079E22A375Be",
-        portfolioAnalyzer: process.env.CONTRACT_PORTFOLIO_ANALYZER || "0x68532091c3C02092804a028e0109091781Cd1bdA",
-        riskOracle: process.env.CONTRACT_RISK_ORACLE || "0x12d10085441a0257aDd5b71c831C61b880EF0569",
-        alertSystem: process.env.CONTRACT_ALERT_SYSTEM || "0x532Dedf68DA445ed37cFaf74C4e3245101190ad1",
-        riskInsurance: process.env.CONTRACT_RISK_INSURANCE || "0xc757ad750Bb5Ca01Fb8D4151449E7AF8C1E01527"
+        riskRegistry: process.env.CONTRACT_RISK_REGISTRY || "0xF404b05B55850cBaC8891c9Db1524Fc1D437124C",
+        portfolioAnalyzer: process.env.CONTRACT_PORTFOLIO_ANALYZER || "0x1e60Cf3CA97866ddC6cb640D169061da9Fe04192",
+        riskOracle: process.env.CONTRACT_RISK_ORACLE || "0x14Ca6F2BEd3FC051E1E8f409D04369A75894a4A8",
+        alertSystem: process.env.CONTRACT_ALERT_SYSTEM || "0xe46F4AcC01B4664c50E421dBb50343096be05Ecc",
+        riskInsurance: process.env.CONTRACT_RISK_INSURANCE || "0x6021d94b73D1b4b0515902BEa7bf17cE3dDa2e8F",
+        contractRegistry: process.env.CONTRACT_REGISTRY || "0xA65647C7335835F477831E4E907aBaA1560646a8",
+        riskGuardianMaster: process.env.RISK_GUARDIAN_MASTER || "0x00F4Ce590406031E88666BF1Fd1310A809a8A3a0"
       }
     }
   }
@@ -73,7 +75,7 @@ const initRiskGuardianCharacter = async ({ runtime }: { runtime: IAgentRuntime }
   logger.info('📝 Text Model:', process.env.OPENROUTER_MODEL || "deepseek/deepseek-r1-0528-qwen3-8b:free");
   logger.info('🧠 Embeddings: DISABLED for performance');
   logger.info('💰 DeFi Analysis: ENABLED with smart contract integration');
-  logger.info('⛓️ Blockchain: Sepolia testnet');
+  logger.info('⛓️ Blockchain: Avalanche Fuji testnet');
   logger.info('📊 Contracts: Risk Registry, Portfolio Analyzer, Risk Oracle');
   
   // Patch runtime para desabilitar embeddings

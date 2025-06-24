@@ -1,4 +1,10 @@
+# 🚀 RiskGuardian AI - Docker Compose CORRIGIDO
+# Realidade: Avalanche Fuji + 27 Contratos Deployados + ElizaOS funcionando
+
 services:
+  # ============================================================================
+  # FRONTEND - Next.js (Avalanche Fuji)
+  # ============================================================================
   frontend:
     build:
       context: ./frontend
@@ -7,60 +13,107 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
-      - NEXT_PUBLIC_API_URL=http://localhost:8002  # ✅ PORTA CORRIGIDA
-      - NEXT_PUBLIC_CHROMIA_URL=http://localhost:7740
-      - NEXT_PUBLIC_ETHEREUM_RPC=http://localhost:8545
-      - NEXT_PUBLIC_CHAIN_ID=31337
+      - NEXT_PUBLIC_API_URL=http://localhost:8002
+      # 🎯 AVALANCHE FUJI (realidade atual)
+      - NEXT_PUBLIC_CHAIN_ID=43113
+      - NEXT_PUBLIC_RPC_URL=https://api.avax-test.network/ext/bc/C/rpc
+      - NEXT_PUBLIC_NETWORK_NAME=avalanche-fuji
+      - NEXT_PUBLIC_EXPLORER_URL=https://testnet.snowtrace.io
+      # 🔗 CONTRATOS CORE DEPLOYADOS NO FUJI
+      - NEXT_PUBLIC_CONTRACT_REGISTRY=0xA65647C7335835F477831E4E907aBaA1560646a8
+      - NEXT_PUBLIC_RISK_REGISTRY=0xF404b05B55850cBaC8891c9Db1524Fc1D437124C
+      - NEXT_PUBLIC_RISK_ORACLE=0x14Ca6F2BEd3FC051E1E8f409D04369A75894a4A8
+      - NEXT_PUBLIC_PORTFOLIO_ANALYZER=0x1e60Cf3CA97866ddC6cb640D169061da9Fe04192
+      - NEXT_PUBLIC_RISK_INSURANCE=0x6021d94b73D1b4b0515902BEa7bf17cE3dDa2e8F
+      - NEXT_PUBLIC_ALERT_SYSTEM=0xe46F4AcC01B4664c50E421dBb50343096be05Ecc
+      # 🛡️ HEDGE CONTRACTS
+      - NEXT_PUBLIC_STOP_LOSS_HEDGE=0x1e7D390EB42112f33930A9Dab1cdeB848361f163
+      - NEXT_PUBLIC_REBALANCE_HEDGE=0xe261a9e260C7F4aCB9E2a1c3daeb141791bbb600
+      - NEXT_PUBLIC_VOLATILITY_HEDGE=0x5C6c0B72FeDB3027eDee33C62bb7C5D3700a488F
+      - NEXT_PUBLIC_CROSS_CHAIN_HEDGE=0xaC521848dC05C7fE4eb43236D1719AEA725143cF
+      # 🤖 AUTOMATION
+      - NEXT_PUBLIC_RISK_GUARDIAN_MASTER=0x00F4Ce590406031E88666BF1Fd1310A809a8A3a0
+      # 🔧 Development fallback (local Anvil para testes)
+      - NEXT_PUBLIC_ANVIL_RPC=http://localhost:8545
+      - NEXT_PUBLIC_ANVIL_CHAIN_ID=31337
     volumes:
       - ./frontend:/app
       - /app/node_modules
       - /app/.next
-      - /app/.pnpm-store  # ✅ Cache pnpm
+      - /app/.pnpm-store  # Cache pnpm
     depends_on:
       - backend
     networks:
       - riskguardian-network
     restart: unless-stopped
-
+    
+  # ============================================================================
+  # BACKEND - Node.js API (Avalanche Fuji)
+  # ============================================================================
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
     ports:
-      - "8002:8002"  # ✅ PORTA CORRIGIDA (era 8001)
+      - "8002:8002"  # Porta corrigida conforme .env atual
     environment:
       - NODE_ENV=development
-      - PORT=8002  # ✅ PORTA CORRIGIDA
-      - CHROMIA_URL=http://chromia-node:7740
+      - PORT=8002
+      # 🌐 AVALANCHE FUJI TESTNET (prioridade)
+      - BLOCKCHAIN_NETWORK=avalanche-fuji
+      - FUJI_CHAIN_ID=43113
+      - FUJI_RPC_URL=https://api.avax-test.network/ext/bc/C/rpc
+      - FUJI_EXPLORER=https://testnet.snowtrace.io
+      # 🔗 CONTRATOS CORE NO FUJI
+      - CONTRACT_REGISTRY_ADDRESS=0xA65647C7335835F477831E4E907aBaA1560646a8
+      - RISK_REGISTRY_ADDRESS=0xF404b05B55850cBaC8891c9Db1524Fc1D437124C
+      - RISK_ORACLE_ADDRESS=0x14Ca6F2BEd3FC051E1E8f409D04369A75894a4A8
+      - PORTFOLIO_ANALYZER_ADDRESS=0x1e60Cf3CA97866ddC6cb640D169061da9Fe04192
+      - RISK_INSURANCE_ADDRESS=0x6021d94b73D1b4b0515902BEa7bf17cE3dDa2e8F
+      - ALERT_SYSTEM_ADDRESS=0xe46F4AcC01B4664c50E421dBb50343096be05Ecc
+      - RISK_GUARDIAN_MASTER_ADDRESS=0x00F4Ce590406031E88666BF1Fd1310A809a8A3a0
+      # 🛡️ HEDGE CONTRACTS
+      - STOP_LOSS_HEDGE_ADDRESS=0x1e7D390EB42112f33930A9Dab1cdeB848361f163
+      - REBALANCE_HEDGE_ADDRESS=0xe261a9e260C7F4aCB9E2a1c3daeb141791bbb600
+      - VOLATILITY_HEDGE_ADDRESS=0x5C6c0B72FeDB3027eDee33C62bb7C5D3700a488F
+      - CROSS_CHAIN_HEDGE_ADDRESS=0xaC521848dC05C7fE4eb43236D1719AEA725143cF
+      # 🔗 CCIP (Cross Chain)
+      - CCIP_ROUTER_FUJI=0x554472a2720E5E7D5D3C817529aBa05eed5F82D8
+      - LINK_TOKEN_FUJI=0x0b9d5D9136855f6FEc3c0993feE6E9ce8a297846
+      # 📊 DATABASE
+      - DATABASE_URL=postgresql://chromia:chromia_password@postgres:5432/chromia
       - REDIS_URL=redis://redis:6379
-      - ETHEREUM_RPC_URL=https://sepolia.drpc.org
-      - ETHEREUM_RPC_URL_ANVIL=http://anvil:8545
-      - JWT_SECRET=${JWT_SECRET}
-      - CHAINLINK_API_KEY=${CHAINLINK_API_KEY}
+      # 🔑 AUTHENTICATION & SECURITY  
+      - JWT_SECRET=${JWT_SECRET:-riskg4rd14n-s3cur3-jwt-k3y-f0r-d3v3l0pm3nt-h4ck4th0n-2025-chromion-ai}
+      - JWT_EXPIRES_IN=7d
+      # 🔧 APIs (opcional)
       - ETHERSCAN_API_KEY=${ETHERSCAN_API_KEY}
+      - CHAINLINK_API_KEY=${CHAINLINK_API_KEY}
       - ALCHEMY_API_KEY=${ALCHEMY_API_KEY}
+      # 📝 LOGS
       - LOG_LEVEL=debug
-      - CHAIN_ID=11155111
-      - NETWORK_NAME=sepolia
-      - RISK_REGISTRY_ADDRESS=0x1B7E83b953d6D4e3e6EB5be6039D079E22A375Be
-      - PORTFOLIO_ANALYZER_ADDRESS=0x68532091c3C02092804a028e0109091781Cd1bdA
-      - RISK_INSURANCE_ADDRESS=0xc757ad750Bb5Ca01Fb8D4151449E7AF8C1E01527
-      - RISK_ORACLE_ADDRESS=0x12d10085441a0257aDd5b71c831C61b880EF0569
-      - ALERT_SYSTEM_ADDRESS=0x532Dedf68DA445ed37cFaf74C4e3245101190ad1
+      - LOG_FILE=logs/app.log
+      # 🌐 CORS
+      - ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001
+      # 🔧 Development fallback (Anvil local)
+      - ETHEREUM_RPC_URL_ANVIL=http://anvil:8545
+      - ANVIL_CHAIN_ID=31337
     volumes:
       - ./backend:/app
       - /app/node_modules
     depends_on:
       redis:
         condition: service_healthy
-      chromia-node:
+      postgres:
         condition: service_healthy
-      anvil:
-        condition: service_healthy
+      # ❌ Chromia e Anvil tornados opcionais (não bloqueantes)
     networks:
       - riskguardian-network
     restart: unless-stopped
 
+  # ============================================================================
+  # ELIZAOS AGENT - AI Risk Analysis (Funcionando)
+  # ============================================================================
   elizaos-agent:
     build:
       context: ./elizaos-agent
@@ -70,39 +123,42 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3001
+      # 🤖 AI CONFIGURATION
       - LOG_LEVEL=debug
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - AI_PROVIDER=${AI_PROVIDER:-openrouter}
+      - AI_MODEL_RISK=${AI_MODEL_RISK:-deepseek/deepseek-r1-0528-qwen3-8b:free}
+      - AI_MODEL_CHAT=${AI_MODEL_CHAT:-deepseek/deepseek-r1-0528-qwen3-8b:free}
+      - AI_MODEL_DATA=${AI_MODEL_DATA:-deepseek/deepseek-r1-0528-qwen3-8b:free}
+      - AI_MODEL_FALLBACK=${AI_MODEL_FALLBACK:-deepseek/deepseek-r1-0528-qwen3-8b:free}
+      # 🔑 APIs (backup - apenas se disponível)
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      # 🌐 NETWORK INTEGRATIONS
+      - BACKEND_URL=http://backend:8002
+      - REDIS_URL=redis://redis:6379
+      # 🔗 AVALANCHE FUJI CONNECTION
+      - AVALANCHE_RPC_URL=https://api.avax-test.network/ext/bc/C/rpc
+      - FUJI_CHAIN_ID=43113
+      # 🔧 Development fallback
+      - ETHEREUM_RPC_URL=http://anvil:8545
+      - ANVIL_CHAIN_ID=31337
+      # ⚙️ GENERAL CONFIG
       - CORS_ORIGIN=*
       - RATE_LIMIT_WINDOW_MS=900000
       - RATE_LIMIT_MAX_REQUESTS=100
-      - ELIZAOS_API_KEY=sk_test_elizaos_key
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
-      - AI_PROVIDER=${AI_PROVIDER}
-      - AI_MODEL_RISK=${AI_MODEL_RISK}
-      - AI_MODEL_CHAT=${AI_MODEL_CHAT}
-      - AI_MODEL_DATA=${AI_MODEL_DATA}
-      - AI_MODEL_FALLBACK=${AI_MODEL_FALLBACK}
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - CHROMIA_URL=http://chromia-node:7740
-      - BACKEND_URL=http://backend:8002  # ✅ PORTA CORRIGIDA
-      - REDIS_URL=redis://redis:6379
-      - ETHEREUM_RPC_URL=http://anvil:8545
-      - POLYGON_RPC_URL=https://polygon-mumbai.infura.io/v3/your-key
-      - BSC_RPC_URL=https://data-seed-prebsc-1-s1.binance.org:8545
-      - AVALANCHE_RPC_URL=https://api.avax-test.network/ext/bc/C/rpc
-      - CHAINLINK_API_KEY=${CHAINLINK_API_KEY}
       - CACHE_TTL=5
       - CACHE_CHECK_PERIOD=1
-      - OPENAI_MODEL=gpt-4-turbo-preview
-      - ANTHROPIC_MODEL=claude-3-opus-20240229
     depends_on:
       - backend
-      - chromia-node
       - redis
     networks:
       - riskguardian-network
     restart: unless-stopped
 
+  # ============================================================================
+  # DATABASES - PostgreSQL + Redis (Obrigatórios)
+  # ============================================================================
   postgres:
     image: ankane/pgvector:latest
     environment:
@@ -122,6 +178,28 @@ services:
       timeout: 5s
       retries: 5
       
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - riskguardian-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  # ============================================================================
+  # OPTIONAL SERVICES (Profiles)
+  # ============================================================================
+  
+  # 🔧 Chromia Node (opcional - para desenvolvimento híbrido)
   chromia-node:
     build:
       context: ./chromia
@@ -155,25 +233,10 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
+    profiles:
+      - optional
 
-  redis:
-    image: redis:7-alpine
-    command: redis-server /usr/local/etc/redis/redis.conf
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
-    networks:
-      - riskguardian-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
-
+  # 🔧 Anvil (opcional - apenas para desenvolvimento local)
   anvil:
     image: ghcr.io/foundry-rs/foundry:latest
     entrypoint: ["anvil", "--host", "0.0.0.0", "--port", "8545", "--chain-id", "31337", "--accounts", "10", "--balance", "10000", "--gas-limit", "30000000", "--block-time", "2"]
@@ -188,7 +251,10 @@ services:
       timeout: 5s
       retries: 3
       start_period: 20s
+    profiles:
+      - optional
 
+  # 🛠️ DEVELOPMENT TOOLS
   pgadmin:
     image: dpage/pgadmin4:latest
     environment:
@@ -207,40 +273,37 @@ services:
     profiles:
       - tools
 
-  contracts:
-    build:
-      context: ./contracts
-      dockerfile: Dockerfile
+  redis-commander:
+    image: rediscommander/redis-commander:latest
     environment:
-      - ETHEREUM_RPC_URL=http://anvil:8545
-      - PRIVATE_KEY=${PRIVATE_KEY:-0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80}
-      - ETHERSCAN_API_KEY=${ETHERSCAN_API_KEY}
-    volumes:
-      - ./contracts:/app
-      - contracts_cache:/app/cache
-      - contracts_out:/app/out
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
     depends_on:
-      anvil:
-        condition: service_healthy
+      - redis
     networks:
       - riskguardian-network
-        
+    profiles:
+      - tools
+
+# ============================================================================
+# VOLUMES & NETWORKS
+# ============================================================================
 volumes:
   postgres_data:
+    driver: local
+  redis_data:
     driver: local
   chromia_data:
     driver: local
   chromia_logs:
     driver: local
-  redis_data:
-    driver: local
   pgadmin_data:
-    driver: local
-  contracts_cache:
-    driver: local
-  contracts_out:
     driver: local
 
 networks:
   riskguardian-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

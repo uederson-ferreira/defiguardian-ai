@@ -1,46 +1,60 @@
 // frontend/src/app/page.tsx
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { ArrowRight, Shield, TrendingUp, Users, Zap, Wallet } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { useAuth } from "@/contexts/AuthContext"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Loader2,
+  Shield,
+  Brain,
+  AlertTriangle,
+  TrendingUp,
+  Activity,
+  DollarSign,
+  Wallet,
+  ArrowRight,
+  Users,
+  Zap,
+} from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useWeb3 } from "@/contexts/Web3Provider";
+import { WalletButton } from "@/components/wallet-button";
+import { WalletConnection } from "@/components/wallet-connection";
+import { DashboardLayout } from "@/components/dashboard-layout";
+//import { AIChat } from '@/components/ai-chat'
+import PortfolioAnalysis from "@/components/portfolio-analysis";
+import RiskAlerts from "@/components/risk-alerts";
+import RiskInsurance from "@/components/risk-insurance";
+import ProtocolRiskMonitor from "@/components/protocol-risk-monitor";
+import { useWeb3Contracts } from "@/hooks/useWeb3Contracts";
 
-export default function Home() {
-  const { isAuthenticated, connectWallet, login, loading, setIsWalletModalOpen } = useAuth()
-  const [isConnecting, setIsConnecting] = useState(false)
-
-  const handleConnectWallet = async () => {
-    try {
-      setIsConnecting(true)
-      
-      console.log('🔄 Starting wallet connection...')
-      
-      // Open wallet selection modal
-      await connectWallet()
-      
-      // The actual connection will be handled by the WalletModal component
-      // and the connectWithWallet function in AuthContext
-      
-    } catch (error) {
-      console.error('❌ Connection failed:', error)
-      alert('Failed to connect wallet. Please try again.')
-    } finally {
-      setIsConnecting(false)
-    }
-  }
+export default function HomePage() {
+  const { user, isAuthenticated, loading } = useAuth();
+  const { isConnected, chainId } = useWeb3();
+  const [isLaunching, setIsLaunching] = useState(false);
+  const { isConnected: web3Connected } = useWeb3Contracts();
 
   const handleLaunchApp = () => {
     if (isAuthenticated) {
       // Already authenticated, go to dashboard
-      window.location.href = '/dashboard'
+      window.location.href = "/dashboard";
     } else {
-      // Not authenticated, trigger wallet connection
-      handleConnectWallet()
+      // Scroll to wallet connection section
+      const walletSection = document.getElementById("wallet-connection");
+      if (walletSection) {
+        walletSection.scrollIntoView({ behavior: "smooth" });
+      }
     }
-  }
+  };
 
   // If loading, show loading state
   if (loading) {
@@ -51,7 +65,7 @@ export default function Home() {
           <p className="text-white">Loading...</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -61,14 +75,16 @@ export default function Home() {
         <nav className="flex items-center justify-between">
           <div className="flex items-center">
             <Shield className="h-8 w-8 text-purple-400" />
-            <span className="ml-2 text-xl font-bold text-white">RiskGuardian AI</span>
+            <span className="ml-2 text-xl font-bold text-white">
+              RiskGuardian AI
+            </span>
           </div>
-          <Button 
+          <Button
             onClick={handleLaunchApp}
             className="bg-purple-600 hover:bg-purple-700 text-white"
-            disabled={loading || isConnecting}
+            disabled={loading}
           >
-            {isAuthenticated ? 'Go to Dashboard' : 'Launch App'}
+            {isAuthenticated ? "Go to Dashboard" : "Launch App"}
           </Button>
         </nav>
       </header>
@@ -77,28 +93,26 @@ export default function Home() {
       <section className="relative py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl md:text-7xl font-bold text-white mb-8">
-            AI-Powered <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">DeFi Risk</span>
+            AI-Powered{" "}
+            <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+              DeFi Risk
+            </span>
             <br />
             Management
           </h1>
           <p className="text-xl text-slate-300 mb-12 max-w-2xl mx-auto">
-            Protect your DeFi investments with advanced AI risk analysis, real-time
-            monitoring, and intelligent portfolio optimization powered by Chromion and
-            Chainlink.
+            Protect your DeFi investments with advanced AI risk analysis,
+            real-time monitoring, and intelligent portfolio optimization powered
+            by Chromion and Chainlink.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               size="lg"
-              onClick={handleConnectWallet}
-              disabled={isConnecting || loading}
+              onClick={handleLaunchApp}
+              disabled={loading}
               className="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white px-8 py-3"
             >
-              {isConnecting ? (
-                <>
-                  <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2" />
-                  Connecting...
-                </>
-              ) : isAuthenticated ? (
+              {isAuthenticated ? (
                 <>
                   <Shield className="mr-2 h-5 w-5" />
                   Dashboard
@@ -112,17 +126,17 @@ export default function Home() {
                 </>
               )}
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
+            <Button
+              size="lg"
+              variant="outline"
               onClick={handleLaunchApp}
-              disabled={loading || isConnecting}
+              disabled={loading}
               className="border-white/20 text-white hover:bg-white/10"
             >
-              {isAuthenticated ? 'Go to App' : 'View Demo'}
+              {isAuthenticated ? "Go to App" : "View Demo"}
             </Button>
           </div>
-          
+
           {/* Status indicator */}
           {isAuthenticated && (
             <div className="mt-6">
@@ -141,14 +155,23 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {[
               { label: "Protocols Monitored", value: "150+", icon: Shield },
-              { label: "Total Value Protected", value: "$2.4B", icon: TrendingUp },
+              {
+                label: "Total Value Protected",
+                value: "$2.4B",
+                icon: TrendingUp,
+              },
               { label: "Active Users", value: "12.5K", icon: Users },
               { label: "Risk Alerts Sent", value: "45K", icon: Zap },
             ].map((stat, index) => (
-              <Card key={index} className="bg-white/5 border-white/10 backdrop-blur-md">
+              <Card
+                key={index}
+                className="bg-white/5 border-white/10 backdrop-blur-md"
+              >
                 <CardContent className="p-6 text-center">
                   <stat.icon className="h-8 w-8 text-purple-400 mx-auto mb-4" />
-                  <div className="text-3xl font-bold text-white mb-2">{stat.value}</div>
+                  <div className="text-3xl font-bold text-white mb-2">
+                    {stat.value}
+                  </div>
                   <div className="text-slate-300">{stat.label}</div>
                 </CardContent>
               </Card>
@@ -161,9 +184,12 @@ export default function Home() {
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Advanced Risk Management Features</h2>
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Advanced Risk Management Features
+            </h2>
             <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-              Comprehensive tools to analyze, monitor, and optimize your DeFi portfolio risk
+              Comprehensive tools to analyze, monitor, and optimize your DeFi
+              portfolio risk
             </p>
           </div>
 
@@ -171,39 +197,50 @@ export default function Home() {
             {[
               {
                 title: "Real-time Risk Analysis",
-                description: "AI-powered risk scoring with continuous monitoring of your DeFi positions",
+                description:
+                  "AI-powered risk scoring with continuous monitoring of your DeFi positions",
                 icon: "🔍",
               },
               {
                 title: "Portfolio Optimization",
-                description: "Intelligent recommendations to balance risk and returns across protocols",
+                description:
+                  "Intelligent recommendations to balance risk and returns across protocols",
                 icon: "⚖️",
               },
               {
                 title: "Smart Contract Auditing",
-                description: "Automated security analysis of smart contracts before you invest",
+                description:
+                  "Automated security analysis of smart contracts before you invest",
                 icon: "🛡️",
               },
               {
                 title: "Market Intelligence",
-                description: "Real-time market data and predictive analytics for better decisions",
+                description:
+                  "Real-time market data and predictive analytics for better decisions",
                 icon: "📊",
               },
               {
                 title: "Risk Alerts",
-                description: "Instant notifications when risk levels change in your portfolio",
+                description:
+                  "Instant notifications when risk levels change in your portfolio",
                 icon: "🚨",
               },
               {
                 title: "Multi-Chain Support",
-                description: "Monitor risks across Ethereum, Polygon, and other major chains",
+                description:
+                  "Monitor risks across Ethereum, Polygon, and other major chains",
                 icon: "🔗",
               },
             ].map((feature, index) => (
-              <Card key={index} className="bg-white/5 border-white/10 backdrop-blur-md">
+              <Card
+                key={index}
+                className="bg-white/5 border-white/10 backdrop-blur-md"
+              >
                 <CardContent className="p-6">
                   <div className="text-4xl mb-4">{feature.icon}</div>
-                  <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
+                  <h3 className="text-xl font-semibold text-white mb-2">
+                    {feature.title}
+                  </h3>
                   <p className="text-slate-300">{feature.description}</p>
                 </CardContent>
               </Card>
@@ -215,22 +252,20 @@ export default function Home() {
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-white mb-8">Ready to Secure Your DeFi Portfolio?</h2>
+          <h2 className="text-4xl font-bold text-white mb-8">
+            Ready to Secure Your DeFi Portfolio?
+          </h2>
           <p className="text-xl text-slate-300 mb-8">
-            Join thousands of DeFi investors who trust RiskGuardian AI to protect their investments
+            Join thousands of DeFi investors who trust RiskGuardian AI to
+            protect their investments
           </p>
           <Button
             size="lg"
-            onClick={handleConnectWallet}
-            disabled={isConnecting || loading}
+            onClick={handleLaunchApp}
+            disabled={loading}
             className="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white px-8 py-3"
           >
-            {isConnecting ? (
-              <>
-                <div className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2" />
-                Connecting...
-              </>
-            ) : isAuthenticated ? (
+            {isAuthenticated ? (
               <>
                 <Shield className="mr-2 h-5 w-5" />
                 Go to Dashboard
@@ -247,12 +282,35 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Wallet Connection Section */}
+      {!isAuthenticated && (
+        <section
+          id="wallet-connection"
+          className="py-20 px-4 sm:px-6 lg:px-8 bg-slate-800/50"
+        >
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-white mb-4">
+                Connect Your Wallet
+              </h2>
+              <p className="text-slate-300">
+                Connect your wallet to start protecting your DeFi investments
+                with AI-powered risk management.
+              </p>
+            </div>
+            <WalletConnection />
+          </div>
+        </section>
+      )}
+
       {/* Footer */}
       <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-white/10">
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center mb-8">
             <Shield className="h-8 w-8 text-purple-400" />
-            <span className="ml-2 text-xl font-bold text-white">RiskGuardian AI</span>
+            <span className="ml-2 text-xl font-bold text-white">
+              RiskGuardian AI
+            </span>
           </div>
           <p className="text-slate-400 mb-4">
             Built with ❤️ for the DeFi community
@@ -263,5 +321,5 @@ export default function Home() {
         </div>
       </footer>
     </div>
-  )
+  );
 }
