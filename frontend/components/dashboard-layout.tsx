@@ -31,7 +31,7 @@ function SidebarContent({ pathname }: { pathname: string }) {
       {/* Logo */}
       <div className="flex h-16 items-center border-b border-slate-700/50 px-6">
         <Shield className="h-8 w-8 text-purple-400" />
-        <span className="ml-2 text-xl font-bold text-white">RiskGuardian</span>
+        <span className="ml-2 text-xl font-bold text-white">DefiGuardian</span>
       </div>
 
       {/* Navigation */}
@@ -121,7 +121,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Page Title - Mobile */}
           <div className="md:hidden">
             <h1 className="text-lg font-semibold text-white">
-              {navigation.find(item => item.href === pathname)?.name || 'RiskGuardian'}
+              {navigation.find(item => item.href === pathname)?.name || 'DefiGuardian'}
             </h1>
           </div>
 

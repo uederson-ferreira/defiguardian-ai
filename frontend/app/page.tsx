@@ -80,7 +80,7 @@ export default function HomePage() {
           <div className="flex items-center">
             <Shield className="h-8 w-8 text-purple-400" />
             <span className="ml-2 text-xl font-bold text-white">
-              RiskGuardian AI
+              DefiGuardian AI
             </span>
           </div>
           <div className="flex items-center gap-4">
@@ -356,13 +356,13 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto text-center">
           <div className="flex items-center justify-center mb-4">
             <Shield className="h-6 w-6 text-purple-400 mr-2" />
-            <span className="text-lg font-bold text-white">RiskGuardian AI</span>
+            <span className="text-lg font-bold text-white">DefiGuardian AI</span>
           </div>
           <p className="text-slate-400 mb-4">
             Protegendo seus investimentos DeFi com inteligência artificial
           </p>
           <p className="text-slate-500 text-sm">
-            © 2024 RiskGuardian AI. Todos os direitos reservados.
+            © 2024 DefiGuardian AI. Todos os direitos reservados.
           </p>
         </div>
       </footer>

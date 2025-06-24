@@ -10,7 +10,7 @@ const logFormat = winston.format.combine(
       timestamp,
       level: level.toUpperCase(),
       message,
-      service: service || 'riskguardian-api',
+      service: service || 'defiguardian-api',
       ...meta
     });
   })
@@ -19,7 +19,7 @@ const logFormat = winston.format.combine(
 export const logger = winston.createLogger({
   level: config.logLevel,
   format: logFormat,
-  defaultMeta: { service: 'riskguardian-api' },
+  defaultMeta: { service: 'defiguardian-api' },
   transports: [
     // Console transport
     new winston.transports.Console({

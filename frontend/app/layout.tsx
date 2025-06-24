@@ -9,7 +9,7 @@ import { ThemeProvider } from "../components/theme-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "RiskGuardian AI",
+  title: "DefiGuardian AI",
   description: "AI-powered DeFi risk management platform",
   icons: {
     icon: "/shield-favicon.svg",

@@ -42,7 +42,7 @@ app.use(limiter);
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
-    message: 'RiskGuardian AI Backend',
+    message: 'DefiGuardian AI Backend',
     version: '1.0.0',
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
@@ -96,7 +96,7 @@ async function initializeServices() {
 
 // Start server
 const server = app.listen(config.port, async () => {
-  logger.info(`🚀 RiskGuardian API running on port ${config.port}`);
+  logger.info(`🚀 DefiGuardian API running on port ${config.port}`);
   logger.info(`📊 Environment: ${config.nodeEnv}`);
   logger.info(`🔗 Blockchain: Sepolia (${config.blockchain.chainId})`);
   logger.info(`📄 Health check: http://localhost:${config.port}/health`);

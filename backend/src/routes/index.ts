@@ -10,7 +10,7 @@ const router = Router();
 router.get('/health', (req, res) => {
   res.json({
     status: 'ok',
-    message: 'RiskGuardian API is healthy',
+    message: 'DefiGuardian API is healthy',
     timestamp: new Date().toISOString(),
     version: '1.0.0'
   });

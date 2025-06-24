@@ -153,7 +153,7 @@ ${marketRiskFormatted > 0.6 ? "• 📈 High market volatility period" : ""}
 
 🚨 **ALERT SETUP**: Would you like me to create automatic risk alerts for this portfolio?
 
-*Data source: RiskGuardian smart contracts on Sepolia blockchain*
+*Data source: DefiGuardian smart contracts on Sepolia blockchain*
 *Contract: Portfolio Analyzer (${SEPOLIA_CONFIG.contracts.portfolioAnalyzer})*`;
 
       // Callback para resposta
@@ -171,7 +171,7 @@ ${marketRiskFormatted > 0.6 ? "• 📈 High market volatility period" : ""}
       
       const errorResponse = `❌ **Portfolio Analysis Error**
 
-Unable to connect to RiskGuardian smart contracts on Sepolia.
+Unable to connect to DefiGuardian smart contracts on Sepolia.
 
 **Possible Issues**:
 • Network connectivity to Sepolia RPC

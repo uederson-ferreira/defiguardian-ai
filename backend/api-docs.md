@@ -1,4 +1,4 @@
-# RiskGuardian API Documentation
+# DefiGuardian API Documentation
 
 ## Base URL
 ```
@@ -15,7 +15,7 @@ Authorization: Bearer <jwt_token>
 
 ### Health & Status
 - `GET /health` - API health check
-  - Response: `{ "status": "ok", "message": "RiskGuardian API is running", "version": "1.0.0" }`
+  - Response: `{ "status": "ok", "message": "DefiGuardian API is running", "version": "1.0.0" }`
 
 - `GET /registry/health` - System health with blockchain status
   - Response includes blockchain connection status and smart contract availability

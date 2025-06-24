@@ -51,7 +51,7 @@ export class AuthService {
   }
 
   generateLoginMessage(address: string, nonce: string): string {
-    return `Welcome to RiskGuardian AI!
+    return `Welcome to DefiGuardian AI!
 
 This request will not trigger a blockchain transaction or cost any gas fees.
 

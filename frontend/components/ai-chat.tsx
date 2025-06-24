@@ -12,7 +12,7 @@ export function AIChat() {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! I'm RiskGuardian AI. How can I help you analyze your portfolio risk today?",
+      text: "Hello! I'm DefiGuardian AI. How can I help you analyze your portfolio risk today?",
       sender: "ai",
       timestamp: new Date(),
     },
@@ -58,7 +58,7 @@ export function AIChat() {
   return (
     <Card className="fixed bottom-6 right-6 z-50 w-80 h-96 bg-slate-900/95 border-slate-700 backdrop-blur-md">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-white">RiskGuardian AI</CardTitle>
+        <CardTitle className="text-sm font-medium text-white">DefiGuardian AI</CardTitle>
         <Button
           variant="ghost"
           size="icon"

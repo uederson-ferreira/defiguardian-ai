@@ -196,7 +196,7 @@ export function WalletConnection({
           Conectar Carteira
         </CardTitle>
         <CardDescription>
-          Conecte sua carteira para acessar recursos completos do RiskGuardian
+          Conecte sua carteira para acessar recursos completos do DefiGuardian
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

@@ -1,4 +1,4 @@
-// elizaos-agent/src/index.ts - Configuração Principal RiskGuardian AI
+// elizaos-agent/src/index.ts - Configuração Principal DefiGuardian AI
 import {
   logger,
   type Character,
@@ -7,7 +7,7 @@ import {
   type ProjectAgent,
 } from '@elizaos/core';
 
-import { riskGuardianCharacter } from '../characters/riskguardian.character';
+import { riskGuardianCharacter } from '../characters/defiguardian.character';
 import { contractActions } from './actions/contractInteraction';
 
 // Forçar desabilitação de embeddings para performance
@@ -16,10 +16,10 @@ process.env.USE_EMBEDDINGS = 'false';
 process.env.TEXT_MODEL_PROVIDER = 'openrouter';
 process.env.EMBEDDING_MODEL_PROVIDER = 'none';
 
-// Plugin para ações do RiskGuardian
+// Plugin para ações do DefiGuardian
 export const riskGuardianPlugin = {
-  name: 'riskguardian',
-  description: 'RiskGuardian blockchain risk management actions',
+  name: 'defiguardian',
+  description: 'DefiGuardian blockchain risk management actions',
   actions: contractActions,
   providers: [],
   services: [],
@@ -69,8 +69,8 @@ export const character: Character = {
 };
 
 // Função de inicialização do character
-const initRiskGuardianCharacter = async ({ runtime }: { runtime: IAgentRuntime }) => {
-  logger.info('🛡️ Initializing RiskGuardian AI Character');
+const initDefiGuardianCharacter = async ({ runtime }: { runtime: IAgentRuntime }) => {
+  logger.info('🛡️ Initializing DefiGuardian AI Character');
   logger.info('🤖 Agent: Elisa - DeFi Risk Analysis Expert');
   logger.info('📝 Text Model:', process.env.OPENROUTER_MODEL || "deepseek/deepseek-r1-0528-qwen3-8b:free");
   logger.info('🧠 Embeddings: DISABLED for performance');
@@ -107,14 +107,14 @@ const initRiskGuardianCharacter = async ({ runtime }: { runtime: IAgentRuntime }
     });
   }
 
-  logger.info('✅ RiskGuardian AI initialization complete');
+  logger.info('✅ DefiGuardian AI initialization complete');
   logger.info('🚀 Ready to analyze DeFi risks with smart contract data');
 };
 
 // Agent project configuration
 export const projectAgent: ProjectAgent = {
   character,
-  init: async (runtime: IAgentRuntime) => await initRiskGuardianCharacter({ runtime }),
+  init: async (runtime: IAgentRuntime) => await initDefiGuardianCharacter({ runtime }),
 };
 
 // Project definition
@@ -127,7 +127,7 @@ export default project;
 // elizaos-agent/package.json atualizado
 /*
 {
-  "name": "riskguardian-elizaos-agent",
+  "name": "defiguardian-elizaos-agent",
   "version": "1.0.0",
   "type": "module",
   "scripts": {

@@ -1,5 +1,5 @@
 {
-  "name": "riskguardian-backend",
+  "name": "defiguardian",
   "version": "0.1.0",
   "description": "RiskGuardian AI Backend API",
   "main": "dist/index.js",

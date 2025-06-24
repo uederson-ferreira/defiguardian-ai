@@ -10,7 +10,7 @@ export const config = {
   apiPrefix: process.env.API_PREFIX || '/api',
   
   // Database
-  databaseUrl: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/riskguardian',
+  databaseUrl: process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5432/defiguardian',
   redisUrl: process.env.REDIS_URL || 'redis://localhost:6379',
   
   // Blockchain - Updated to Avalanche Fuji
