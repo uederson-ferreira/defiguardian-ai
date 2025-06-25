@@ -1,21 +1,15 @@
-import type { Metadata } from "next";
+// app/layout.tsx
+// ROOT LAYOUT COM PROVIDERS NEXTAUTH
+
 import { Inter } from "next/font/google";
+import { Providers } from "./providers";
 import "./globals.css";
-import { AuthProvider } from "../contexts/AuthContext";
-import { Web3Provider } from "../contexts/Web3Provider";
-import { Toaster } from "react-hot-toast";
-import { ThemeProvider } from "../components/theme-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "DefiGuardian AI",
-  description: "AI-powered DeFi risk management platform",
-  icons: {
-    icon: "/shield-favicon.svg",
-    shortcut: "/shield-favicon.svg",
-    apple: "/shield-favicon.svg",
-  },
+  description: "AI-Powered DeFi Risk Management Platform",
 };
 
 export default function RootLayout({
@@ -26,29 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <AuthProvider>
-            <Web3Provider>
-              {children}
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: "#1e293b",
-                    color: "#f8fafc",
-                    border: "1px solid #475569",
-                  },
-                }}
-              />
-            </Web3Provider>
-          </AuthProvider>
-        </ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

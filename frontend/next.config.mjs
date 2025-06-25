@@ -14,11 +14,10 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8002'}/api/:path*`,
+        source: '/api/((?!auth).*)',
+        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8002'}/api/$1`,
       },
     ]
   },
 }
-
 export default nextConfig

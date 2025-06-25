@@ -151,7 +151,7 @@ cache/
 broadcast/
 
 # Dependencies (install via forge install)
-lib/
+contractsv2/lib
 contracts/script/extras
 */script/extras
 script/extras
@@ -194,8 +194,6 @@ contratosv2
 
 Garbage-excluir
 
-lib/
-*/lib
 /lib/v3-core/
 /lib/v3-periphery/
 
