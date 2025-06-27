@@ -1,8 +1,11 @@
-// app/layout.tsx
-// ROOT LAYOUT COM PROVIDERS NEXTAUTH
+/**
+ * MÓDULO: Layout Principal Corrigido
+ * LOCALIZAÇÃO: app/layout.tsx
+ * DESCRIÇÃO: Import path correto após limpeza arquitetural
+ */
 
 import { Inter } from "next/font/google";
-import { Providers } from "./providers";
+import { Providers } from "./providers"; // ✅ CORRIGIDO: Caminho correto
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });

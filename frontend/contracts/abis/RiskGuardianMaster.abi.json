@@ -1,0 +1,658 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [
+      {
+        "name": "_initialOwner",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "activeUsers",
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "addActiveUser",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "checkUpkeep",
+    "inputs": [
+      {
+        "name": "",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "upkeepNeeded",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "performData",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "config",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "stopLossEnabled",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "rebalanceEnabled",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "volatilityEnabled",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "crossChainEnabled",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "checkInterval",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "lastCheckTime",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "maxGasPerUpkeep",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "crossChainHedgeContract",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "emergencyPause",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getActiveUsers",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address[]",
+        "internalType": "address[]"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getAutomationConfig",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct DefiGuardianMaster.AutomationConfig",
+        "components": [
+          {
+            "name": "stopLossEnabled",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "rebalanceEnabled",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "volatilityEnabled",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "crossChainEnabled",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "checkInterval",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "lastCheckTime",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "maxGasPerUpkeep",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getExecutionStats",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct DefiGuardianMaster.ExecutionStats",
+        "components": [
+          {
+            "name": "totalStopLossExecutions",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "totalRebalanceExecutions",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "totalVolatilityExecutions",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "totalCrossChainExecutions",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "lastExecutionTime",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "totalGasUsed",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isActiveUser",
+    "inputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "manualHedgeExecution",
+    "inputs": [
+      {
+        "name": "hedgeType",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "identifier",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "owner",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "performUpkeep",
+    "inputs": [
+      {
+        "name": "",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "rebalanceHedgeContract",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "recoverTokens",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "renounceOwnership",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setHedgeContracts",
+    "inputs": [
+      {
+        "name": "_stopLossHedge",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "_rebalanceHedge",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "_volatilityHedge",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "_crossChainHedge",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "stats",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "totalStopLossExecutions",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "totalRebalanceExecutions",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "totalVolatilityExecutions",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "totalCrossChainExecutions",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "lastExecutionTime",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "totalGasUsed",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "stopLossHedgeContract",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "transferOwnership",
+    "inputs": [
+      {
+        "name": "newOwner",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "updateAutomationConfig",
+    "inputs": [
+      {
+        "name": "_stopLossEnabled",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "_rebalanceEnabled",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "_volatilityEnabled",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "_crossChainEnabled",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "_checkInterval",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "_maxGasPerUpkeep",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "volatilityHedgeContract",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "event",
+    "name": "AutomationConfigUpdated",
+    "inputs": [
+      {
+        "name": "stopLoss",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      },
+      {
+        "name": "rebalance",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      },
+      {
+        "name": "volatility",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      },
+      {
+        "name": "crossChain",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      },
+      {
+        "name": "interval",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "HedgeContractUpdated",
+    "inputs": [
+      {
+        "name": "contractType",
+        "type": "string",
+        "indexed": false,
+        "internalType": "string"
+      },
+      {
+        "name": "newAddress",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "HedgeExecuted",
+    "inputs": [
+      {
+        "name": "hedgeType",
+        "type": "string",
+        "indexed": false,
+        "internalType": "string"
+      },
+      {
+        "name": "user",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "identifier",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      },
+      {
+        "name": "gasUsed",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OwnershipTransferred",
+    "inputs": [
+      {
+        "name": "previousOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "UpkeepPerformed",
+    "inputs": [
+      {
+        "name": "stopLossExecutions",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "rebalanceExecutions",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "volatilityExecutions",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "totalGasUsed",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "OnlySimulatedBackend",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "OwnableInvalidOwner",
+    "inputs": [
+      {
+        "name": "owner",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "OwnableUnauthorizedAccount",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ReentrancyGuardReentrantCall",
+    "inputs": []
+  }
+]

@@ -1,9 +1,15 @@
 // hooks/useAuth.ts
-// ✅ HOOK USEAUTH CORRIGIDO
+// ✅ HOOK USEAUTH CORRIGIDO - SEM DEPENDÊNCIA DO useSupabase
 
 import { useSession, signIn, signOut } from "next-auth/react";
-import { useSupabase } from "@/app/api/auth/providers";
 import { useState, useEffect } from "react";
+import { createClient } from '@supabase/supabase-js';
+
+// Configuração do Supabase no lado do cliente
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 interface UserProfile {
   id: string;
@@ -17,7 +23,6 @@ interface UserProfile {
 
 export function useAuth() {
   const { data: session, status } = useSession();
-  const supabase = useSupabase();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -25,6 +30,8 @@ export function useAuth() {
   useEffect(() => {
     if (session?.user?.email && status === "authenticated") {
       loadUserProfile();
+    } else {
+      setProfile(null);
     }
   }, [session, status]);
 
@@ -62,7 +69,7 @@ export function useAuth() {
     }
   };
 
-  const updateWalletAddress = async (walletAddress: string) => {
+  const updateWalletAddress = async (walletAddress: string): Promise<boolean> => {
     if (!session?.user?.email) {
       console.error("Usuário não autenticado");
       return false;
@@ -98,23 +105,60 @@ export function useAuth() {
     }
   };
 
-  const login = () => signIn()
-  const logout = () => signOut()
+  const login = async (provider?: 'google' | 'github'): Promise<boolean> => {
+    try {
+      setLoading(true);
+      const result = await signIn(provider, {
+        redirect: false,
+        callbackUrl: '/dashboard'
+      });
+      
+      if (result?.error) {
+        console.error('Erro no login:', result.error);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Erro ao fazer login:', error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = async (): Promise<void> => {
+    try {
+      setLoading(true);
+      await signOut({
+        redirect: false,
+        callbackUrl: '/'
+      });
+      setProfile(null);
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return {
     // Dados do usuário
     user: session?.user || null,
     profile,
-    loading,
+    loading: loading || status === 'loading',
     isAuthenticated: !!session?.user,
     
     // Métodos
     login,
     logout,
     updateWalletAddress,
-    loadUserProfile,
+    refreshProfile: loadUserProfile,
     
-    // Status
+    // Status da sessão
     status,
-  }
+    
+    // Cliente Supabase (se necessário para uso direto)
+    supabase,
+  };
 }

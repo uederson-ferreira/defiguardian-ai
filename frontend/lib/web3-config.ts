@@ -1,6 +1,9 @@
-// Web3 Configuration for DefiGuardian Frontend
-// Avalanche Fuji Testnet Integration
+// lib/web3-config.ts
+import { getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { avalancheFuji } from 'wagmi/chains';
+import { http } from 'viem';
 
+// Avalanche Fuji Chain Configuration
 export const CHAIN_CONFIG = {
   chainId: parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '43113'),
   chainName: process.env.NEXT_PUBLIC_CHAIN_NAME || 'Avalanche Fuji Testnet',
@@ -13,7 +16,7 @@ export const CHAIN_CONFIG = {
   }
 };
 
-// Smart Contract Addresses
+// Smart Contract Addresses (from your deployment)
 export const CONTRACT_ADDRESSES = {
   // Core Contracts
   CONTRACT_REGISTRY: process.env.NEXT_PUBLIC_CONTRACT_REGISTRY || '0xA65647C7335835F477831E4E907aBaA1560646a8',
@@ -32,52 +35,36 @@ export const CONTRACT_ADDRESSES = {
   STOP_LOSS_HEDGE: process.env.NEXT_PUBLIC_STOP_LOSS_HEDGE || '0x1e7D390EB42112f33930A9Dab1cdeB848361f163',
   REBALANCE_HEDGE: process.env.NEXT_PUBLIC_REBALANCE_HEDGE || '0xe261a9e260C7F4aCB9E2a1c3daeb141791bbb600',
   VOLATILITY_HEDGE: process.env.NEXT_PUBLIC_VOLATILITY_HEDGE || '0x5C6c0B72FeDB3027eDee33C62bb7C5D3700a488F',
-  CROSS_CHAIN_HEDGE: process.env.NEXT_PUBLIC_CROSS_CHAIN_HEDGE || '0xaC521848dC05C7fE4eb43236D1719AEA725143cF'
-};
+  CROSS_CHAIN_HEDGE: process.env.NEXT_PUBLIC_CROSS_CHAIN_HEDGE || '0xaC521848dC05C7fE4eb43236D1719AEA725143cF',
+} as const;
 
-// Mock Protocol Addresses (for testing)
+// Mock Protocol Addresses for Development
 export const MOCK_PROTOCOLS = {
-  COMPOUND_V3: process.env.NEXT_PUBLIC_COMPOUND_V3_MOCK || '0xBf863e9edd0684c7C45793A2C15F35DeF78cb28c',
-  LIDO: process.env.NEXT_PUBLIC_LIDO_MOCK || '0xE1AbA07004A31FefB36c927FAa98Dd6D04d1CC21',
-  CURVE: process.env.NEXT_PUBLIC_CURVE_MOCK || '0x26D6199f59bb8fecC4C2F1bd49708Ad4FeBa8342',
-  BALANCER: process.env.NEXT_PUBLIC_BALANCER_MOCK || '0x1275a590e071fb6f2DF43863109f1318007e5627',
-  YEARN: process.env.NEXT_PUBLIC_YEARN_MOCK || '0xE5fc6650Cd5884B8701b8cb43bdaEDa7faB00FBf',
-  MOCK_AAVE: process.env.NEXT_PUBLIC_MOCK_PROTOCOL_1 || '0x0000000000000000000000000000000000000000',
-  MOCK_COMPOUND: process.env.NEXT_PUBLIC_MOCK_PROTOCOL_2 || '0x0000000000000000000000000000000000000000',
-  MOCK_UNISWAP: process.env.NEXT_PUBLIC_MOCK_PROTOCOL_3 || '0x0000000000000000000000000000000000000000'
-};
+  MOCK_UNISWAP: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
+  MOCK_AAVE: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2',
+  MOCK_COMPOUND: '0xc3d688B66703497DAA19211EEdff47f25384cdc3',
+  CURVE: '0xD51a44d3FaE010294C616388b506AcdA1bfAAE46'
+} as const;
 
-// Mock Price Feed Addresses
-export const MOCK_PRICE_FEEDS = {
-  WBTC_USD: process.env.NEXT_PUBLIC_WBTC_USD_MOCK_FEED || '0xe9c00f0287fe9b9815d7b8F0a5e24A5aA7983C35',
-  USDT_USD: process.env.NEXT_PUBLIC_USDT_USD_MOCK_FEED || '0x1d12a0Ae03EeeA2251f4227c6A6C129f76d37C1B',
-  AAVE_USD: process.env.NEXT_PUBLIC_AAVE_USD_MOCK_FEED || '0xe8b6A9Fa44E7EccF20995a1f669A47B312EC3103',
-  COMP_USD: process.env.NEXT_PUBLIC_COMP_USD_MOCK_FEED || '0x9A32e45045933dB7e29AA59A9cDa375FfF875ba2',
-  CRV_USD: process.env.NEXT_PUBLIC_CRV_USD_MOCK_FEED || '0xfB0Df246ac045cCd8c9a23528538a0F42DB90376',
-  LDO_USD: process.env.NEXT_PUBLIC_LDO_USD_MOCK_FEED || '0xD00284526a6666A163548Fa747B98FE0FEe0e17d',
-  BAL_USD: process.env.NEXT_PUBLIC_BAL_USD_MOCK_FEED || '0x38a027F9bf8AAdACC54a790EE75e241039D8Ba16',
-  YFI_USD: process.env.NEXT_PUBLIC_YFI_USD_MOCK_FEED || '0xB34dD121C800c56198880D85161869A475906c6d'
-};
-
-// Contract ABIs (simplified for frontend use)
+// Contract ABIs (simplified for key functions)
 export const CONTRACT_ABIS = {
   PORTFOLIO_ANALYZER: [
     'function analyzePortfolio(address user) view returns (uint256 riskScore, string memory analysis)',
-    'function getPositions(address user) view returns (tuple(address protocol, address token, uint256 amount)[])',
-    'function getTotalValue(address user) view returns (uint256)',
-    'function getAssetAllocation(address user) view returns (string[] memory assets, uint256[] memory percentages)'
+    'function getUserPositions(address user) view returns (address[] memory protocols, uint256[] memory amounts)',
+    'function getTotalValue(address user) view returns (uint256 totalValue)'
   ],
   RISK_ORACLE: [
-    'function getProtocolRisk(address protocol) view returns (uint256)',
-    'function getTokenRisk(address token) view returns (uint256)',
-    'function getMarketRisk() view returns (uint256)'
+    'function getProtocolRisk(address protocol) view returns (uint256 riskScore)',
+    'function getMarketRisk() view returns (uint256 marketRisk)',
+    'function updateRiskData(address protocol, uint256 newRisk) external'
   ],
   RISK_REGISTRY: [
-    'function getAllProtocols() view returns (address[])',
-    'function getProtocolInfo(address protocol) view returns (string memory name, uint256 riskLevel)'
+    'function registerProtocol(address protocol, string memory name, uint256 riskCategory) external',
+    'function getProtocolInfo(address protocol) view returns (string memory name, uint256 riskCategory, bool active)',
+    'function getAllProtocols() view returns (address[] memory)'
   ],
   ALERT_SYSTEM: [
-    'function createAlert(address user, uint8 alertType, uint256 threshold) returns (uint256 alertId)',
+    'function createAlert(address user, uint256 threshold) returns (uint256 alertId)',
     'function getActiveAlerts(address user) view returns (uint256[] memory)',
     'function getUserAlertsCount(address user) view returns (uint256)'
   ],
@@ -86,25 +73,40 @@ export const CONTRACT_ABIS = {
     'function getUserPolicies(address user) view returns (uint256[] memory)',
     'function getPolicyInfo(uint256 policyId) view returns (address user, address protocol, uint256 coverage, bool active)'
   ]
-};
+} as const;
 
-// Development settings
-export const DEV_CONFIG = {
-  enableTestnets: process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true',
-  debugMode: process.env.NEXT_PUBLIC_DEBUG_MODE === 'true'
-};
+// Wagmi Configuration Factory - evita múltiplas inicializações
+let wagmiConfigInstance: ReturnType<typeof getDefaultConfig> | null = null;
+
+export function getWagmiConfig() {
+  if (!wagmiConfigInstance) {
+    wagmiConfigInstance = getDefaultConfig({
+      appName: 'DefiGuardian AI',
+      projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'your-project-id',
+      chains: [avalancheFuji],
+      transports: {
+        [avalancheFuji.id]: http(CHAIN_CONFIG.rpcUrl),
+      },
+      ssr: true,
+    });
+  }
+  return wagmiConfigInstance;
+}
+
+// Backward compatibility
+export const config = getWagmiConfig();
 
 // Helper function to get contract address by name
 export function getContractAddress(contractName: keyof typeof CONTRACT_ADDRESSES): string {
   return CONTRACT_ADDRESSES[contractName];
 }
 
-// Helper function to get contract ABI by name
-export function getContractABI(contractName: keyof typeof CONTRACT_ABIS): string[] {
+// Helper function to get contract ABI by name  
+export function getContractABI(contractName: keyof typeof CONTRACT_ABIS): readonly string[] {
   return CONTRACT_ABIS[contractName];
 }
 
-// Network configuration for wallet connection
+// Network configuration for manual wallet connection
 export const NETWORK_CONFIG = {
   chainId: `0x${CHAIN_CONFIG.chainId.toString(16)}`, // Convert to hex
   chainName: CHAIN_CONFIG.chainName,
@@ -113,12 +115,18 @@ export const NETWORK_CONFIG = {
   blockExplorerUrls: [CHAIN_CONFIG.blockExplorer]
 };
 
+// Development settings
+export const DEV_CONFIG = {
+  enableTestnets: process.env.NEXT_PUBLIC_ENABLE_TESTNETS === 'true',
+  debugMode: process.env.NEXT_PUBLIC_DEBUG_MODE === 'true'
+};
+
 export default {
   CHAIN_CONFIG,
   CONTRACT_ADDRESSES,
   MOCK_PROTOCOLS,
-  MOCK_PRICE_FEEDS,
   CONTRACT_ABIS,
   DEV_CONFIG,
-  NETWORK_CONFIG
+  NETWORK_CONFIG,
+  config
 };

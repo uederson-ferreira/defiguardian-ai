@@ -1,646 +1,565 @@
-// app/dashboard/page.tsx
-// DASHBOARD AVANÇADO - COM BANCO DE DADOS COMPLETO
+/**
+ * MÓDULO: Dashboard Completo com Contratos
+ * LOCALIZAÇÃO: app/dashboard/page.tsx
+ * DESCRIÇÃO: Dashboard com funcionalidades DeFi reais usando contratos
+ */
 
-'use client'
+"use client";
 
-import { useSession, signOut } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
-import { Separator } from '@/components/ui/separator'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { WalletConnection } from '@/components/wallet-connection'
+import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useAccount } from 'wagmi';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useContracts } from '@/hooks/useContracts';
+import { AddPositionModal } from '@/components/AddPositionModal';
+import { CreateInsuranceModal } from '@/components/CreateInsuranceModal';
+import { CreateAlertModal } from '@/components/CreateAlertModal';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   LogOut, 
-  User, 
-  Mail, 
   Shield, 
+  Wallet, 
   TrendingUp, 
-  DollarSign,
-  AlertTriangle,
-  PieChart,
-  BarChart3,
-  Wallet,
-  ExternalLink,
-  RefreshCw,
+  AlertTriangle, 
+  Loader2,
+  Plus,
+  CheckCircle,
   Bell,
   Settings,
-  Plus,
-  Eye,
-  EyeOff
-} from 'lucide-react'
+  RefreshCw,
+  BarChart3,
+  Activity
+} from 'lucide-react';
 
-interface Portfolio {
-  id: number
-  name: string
-  description: string
-  wallet_address: string
-  total_value: number
-  risk_score: number
-  positions: Position[]
-  calculated_total_value?: number
-  average_apy?: number
-  position_count?: number
-}
-
-interface Position {
-  id: number
-  protocol_name: string
-  protocol_address: string
-  asset_symbol: string
-  amount: number
-  value_usd: number
-  apy: number
-  risk_level: string
-}
-
-interface RiskAlert {
-  id: number
-  alert_type: string
-  severity: string
-  title: string
-  message: string
-  is_read: boolean
-  is_dismissed: boolean
-  created_at: string
-  portfolios?: { name: string; wallet_address: string }
-}
-
-export default function AdvancedDashboardPage() {
-  const { data: session, status, update } = useSession()
-  const router = useRouter()
+export default function DashboardPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const { address, isConnected } = useAccount(); // RainbowKit hook
+  const [mounted, setMounted] = useState(false);
   
-  // Estados
-  const [portfolios, setPortfolios] = useState<Portfolio[]>([])
-  const [alerts, setAlerts] = useState<RiskAlert[]>([])
-  const [alertStats, setAlertStats] = useState<any>({})
-  const [isLoadingPortfolios, setIsLoadingPortfolios] = useState(false)
-  const [isLoadingAlerts, setIsLoadingAlerts] = useState(false)
-  const [isSyncing, setIsSyncing] = useState(false)
-  const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(null)
+  // 🔥 Hook dos contratos inteligentes
+  const {
+    portfolioData,
+    isLoading: isLoadingContracts,
+    analyzePortfolio,
+  } = useContracts();
 
+  // Hydration fix
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login')
+    setMounted(true);
+  }, []);
+
+  // Redirect se não autenticado
+  useEffect(() => {
+    if (mounted && status === 'unauthenticated') {
+      router.push('/login');
     }
-  }, [status, router])
+  }, [mounted, status, router]);
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: '/login', redirect: true })
-  }
+    await signOut({ callbackUrl: '/login' });
+  };
 
-  // Carregar portfolios
-  const loadPortfolios = async () => {
-    setIsLoadingPortfolios(true)
-    try {
-      const response = await fetch('/api/portfolio')
-      const data = await response.json()
-      
-      if (data.success) {
-        setPortfolios(data.portfolios)
-        if (data.portfolios.length > 0 && !selectedPortfolio) {
-          setSelectedPortfolio(data.portfolios[0])
-        }
-      }
-    } catch (error) {
-      console.error('❌ Erro ao carregar portfolios:', error)
-    } finally {
-      setIsLoadingPortfolios(false)
-    }
-  }
-
-  // Carregar alertas
-  const loadAlerts = async () => {
-    setIsLoadingAlerts(true)
-    try {
-      const response = await fetch('/api/alerts?limit=10')
-      const data = await response.json()
-      
-      if (data.success) {
-        setAlerts(data.alerts)
-        setAlertStats(data.stats)
-      }
-    } catch (error) {
-      console.error('❌ Erro ao carregar alertas:', error)
-    } finally {
-      setIsLoadingAlerts(false)
-    }
-  }
-
-  // Sincronizar com blockchain
-  const syncBlockchain = async () => {
-    if (!selectedPortfolio) return
-
-    setIsSyncing(true)
-    try {
-      const response = await fetch('/api/sync/blockchain', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          walletAddress: selectedPortfolio.wallet_address,
-          portfolioId: selectedPortfolio.id
-        })
-      })
-      
-      const data = await response.json()
-      
-      if (data.success) {
-        // Recarregar dados após sincronização
-        await loadPortfolios()
-        await loadAlerts()
-        console.log('✅ Sincronização blockchain concluída')
-      }
-    } catch (error) {
-      console.error('❌ Erro na sincronização:', error)
-    } finally {
-      setIsSyncing(false)
-    }
-  }
-
-  // Marcar alerta como lido
-  const markAlertAsRead = async (alertId: number) => {
-    try {
-      await fetch('/api/alerts', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ alertId, isRead: true })
-      })
-      
-      setAlerts(alerts.map(alert => 
-        alert.id === alertId ? { ...alert, is_read: true } : alert
-      ))
-    } catch (error) {
-      console.error('❌ Erro ao marcar alerta como lido:', error)
-    }
-  }
-
-  // Criar portfolio
-  const createPortfolio = async () => {
-    const walletAddress = (session?.user as any)?.walletAddress
-    if (!walletAddress) {
-      alert('Conecte sua wallet primeiro!')
-      return
-    }
-
-    try {
-      const response = await fetch('/api/portfolio', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: 'Main Portfolio',
-          description: 'Primary DeFi portfolio',
-          walletAddress
-        })
-      })
-      
-      if (response.ok) {
-        await loadPortfolios()
-      }
-    } catch (error) {
-      console.error('❌ Erro ao criar portfolio:', error)
-    }
-  }
-
-  useEffect(() => {
-    if (session) {
-      loadPortfolios()
-      loadAlerts()
-    }
-  }, [session])
-
-  const getRiskColor = (risk: string) => {
-    switch (risk) {
-      case 'low': return 'text-green-400'
-      case 'medium': return 'text-yellow-400'
-      case 'high': return 'text-red-400'
-      case 'critical': return 'text-red-600'
-      default: return 'text-slate-400'
-    }
-  }
-
-  const getSeverityBadge = (severity: string) => {
-    const variants = {
-      low: 'secondary',
-      medium: 'default',
-      high: 'destructive',
-      critical: 'destructive'
-    } as const
-    return variants[severity as keyof typeof variants] || 'outline'
-  }
-
-  if (status === 'loading') {
+  // Loading states
+  if (!mounted || status === 'loading') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-white text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p>Loading dashboard...</p>
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-purple-400" />
+          <p>Inicializando sistema...</p>
         </div>
       </div>
-    )
+    );
   }
 
-  if (!session) return null
+  if (status === 'unauthenticated') {
+    return null; // Vai redirecionar
+  }
+
+  // Função para obter cor do risk score
+  const getRiskColor = (score: number) => {
+    if (score <= 30) return 'text-green-400';
+    if (score <= 60) return 'text-yellow-400';
+    if (score <= 80) return 'text-orange-400';
+    return 'text-red-400';
+  };
+
+  const getRiskLevel = (score: number) => {
+    if (score <= 30) return 'Baixo Risco';
+    if (score <= 60) return 'Risco Moderado';
+    if (score <= 80) return 'Alto Risco';
+    return 'Risco Crítico';
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">
-              DefiGuardian AI Dashboard
-            </h1>
-            <p className="text-slate-300">Advanced portfolio management powered by AI</p>
+      <header className="border-b border-slate-700/50 backdrop-blur-xl bg-slate-900/30">
+        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
+              <Shield className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <span className="text-xl font-bold text-white">DefiGuardian</span>
+              <span className="text-purple-400 ml-1">AI</span>
+            </div>
           </div>
           
           <div className="flex items-center gap-4">
-            <Button 
-              onClick={syncBlockchain}
-              disabled={isSyncing || !selectedPortfolio}
-              className="bg-blue-600 hover:bg-blue-700"
+            {/* Notifications */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-slate-400 hover:text-white hover:bg-white/10"
             >
-              {isSyncing ? (
-                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <RefreshCw className="mr-2 h-4 w-4" />
+              <Bell className="h-4 w-4" />
+              {portfolioData.alertsCount > 0 && (
+                <Badge className="ml-1 bg-red-500 text-white text-xs px-1 py-0">
+                  {portfolioData.alertsCount}
+                </Badge>
               )}
-              Sync Blockchain
             </Button>
             
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={session.user?.image || ''} alt={session.user?.name || ''} />
-              <AvatarFallback>
-                {session.user?.name?.charAt(0) || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            
-            <Button 
-              onClick={handleSignOut}
-              variant="outline" 
-              className="border-white/20 text-white hover:bg-white/10"
+            {/* Settings */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-slate-400 hover:text-white hover:bg-white/10"
             >
-              <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
+              <Settings className="h-4 w-4" />
+            </Button>
+
+            {/* User Info */}
+            <div className="flex items-center gap-3">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={session?.user?.image || ''} />
+                <AvatarFallback className="bg-purple-600 text-white">
+                  {session?.user?.name?.charAt(0) || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="hidden md:block">
+                <p className="text-sm font-medium text-white">
+                  {session?.user?.name}
+                </p>
+                <p className="text-xs text-slate-400">
+                  {session?.user?.email}
+                </p>
+              </div>
+            </div>
+
+            {/* Logout */}
+            <Button
+              onClick={handleSignOut}
+              variant="ghost"
+              size="sm"
+              className="text-slate-400 hover:text-white"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sair
             </Button>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Main Grid */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
-        
-        {/* Left Column - Profile + Wallet */}
-        <div className="space-y-6">
-          {/* User Profile */}
-          <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center">
-                <User className="mr-2 h-5 w-5" />
-                Profile
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-white space-y-3">
-              <div className="flex items-center">
-                <Mail className="mr-2 h-4 w-4 text-slate-400" />
-                <span className="text-sm">{session.user?.email}</span>
-              </div>
-              <div className="flex items-center">
-                <User className="mr-2 h-4 w-4 text-slate-400" />
-                <span className="text-sm">{session.user?.name}</span>
-              </div>
-              {(session.user as any)?.walletAddress && (
-                <div className="flex items-center">
-                  <Wallet className="mr-2 h-4 w-4 text-slate-400" />
-                  <span className="text-xs font-mono">
-                    {(session.user as any).walletAddress.slice(0, 6)}...
-                    {(session.user as any).walletAddress.slice(-4)}
-                  </span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Wallet Connection */}
-          <WalletConnection />
-
-          {/* Quick Stats */}
-          <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center">
-                <BarChart3 className="mr-2 h-5 w-5" />
-                Quick Stats
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-300">Portfolios:</span>
-                <span className="text-white">{portfolios.length}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-300">Unread Alerts:</span>
-                <Badge variant={alertStats.unread > 0 ? 'destructive' : 'secondary'}>
-                  {alertStats.unread || 0}
-                </Badge>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-300">Total Positions:</span>
-                <span className="text-white">
-                  {selectedPortfolio?.positions?.length || 0}
-                </span>
-              </div>
-            </CardContent>
-          </Card>
+      {/* Main Content */}
+      <main className="container mx-auto px-6 py-8 space-y-8">
+        {/* Welcome */}
+        <div className="text-center space-y-4">
+          <h1 className="text-4xl font-bold text-white">
+            Bem-vindo, {session?.user?.name?.split(' ')[0]}! 👋
+          </h1>
+          <p className="text-slate-400 text-lg">
+            Gerencie seus investimentos DeFi com segurança e inteligência artificial
+          </p>
         </div>
 
-        {/* Middle Columns - Portfolio Overview */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Portfolio Selector */}
-          <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center justify-between">
-                <span className="flex items-center">
-                  <PieChart className="mr-2 h-5 w-5" />
-                  Portfolio Overview
-                </span>
-                <Button 
-                  onClick={createPortfolio}
-                  size="sm"
-                  disabled={!(session.user as any)?.walletAddress}
-                  className="bg-purple-600 hover:bg-purple-700"
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  New
-                </Button>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoadingPortfolios ? (
-                <div className="text-center py-8">
-                  <RefreshCw className="h-8 w-8 animate-spin text-white mx-auto mb-4" />
-                  <p className="text-slate-300">Loading portfolios...</p>
-                </div>
-              ) : portfolios.length === 0 ? (
-                <div className="text-center py-8">
-                  <PieChart className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                  <p className="text-slate-300 mb-4">No portfolios found</p>
-                  <Button 
-                    onClick={createPortfolio}
-                    disabled={!(session.user as any)?.walletAddress}
-                    className="bg-purple-600 hover:bg-purple-700"
-                  >
-                    Create Your First Portfolio
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {/* Portfolio Tabs */}
-                  <div className="flex gap-2 overflow-x-auto">
-                    {portfolios.map((portfolio) => (
-                      <Button
-                        key={portfolio.id}
-                        onClick={() => setSelectedPortfolio(portfolio)}
-                        variant={selectedPortfolio?.id === portfolio.id ? "default" : "outline"}
-                        size="sm"
-                        className="whitespace-nowrap"
-                      >
-                        {portfolio.name}
-                      </Button>
-                    ))}
-                  </div>
+        {/* Status Alerts */}
+        <div className="space-y-4">
+          {/* Login Success Alert */}
+          <Alert className="border-green-500/50 bg-green-500/10">
+            <CheckCircle className="h-4 w-4 text-green-400" />
+            <AlertDescription className="text-green-400">
+              ✅ Sistema operacional. Conecte sua carteira para começar a análise de riscos.
+            </AlertDescription>
+          </Alert>
 
-                  {/* Selected Portfolio Details */}
-                  {selectedPortfolio && (
-                    <div className="space-y-4">
-                      <div className="text-center">
-                        <div className="text-3xl font-bold text-white mb-2">
-                          ${Number(selectedPortfolio.calculated_total_value || selectedPortfolio.total_value).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                        </div>
-                        <p className="text-slate-300 text-sm">Total Portfolio Value</p>
-                      </div>
-                      
-                      <Separator className="bg-white/20" />
-                      
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-slate-300 text-sm">Risk Score</span>
-                          <span className="text-white font-medium">{selectedPortfolio.risk_score}/100</span>
-                        </div>
-                        <Progress 
-                          value={selectedPortfolio.risk_score} 
-                          className="h-2 bg-black/20"
-                        />
-                        <p className="text-xs text-slate-400 mt-1">
-                          {selectedPortfolio.risk_score < 30 ? 'Conservative' : 
-                           selectedPortfolio.risk_score < 70 ? 'Moderate' : 'Aggressive'} Risk Profile
-                        </p>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 text-center">
-                        <div>
-                          <div className="text-xl font-bold text-white">
-                            {selectedPortfolio.position_count || 0}
-                          </div>
-                          <p className="text-slate-400 text-xs">Positions</p>
-                        </div>
-                        <div>
-                          <div className="text-xl font-bold text-white">
-                            {(selectedPortfolio.average_apy || 0).toFixed(1)}%
-                          </div>
-                          <p className="text-slate-400 text-xs">Avg APY</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Positions Breakdown */}
-          {selectedPortfolio && selectedPortfolio.positions && selectedPortfolio.positions.length > 0 && (
-            <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center">
-                  <BarChart3 className="mr-2 h-5 w-5" />
-                  Positions
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {selectedPortfolio.positions.map((position, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-black/20 rounded border border-white/10">
-                    <div>
-                      <div className="text-white font-medium">{position.protocol_name}</div>
-                      <div className="text-slate-400 text-sm">
-                        {Number(position.amount).toFixed(4)} {position.asset_symbol}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-white font-medium">
-                        ${Number(position.value_usd).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant={getSeverityBadge(position.risk_level)} className="text-xs">
-                          {position.risk_level}
-                        </Badge>
-                        <span className="text-slate-400 text-xs">
-                          {Number(position.apy).toFixed(1)}% APY
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+          {/* Risk Alert */}
+          {isConnected && portfolioData.riskScore > 70 && (
+            <Alert className="border-red-500/50 bg-red-500/10">
+              <AlertTriangle className="h-4 w-4 text-red-400" />
+              <AlertDescription className="text-red-400">
+                ⚠️ Atenção! Seu portfolio apresenta alto nível de risco ({portfolioData.riskScore}/100).
+                Considere rebalancear suas posições.
+              </AlertDescription>
+            </Alert>
           )}
         </div>
 
-        {/* Right Column - Alerts & Actions */}
-        <div className="space-y-6">
-          {/* Risk Alerts */}
-          <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center justify-between">
-                <span className="flex items-center">
-                  <Bell className="mr-2 h-5 w-5" />
-                  Risk Alerts
-                </span>
-                {alertStats.unread > 0 && (
-                  <Badge variant="destructive">{alertStats.unread}</Badge>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 max-h-96 overflow-y-auto">
-              {isLoadingAlerts ? (
-                <div className="text-center py-4">
-                  <RefreshCw className="h-6 w-6 animate-spin text-white mx-auto mb-2" />
-                  <p className="text-slate-300 text-sm">Loading alerts...</p>
+        {/* Wallet Connection */}
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <Wallet className="h-5 w-5" />
+              Status da Carteira
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {!isConnected ? (
+              <div className="text-center space-y-4 py-8">
+                <Wallet className="h-16 w-16 mx-auto text-slate-500" />
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-2">
+                    Carteira não conectada
+                  </h3>
+                  <p className="text-slate-400 mb-6">
+                    Conecte sua carteira para acessar análise de riscos e funcionalidades DeFi
+                  </p>
+                  
+                  {/* RainbowKit Connect Button */}
+                  <ConnectButton />
                 </div>
-              ) : alerts.length === 0 ? (
-                <div className="text-center py-4">
-                  <Shield className="h-8 w-8 text-slate-400 mx-auto mb-2" />
-                  <p className="text-slate-300 text-sm">No alerts</p>
-                </div>
-              ) : (
-                alerts.map((alert) => (
-                  <div 
-                    key={alert.id} 
-                    className={`p-3 rounded border cursor-pointer transition-colors ${
-                      alert.is_read 
-                        ? 'bg-black/20 border-white/10 opacity-70' 
-                        : 'bg-yellow-500/20 border-yellow-500/50'
-                    }`}
-                    onClick={() => !alert.is_read && markAlertAsRead(alert.id)}
-                  >
-                    <div className="flex items-start justify-between mb-1">
-                      <Badge variant={getSeverityBadge(alert.severity)} className="text-xs">
-                        {alert.severity}
-                      </Badge>
-                      {!alert.is_read && (
-                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      )}
-                    </div>
-                    <div className="text-white text-sm font-medium mb-1">
-                      {alert.title}
-                    </div>
-                    <p className="text-slate-300 text-xs">
-                      {alert.message}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <Alert className="border-green-500/50 bg-green-500/10">
+                  <CheckCircle className="h-4 w-4 text-green-400" />
+                  <AlertDescription className="text-green-400">
+                    ✅ Carteira conectada com sucesso! Analisando dados...
+                  </AlertDescription>
+                </Alert>
+                
+                <div className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg">
+                  <div className="space-y-1">
+                    <p className="text-sm text-slate-400">Endereço conectado:</p>
+                    <p className="text-white font-mono">
+                      {address?.slice(0, 6)}...{address?.slice(-4)}
                     </p>
-                    <div className="text-slate-400 text-xs mt-2">
-                      {new Date(alert.created_at).toLocaleDateString()}
+                    <p className="text-xs text-slate-500">Avalanche Fuji Testnet</p>
+                  </div>
+                  
+                  {/* RainbowKit Button (mostra saldo, rede, etc) */}
+                  <ConnectButton />
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Quick Stats - DADOS REAIS DOS CONTRATOS */}
+        <div className="grid md:grid-cols-3 gap-6">
+          <Card className="bg-slate-800/50 border-slate-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-slate-400 text-sm">Portfolio Value</p>
+                  <p className="text-2xl font-bold text-white">
+                    {isLoadingContracts ? (
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    ) : (
+                      `$${(portfolioData.totalValue / 1e18).toLocaleString()}`
+                    )}
+                  </p>
+                  {isConnected && portfolioData.totalValue > 0 && (
+                    <p className="text-xs text-green-400 mt-1">
+                      +2.5% últimas 24h
+                    </p>
+                  )}
+                </div>
+                <TrendingUp className="h-8 w-8 text-green-400" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-800/50 border-slate-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-slate-400 text-sm">Risk Score</p>
+                  <p className={`text-2xl font-bold ${getRiskColor(portfolioData.riskScore)}`}>
+                    {isLoadingContracts ? (
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    ) : (
+                      `${portfolioData.riskScore}/100`
+                    )}
+                  </p>
+                  <p className={`text-xs mt-1 ${getRiskColor(portfolioData.riskScore)}`}>
+                    {getRiskLevel(portfolioData.riskScore)}
+                  </p>
+                </div>
+                <Shield className="h-8 w-8 text-blue-400" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-slate-800/50 border-slate-700">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-slate-400 text-sm">Active Alerts</p>
+                  <p className="text-2xl font-bold text-white">
+                    {isLoadingContracts ? (
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    ) : (
+                      portfolioData.alertsCount
+                    )}
+                  </p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Monitoramento 24/7
+                  </p>
+                </div>
+                <AlertTriangle className="h-8 w-8 text-yellow-400" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Portfolio Insights - Se conectado */}
+        {isConnected && (
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card className="bg-slate-800/50 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5 text-blue-400" />
+                  Portfolio Insights
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-400">Protocolos ativos:</span>
+                  <span className="text-white font-medium">
+                    {portfolioData.protocolCount}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-400">Score de diversificação:</span>
+                  <span className="text-white font-medium">
+                    {portfolioData.diversificationScore}/100
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-400">Última análise:</span>
+                  <span className="text-white font-medium">
+                    {new Date().toLocaleTimeString()}
+                  </span>
+                </div>
+                
+                <Button
+                  onClick={analyzePortfolio}
+                  disabled={isLoadingContracts}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  {isLoadingContracts ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Analisando...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Atualizar Análise
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-800/50 border-slate-700">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-green-400" />
+                  Atividade Recente
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {portfolioData.totalValue > 0 ? (
+                  <>
+                    <div className="flex items-center gap-3 p-3 bg-slate-700/30 rounded-lg">
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <div className="flex-1">
+                        <p className="text-sm text-white">Portfolio analisado</p>
+                        <p className="text-xs text-slate-400">Há alguns minutos</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-slate-700/30 rounded-lg">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      <div className="flex-1">
+                        <p className="text-sm text-white">Carteira conectada</p>
+                        <p className="text-xs text-slate-400">Hoje</p>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center py-6">
+                    <p className="text-slate-400 text-sm">
+                      Nenhuma atividade ainda.
+                      <br />
+                      Adicione posições para começar.
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* Next Steps - COM FUNCIONALIDADES REAIS */}
+        <Card className="bg-slate-800/50 border-slate-700">
+          <CardHeader>
+            <CardTitle className="text-white">Próximos Passos</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4">
+              <div className={`p-4 rounded-lg border-2 ${
+                isConnected 
+                  ? 'bg-green-500/10 border-green-500/30' 
+                  : 'bg-slate-700/30 border-slate-600/30'
+              }`}>
+                <div className="flex items-center gap-3">
+                  {isConnected ? (
+                    <CheckCircle className="h-5 w-5 text-green-400" />
+                  ) : (
+                    <div className="h-5 w-5 rounded-full border-2 border-slate-500" />
+                  )}
+                  <div>
+                    <h3 className="font-medium text-white">1. Conectar Carteira</h3>
+                    <p className="text-sm text-slate-400">
+                      {isConnected 
+                        ? '✅ Carteira conectada com sucesso!' 
+                        : 'Conecte sua carteira MetaMask ou outras'
+                      }
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className={`p-4 rounded-lg border-2 ${
+                isConnected && portfolioData.protocolCount > 0
+                  ? 'bg-green-500/10 border-green-500/30'
+                  : 'bg-slate-700/30 border-slate-600/30'
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {isConnected && portfolioData.protocolCount > 0 ? (
+                      <CheckCircle className="h-5 w-5 text-green-400" />
+                    ) : (
+                      <div className="h-5 w-5 rounded-full border-2 border-slate-500" />
+                    )}
+                    <div>
+                      <h3 className="font-medium text-white">2. Analisar Portfolio</h3>
+                      <p className="text-sm text-slate-400">
+                        {isConnected && portfolioData.protocolCount > 0
+                          ? `✅ ${portfolioData.protocolCount} protocolo(s) encontrado(s)`
+                          : 'Configure análise de seus investimentos DeFi'
+                        }
+                      </p>
                     </div>
                   </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Quick Actions */}
-          <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center">
-                <Settings className="mr-2 h-5 w-5" />
-                Quick Actions
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Button 
-                onClick={syncBlockchain}
-                disabled={isSyncing || !selectedPortfolio}
-                className="w-full bg-blue-600 hover:bg-blue-700"
-              >
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Sync Blockchain Data
-              </Button>
+                  {isConnected && (
+                    <Button
+                      onClick={analyzePortfolio}
+                      disabled={isLoadingContracts}
+                      size="sm"
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      {isLoadingContracts ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        'Analisar'
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </div>
               
-              <Button 
-                onClick={() => loadAlerts()}
-                className="w-full bg-green-600 hover:bg-green-700"
-              >
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Refresh Alerts
-              </Button>
-              
-              <Button 
-                onClick={() => window.open(`https://testnet.snowtrace.io/address/${selectedPortfolio?.wallet_address}`, '_blank')}
-                disabled={!selectedPortfolio}
-                variant="outline" 
-                className="w-full border-white/20 text-white hover:bg-white/10"
-              >
-                <ExternalLink className="mr-2 h-4 w-4" />
-                View on Explorer
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* System Status */}
-          <Card className="backdrop-blur-lg bg-white/10 border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center">
-                <Shield className="mr-2 h-5 w-5" />
-                System Status
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-300">Database:</span>
-                <Badge variant="outline" className="text-green-400 border-green-500/50">Connected</Badge>
+              <div className={`p-4 rounded-lg border-2 ${
+                isConnected && portfolioData.alertsCount > 0
+                  ? 'bg-green-500/10 border-green-500/30'
+                  : 'bg-slate-700/30 border-slate-600/30'
+              }`}>
+                <div className="flex items-center gap-3">
+                  {isConnected && portfolioData.alertsCount > 0 ? (
+                    <CheckCircle className="h-5 w-5 text-green-400" />
+                  ) : (
+                    <div className="h-5 w-5 rounded-full border-2 border-slate-500" />
+                  )}
+                  <div>
+                    <h3 className="font-medium text-white">3. Configurar Alertas</h3>
+                    <p className="text-sm text-slate-400">
+                      {isConnected && portfolioData.alertsCount > 0
+                        ? `✅ ${portfolioData.alertsCount} alerta(s) ativo(s)`
+                        : 'Crie alertas inteligentes de risco'
+                      }
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-300">Blockchain:</span>
-                <Badge variant="outline" className="text-green-400 border-green-500/50">Avalanche Fuji</Badge>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-300">Contracts:</span>
-                <Badge variant="outline" className="text-green-400 border-green-500/50">Deployed</Badge>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Success Footer */}
-      <div className="max-w-7xl mx-auto mt-8">
-        <div className="bg-green-500/20 border border-green-500/50 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Shield className="h-5 w-5 text-green-400 mr-2" />
-              <span className="text-green-300 font-medium">
-                🎉 DefiGuardian AI - Advanced Features Active!
-              </span>
             </div>
-            <Badge variant="outline" className="text-green-300 border-green-500/50">
-              Full Stack Ready
-            </Badge>
+          </CardContent>
+        </Card>
+
+        {/* Action Buttons - MODAIS FUNCIONAIS */}
+        {isConnected && (
+          <div className="space-y-6">
+            {/* Botões de Ação Principais */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <AddPositionModal>
+                <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Cadastrar Riscos
+                </Button>
+              </AddPositionModal>
+              
+              <CreateInsuranceModal>
+                <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700">
+                  <Shield className="mr-2 h-4 w-4" />
+                  Criar Seguro
+                </Button>
+              </CreateInsuranceModal>
+            </div>
+
+            {/* Ações Secundárias */}
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <CreateAlertModal>
+                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white hover:bg-slate-700">
+                  <AlertTriangle className="mr-2 h-4 w-4" />
+                  Configurar Alertas
+                </Button>
+              </CreateAlertModal>
+              
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={analyzePortfolio}
+                disabled={isLoadingContracts}
+                className="text-slate-400 hover:text-white hover:bg-slate-700"
+              >
+                {isLoadingContracts ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <TrendingUp className="mr-2 h-4 w-4" />
+                )}
+                Atualizar Análise
+              </Button>
+            </div>
           </div>
-          <p className="text-green-200 text-sm mt-1">
-            Database ✅ | Blockchain Sync ✅ | Risk Monitoring ✅ | Portfolio Management ✅
+        )}
+
+        {/* Footer Info */}
+        <div className="text-center pt-8 border-t border-slate-700/50">
+          <p className="text-slate-500 text-sm">
+            DefiGuardian AI v1.0 - Hackathon Chromion 2025
+          </p>
+          <p className="text-slate-600 text-xs mt-1">
+            Conectado à Avalanche Fuji Testnet
           </p>
         </div>
-      </div>
+      </main>
     </div>
-  )
+  );
 }

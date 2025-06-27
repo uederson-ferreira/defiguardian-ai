@@ -1,5 +1,5 @@
 // app/api/alerts/route.ts
-// API PARA GERENCIAR ALERTAS DE RISCO
+// API PARA GERENCIAR ALERTAS DE RISCO - CORRIGIDA COM TIPAGEM
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
@@ -10,6 +10,30 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
+
+// Interfaces para tipagem
+interface AlertRecord {
+  id: string
+  user_id: string
+  portfolio_id?: string
+  alert_type: string
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  title: string
+  message: string
+  is_read: boolean
+  is_dismissed: boolean
+  created_at: string
+  updated_at: string
+  portfolios?: {
+    name: string
+    wallet_address: string
+  }
+}
+
+interface StatsRecord {
+  severity: 'low' | 'medium' | 'high' | 'critical'
+  is_read: boolean
+}
 
 // GET - Buscar alertas do usuário
 export async function GET(request: NextRequest) {
@@ -72,18 +96,20 @@ export async function GET(request: NextRequest) {
       .select('severity, is_read')
       .eq('user_id', userData.id)
 
+    const statsData = stats as StatsRecord[] | null
+
     const alertStats = {
-      total: stats?.length || 0,
-      unread: stats?.filter(alert => !alert.is_read).length || 0,
-      critical: stats?.filter(alert => alert.severity === 'critical').length || 0,
-      high: stats?.filter(alert => alert.severity === 'high').length || 0,
-      medium: stats?.filter(alert => alert.severity === 'medium').length || 0,
-      low: stats?.filter(alert => alert.severity === 'low').length || 0
+      total: statsData?.length || 0,
+      unread: statsData?.filter((alert: StatsRecord) => !alert.is_read).length || 0,
+      critical: statsData?.filter((alert: StatsRecord) => alert.severity === 'critical').length || 0,
+      high: statsData?.filter((alert: StatsRecord) => alert.severity === 'high').length || 0,
+      medium: statsData?.filter((alert: StatsRecord) => alert.severity === 'medium').length || 0,
+      low: statsData?.filter((alert: StatsRecord) => alert.severity === 'low').length || 0
     }
 
     return NextResponse.json({
       success: true,
-      alerts,
+      alerts: alerts as AlertRecord[],
       stats: alertStats
     })
 
@@ -124,7 +150,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validar severity
-    const validSeverities = ['low', 'medium', 'high', 'critical']
+    const validSeverities = ['low', 'medium', 'high', 'critical'] as const
     if (!validSeverities.includes(severity)) {
       return NextResponse.json(
         { error: 'Severity inválido' },
@@ -175,7 +201,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Alerta criado com sucesso',
-      alert
+      alert: alert as AlertRecord
     })
 
   } catch (error) {
@@ -223,7 +249,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Atualizar alerta
-    const updateData: any = {}
+    const updateData: Partial<AlertRecord> = {}
     if (typeof isRead === 'boolean') updateData.is_read = isRead
     if (typeof isDismissed === 'boolean') updateData.is_dismissed = isDismissed
 
@@ -246,7 +272,7 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Alerta atualizado com sucesso',
-      alert
+      alert: alert as AlertRecord
     })
 
   } catch (error) {

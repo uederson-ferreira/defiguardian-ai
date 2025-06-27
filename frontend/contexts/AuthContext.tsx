@@ -1,3 +1,9 @@
+/**
+ * MÓDULO: AuthContext Corrigido
+ * LOCALIZAÇÃO: contexts/AuthContext.tsx  
+ * DESCRIÇÃO: Remove auto-conexão automática, apenas conexão manual
+ */
+
 "use client";
 
 import React, {
@@ -47,12 +53,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // 🔧 FIX: Não loading inicial
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // 🔧 FIX: Apenas setup de listeners, SEM auto-conexão
   useEffect(() => {
-    checkAuthStatus();
     setupEventListeners();
     return () => {
       removeEventListeners();
@@ -79,64 +85,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (accounts.length === 0) {
       logout();
     } else if (user && accounts[0] !== user.address) {
-      // Account changed, reconnect
-      connectWallet();
+      // 🔧 FIX: NÃO reconectar automaticamente, apenas deslogar
+      console.log('🔄 Conta alterada, fazendo logout...');
+      logout();
     }
   };
 
   const handleChainChanged = (chainId: string) => {
-    // Reload the page when chain changes
-    window.location.reload();
+    // 🔧 FIX: Não recarregar página, apenas atualizar chainId
+    if (user) {
+      setUser(prev => prev ? { ...prev, chainId: parseInt(chainId, 16) } : null);
+    }
   };
 
   const handleDisconnect = () => {
     logout();
   };
 
-  const checkAuthStatus = async () => {
-    try {
-      setError(null);
-      const token = localStorage.getItem("auth_token");
-      const address = localStorage.getItem("wallet_address");
-
-      if (token && address) {
-        // Check if wallet is still connected
-        if (window.ethereum) {
-          try {
-            const accounts = await window.ethereum.request({
-              method: "eth_accounts",
-            });
-            if (accounts.includes(address)) {
-              const provider = new ethers.BrowserProvider(window.ethereum);
-              const network = await provider.getNetwork();
-              const balance = await provider.getBalance(address);
-
-              setUser({
-                address,
-                chainId: Number(network.chainId),
-                balance: ethers.formatEther(balance),
-              });
-            } else {
-              // Wallet disconnected, clear auth
-              localStorage.removeItem("auth_token");
-              localStorage.removeItem("wallet_address");
-            }
-          } catch (err) {
-            console.warn("Failed to check wallet connection:", err);
-            setUser({ address });
-          }
-        } else {
-          setUser({ address });
-        }
-      }
-    } catch (error) {
-      console.error("Error checking auth status:", error);
-      setError("Failed to check authentication status");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // 🔧 FIX: Função MANUAL para conectar wallet (não automática)
   const connectWallet = async () => {
     if (connecting) return;
 
@@ -152,92 +118,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Check if MetaMask is unlocked
-      try {
-        const accounts = await window.ethereum.request({
-          method: "eth_accounts",
-        });
-        if (accounts.length === 0) {
-          // MetaMask is locked, request access
-          await window.ethereum.request({ method: "eth_requestAccounts" });
-        }
-      } catch (err: any) {
-        if (err.code === 4001) {
-          const error = "Conexão rejeitada pelo usuário";
-          setError(error);
-          toast.error(error);
-          return;
-        }
-        throw err;
-      }
-
-      // Get accounts
+      // Request wallet connection
       const accounts = await window.ethereum.request({
         method: "eth_requestAccounts",
       });
 
-      if (accounts.length === 0) {
-        const error = "Nenhuma conta encontrada";
-        setError(error);
-        toast.error(error);
-        return;
+      if (!accounts.length) {
+        throw new Error("Nenhuma conta encontrada");
       }
 
       const address = accounts[0];
-
-      // Get network and balance info
       const provider = new ethers.BrowserProvider(window.ethereum);
       const network = await provider.getNetwork();
       const balance = await provider.getBalance(address);
 
-      // Get nonce from backend with retry logic
-      let nonceResponse;
-      let retries = 3;
+      // Generate login message
+      const nonce = Math.floor(Math.random() * 1000000).toString();
+      const message = `Sign this message to authenticate with DefiGuardian.\n\nNonce: ${nonce}`;
 
-      while (retries > 0) {
-        try {
-          nonceResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/auth/nonce`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ address }),
-            }
-          );
-
-          if (nonceResponse.ok) break;
-
-          if (retries === 1) {
-            throw new Error(
-              `Failed to get nonce: ${nonceResponse.status} ${nonceResponse.statusText}`
-            );
-          }
-
-          retries--;
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        } catch (err) {
-          if (retries === 1) throw err;
-          retries--;
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
-      }
-
-      if (!nonceResponse || !nonceResponse.ok) {
-        throw new Error("Failed to get nonce from server");
-      }
-
-      const { data } = await nonceResponse.json();
-      const { message } = data;
-
-      // Sign message with user-friendly error handling
       let signature;
       try {
-        signature = await window.ethereum.request({
-          method: "personal_sign",
-          params: [message, address],
-        });
+        const signer = await provider.getSigner();
+        signature = await signer.signMessage(message);
       } catch (err: any) {
         if (err.code === 4001) {
           const error = "Assinatura rejeitada pelo usuário";
@@ -295,6 +197,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const logout = () => {
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("wallet_address");
+    setUser(null);
+    setError(null);
+    toast.success("Desconectado com sucesso!");
+  };
+
+  const updateUser = (userData: Partial<User>) => {
+    setUser((prev) => (prev ? { ...prev, ...userData } : null));
+  };
+
   const switchNetwork = async (chainId: number) => {
     try {
       if (!window.ethereum) {
@@ -328,38 +242,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Failed to get balance:", error);
       return null;
-    }
-  };
-
-  const updateUser = (userData: Partial<User>) => {
-    setUser((prev) => (prev ? { ...prev, ...userData } : null));
-  };
-
-  const logout = async () => {
-    try {
-      setError(null);
-      const token = localStorage.getItem("auth_token");
-
-      if (token) {
-        try {
-          await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-        } catch (error) {
-          console.warn("Failed to logout from server:", error);
-        }
-      }
-    } catch (error) {
-      console.error("Logout error:", error);
-    } finally {
-      localStorage.removeItem("auth_token");
-      localStorage.removeItem("wallet_address");
-      setUser(null);
-      setError(null);
-      toast.success("Desconectado com sucesso");
     }
   };
 

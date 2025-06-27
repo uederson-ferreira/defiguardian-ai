@@ -1,5 +1,5 @@
 // app/api/portfolio/route.ts
-// API PARA GERENCIAR PORTFOLIOS
+// API PARA GERENCIAR PORTFOLIOS - CORRIGIDA COM TIPAGEM
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
@@ -10,6 +10,38 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
+
+// Interfaces para tipagem
+interface PositionRecord {
+  id: string
+  portfolio_id: string
+  protocol: string
+  token_symbol: string
+  value_usd: number
+  apy: number | null
+  risk_level: string
+  created_at: string
+  updated_at: string
+}
+
+interface PortfolioRecord {
+  id: string
+  user_id: string
+  name: string
+  description: string | null
+  wallet_address: string
+  total_value: number
+  risk_score: number
+  created_at: string
+  updated_at: string
+  positions?: PositionRecord[]
+}
+
+interface PortfolioWithStats extends PortfolioRecord {
+  calculated_total_value: number
+  average_apy: number
+  position_count: number
+}
 
 // GET - Buscar portfolios do usuário
 export async function GET(request: NextRequest) {
@@ -55,12 +87,12 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Calcular estatísticas
-    const portfoliosWithStats = portfolios?.map(portfolio => {
+    // Calcular estatísticas - COM TIPAGEM CORRETA
+    const portfoliosWithStats: PortfolioWithStats[] = (portfolios as PortfolioRecord[])?.map((portfolio: PortfolioRecord) => {
       const positions = portfolio.positions || []
-      const totalValue = positions.reduce((sum: number, pos: any) => sum + Number(pos.value_usd), 0)
+      const totalValue = positions.reduce((sum: number, pos: PositionRecord) => sum + Number(pos.value_usd), 0)
       const avgApy = positions.length > 0 
-        ? positions.reduce((sum: number, pos: any) => sum + (Number(pos.apy) || 0), 0) / positions.length
+        ? positions.reduce((sum: number, pos: PositionRecord) => sum + (Number(pos.apy) || 0), 0) / positions.length
         : 0
 
       return {
@@ -69,7 +101,7 @@ export async function GET(request: NextRequest) {
         average_apy: avgApy,
         position_count: positions.length
       }
-    })
+    }) || []
 
     return NextResponse.json({
       success: true,
@@ -156,7 +188,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Portfolio criado com sucesso',
-      portfolio
+      portfolio: portfolio as PortfolioRecord
     })
 
   } catch (error) {

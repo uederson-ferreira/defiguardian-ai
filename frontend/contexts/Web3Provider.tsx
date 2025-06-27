@@ -1,3 +1,9 @@
+/**
+ * MÓDULO: Web3Provider Corrigido
+ * LOCALIZAÇÃO: contexts/Web3Provider.tsx
+ * DESCRIÇÃO: Provider Web3 SEM auto-conexão, apenas conexão manual
+ */
+
 "use client";
 
 import React, {
@@ -22,6 +28,7 @@ interface Web3ContextType {
   initializeProvider: () => Promise<void>;
   switchToCorrectNetwork: () => Promise<void>;
   addNetwork: () => Promise<void>;
+  disconnect: () => void;
 }
 
 const Web3Context = createContext<Web3ContextType | undefined>(undefined);
@@ -36,46 +43,77 @@ export function Web3Provider({ children }: { children: ReactNode }) {
   const isCorrectNetwork = chainId === CHAIN_CONFIG.chainId;
   const isConnected = !!provider && !!signer;
 
+  // 🔧 FIX: Apenas listeners, SEM auto-inicialização
   useEffect(() => {
-    if (window.ethereum) {
+    if (typeof window !== 'undefined' && window.ethereum) {
       const handleChainChanged = (newChainId: string) => {
-        setChainId(parseInt(newChainId, 16));
-        // Reinitialize provider when chain changes
-        initializeProvider();
+        const parsedChainId = parseInt(newChainId, 16);
+        setChainId(parsedChainId);
+        console.log('🔄 Chain changed to:', parsedChainId);
+        
+        // 🔧 FIX: NÃO reinicializar automaticamente
+        // Apenas atualizar o chainId
       };
 
       const handleAccountsChanged = (accounts: string[]) => {
         if (accounts.length === 0) {
           // Disconnected
-          setProvider(null);
-          setSigner(null);
-          setChainId(null);
+          console.log('🔌 Wallet disconnected');
+          disconnect();
         } else {
-          // Account changed, reinitialize
-          initializeProvider();
+          // Account changed
+          console.log('👤 Account changed to:', accounts[0]);
+          // 🔧 FIX: NÃO reinicializar automaticamente
+          // Usuário deve conectar manualmente
         }
       };
 
+      const handleDisconnect = () => {
+        console.log('🔌 Wallet disconnect event');
+        disconnect();
+      };
+
+      // Setup listeners
       window.ethereum.on("chainChanged", handleChainChanged);
       window.ethereum.on("accountsChanged", handleAccountsChanged);
+      window.ethereum.on("disconnect", handleDisconnect);
 
       return () => {
-        window.ethereum?.removeListener("chainChanged", handleChainChanged);
-        window.ethereum?.removeListener(
-          "accountsChanged",
-          handleAccountsChanged
-        );
+        if (window.ethereum) {
+          window.ethereum.removeListener("chainChanged", handleChainChanged);
+          window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
+          window.ethereum.removeListener("disconnect", handleDisconnect);
+        }
       };
     }
   }, []);
 
+  // 🔧 FIX: Função MANUAL para inicializar provider
   const initializeProvider = async () => {
     try {
       setLoading(true);
       setError(null);
 
       if (!window.ethereum) {
-        throw new Error("MetaMask not found");
+        throw new Error("MetaMask não está instalado");
+      }
+
+      console.log('🔗 Inicializando Web3 provider...');
+
+      // Verificar se já há contas conectadas
+      const accounts = await window.ethereum.request({ 
+        method: 'eth_accounts' 
+      });
+
+      if (accounts.length === 0) {
+        // Solicitar conexão
+        const newAccounts = await window.ethereum.request({
+          method: 'eth_requestAccounts'
+        });
+        
+        if (newAccounts.length === 0) {
+          throw new Error("Nenhuma conta selecionada");
+        }
       }
 
       const browserProvider = new ethers.BrowserProvider(window.ethereum);
@@ -85,12 +123,21 @@ export function Web3Provider({ children }: { children: ReactNode }) {
       setProvider(browserProvider);
       setSigner(providerSigner);
       setChainId(Number(network.chainId));
+
+      console.log('✅ Web3 provider inicializado:', {
+        chainId: Number(network.chainId),
+        account: await providerSigner.getAddress()
+      });
+
+      toast.success("Web3 conectado com sucesso!");
+
     } catch (error: any) {
-      console.error("Failed to initialize Web3 provider:", error);
-      setError(error.message || "Failed to initialize Web3");
+      console.error("❌ Falha ao inicializar Web3 provider:", error);
+      setError(error.message || "Falha ao inicializar Web3");
       setProvider(null);
       setSigner(null);
       setChainId(null);
+      toast.error(error.message || "Falha ao conectar Web3");
     } finally {
       setLoading(false);
     }
@@ -99,18 +146,25 @@ export function Web3Provider({ children }: { children: ReactNode }) {
   const switchToCorrectNetwork = async () => {
     try {
       if (!window.ethereum) {
-        throw new Error("MetaMask not found");
+        throw new Error("MetaMask não encontrado");
       }
+
+      console.log('🔄 Mudando para rede correta...');
 
       await window.ethereum.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId: `0x${CHAIN_CONFIG.chainId.toString(16)}` }],
       });
+
+      toast.success("Rede alterada com sucesso!");
+
     } catch (error: any) {
       if (error.code === 4902) {
         // Network not added, try to add it
         await addNetwork();
       } else {
+        console.error("❌ Erro ao mudar rede:", error);
+        toast.error("Falha ao mudar rede");
         throw error;
       }
     }
@@ -119,8 +173,10 @@ export function Web3Provider({ children }: { children: ReactNode }) {
   const addNetwork = async () => {
     try {
       if (!window.ethereum) {
-        throw new Error("MetaMask not found");
+        throw new Error("MetaMask não encontrado");
       }
+
+      console.log('➕ Adicionando rede...');
 
       await window.ethereum.request({
         method: "wallet_addEthereumChain",
@@ -134,10 +190,22 @@ export function Web3Provider({ children }: { children: ReactNode }) {
           },
         ],
       });
+
+      toast.success("Rede adicionada com sucesso!");
+
     } catch (error: any) {
-      console.error("Failed to add network:", error);
+      console.error("❌ Falha ao adicionar rede:", error);
+      toast.error("Falha ao adicionar rede");
       throw error;
     }
+  };
+
+  const disconnect = () => {
+    console.log('🔌 Desconectando Web3...');
+    setProvider(null);
+    setSigner(null);
+    setChainId(null);
+    setError(null);
   };
 
   const value: Web3ContextType = {
@@ -151,6 +219,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
     initializeProvider,
     switchToCorrectNetwork,
     addNetwork,
+    disconnect,
   };
 
   return <Web3Context.Provider value={value}>{children}</Web3Context.Provider>;
