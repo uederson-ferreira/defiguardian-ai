@@ -6,8 +6,8 @@
 
 "use client";
 
-import { useState } from 'react';
-import { useContracts } from '@/hooks/useContracts';
+import { useState } from "react";
+import { useContracts } from "@/hooks/useContracts";
 import {
   Dialog,
   DialogContent,
@@ -15,70 +15,70 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
-import { Plus, Loader2, TrendingUp, DollarSign, Shield } from 'lucide-react';
+} from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import { Plus, Loader2, TrendingUp, DollarSign, Shield } from "lucide-react";
 
 // Protocolos DeFi populares (endereços de exemplo - ajuste conforme necessário)
 const PROTOCOLS = [
   {
-    name: 'Uniswap V3',
-    address: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
-    description: 'DEX líquida',
-    risk: 'Baixo'
+    name: "Uniswap V3",
+    address: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+    description: "DEX líquida",
+    risk: "Baixo",
   },
   {
-    name: 'Aave',
-    address: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2',
-    description: 'Lending protocol',
-    risk: 'Médio'
+    name: "Aave",
+    address: "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+    description: "Lending protocol",
+    risk: "Médio",
   },
   {
-    name: 'Compound',
-    address: '0xc3d688B66703497DAA19211EEdff47f25384cdc3',
-    description: 'Lending protocol',
-    risk: 'Médio'
+    name: "Compound",
+    address: "0xc3d688B66703497DAA19211EEdff47f25384cdc3",
+    description: "Lending protocol",
+    risk: "Médio",
   },
   {
-    name: 'Curve',
-    address: '0xD51a44d3FaE010294C616388b506AcdA1bfAAE46',
-    description: 'Stablecoin DEX',
-    risk: 'Baixo'
-  }
+    name: "Curve",
+    address: "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46",
+    description: "Stablecoin DEX",
+    risk: "Baixo",
+  },
 ];
 
-// Tokens comuns
+// Tokens da Fuji Testnet (endereços reais)
 const TOKENS = [
   {
-    name: 'USDC',
-    address: '0xA0b86a33E6417c543439Ac4c4B9A13F1b8a59C3b',
-    symbol: 'USDC'
+    name: "USDC",
+    address: "0x5425890298aed601595a70AB815c96711a31Bc65",
+    symbol: "USDC",
   },
   {
-    name: 'USDT',
-    address: '0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7',
-    symbol: 'USDT'
+    name: "USDT",
+    address: "0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7",
+    symbol: "USDT",
   },
   {
-    name: 'AVAX',
-    address: '0x0000000000000000000000000000000000000000',
-    symbol: 'AVAX'
+    name: "WAVAX",
+    address: "0xd00ae08403B9bbb9124bB305C09058E32C39A48c",
+    symbol: "WAVAX",
   },
   {
-    name: 'WETH',
-    address: '0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB',
-    symbol: 'WETH'
-  }
+    name: "WETH",
+    address: "0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB",
+    symbol: "WETH",
+  },
 ];
 
 interface AddPositionModalProps {
@@ -89,11 +89,11 @@ interface AddPositionModalProps {
 export function AddPositionModal({ trigger, children }: AddPositionModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Form states
-  const [selectedProtocol, setSelectedProtocol] = useState<string>('');
-  const [selectedToken, setSelectedToken] = useState<string>('');
-  const [amount, setAmount] = useState<string>('');
+  const [selectedProtocol, setSelectedProtocol] = useState<string>("");
+  const [selectedToken, setSelectedToken] = useState<string>("");
+  const [amount, setAmount] = useState<string>("");
 
   const { addPosition, isConnected } = useContracts();
 
@@ -104,26 +104,28 @@ export function AddPositionModal({ trigger, children }: AddPositionModalProps) {
 
     try {
       setIsLoading(true);
-      
+
       // Converter amount para wei (assumindo 18 decimais)
       const amountWei = (parseFloat(amount) * 1e18).toString();
-      
+
       await addPosition(selectedProtocol, selectedToken, amountWei);
-      
+
       // Reset form
-      setSelectedProtocol('');
-      setSelectedToken('');
-      setAmount('');
+      setSelectedProtocol("");
+      setSelectedToken("");
+      setAmount("");
       setIsOpen(false);
     } catch (error) {
-      console.error('Erro ao adicionar posição:', error);
+      console.error("Erro ao adicionar posição:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const selectedProtocolData = PROTOCOLS.find(p => p.address === selectedProtocol);
-  const selectedTokenData = TOKENS.find(t => t.address === selectedToken);
+  const selectedProtocolData = PROTOCOLS.find(
+    (p) => p.address === selectedProtocol
+  );
+  const selectedTokenData = TOKENS.find((t) => t.address === selectedToken);
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -135,7 +137,7 @@ export function AddPositionModal({ trigger, children }: AddPositionModalProps) {
           </Button>
         )}
       </DialogTrigger>
-      
+
       <DialogContent className="sm:max-w-md bg-slate-800 border-slate-700 text-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -163,24 +165,31 @@ export function AddPositionModal({ trigger, children }: AddPositionModalProps) {
             <Label htmlFor="protocol" className="text-sm font-medium">
               Protocolo DeFi
             </Label>
-            <Select value={selectedProtocol} onValueChange={setSelectedProtocol}>
+            <Select
+              value={selectedProtocol}
+              onValueChange={setSelectedProtocol}
+            >
               <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                 <SelectValue placeholder="Selecione um protocolo" />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700">
                 {PROTOCOLS.map((protocol) => (
-                  <SelectItem 
-                    key={protocol.address} 
+                  <SelectItem
+                    key={protocol.address}
                     value={protocol.address}
                     className="text-white hover:bg-slate-700"
                   >
                     <div className="flex items-center justify-between w-full">
                       <span>{protocol.name}</span>
-                      <span className={`text-xs px-2 py-1 rounded ${
-                        protocol.risk === 'Baixo' ? 'bg-green-500/20 text-green-400' :
-                        protocol.risk === 'Médio' ? 'bg-yellow-500/20 text-yellow-400' :
-                        'bg-red-500/20 text-red-400'
-                      }`}>
+                      <span
+                        className={`text-xs px-2 py-1 rounded ${
+                          protocol.risk === "Baixo"
+                            ? "bg-green-500/20 text-green-400"
+                            : protocol.risk === "Médio"
+                            ? "bg-yellow-500/20 text-yellow-400"
+                            : "bg-red-500/20 text-red-400"
+                        }`}
+                      >
                         {protocol.risk}
                       </span>
                     </div>
@@ -206,8 +215,8 @@ export function AddPositionModal({ trigger, children }: AddPositionModalProps) {
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700">
                 {TOKENS.map((token) => (
-                  <SelectItem 
-                    key={token.address} 
+                  <SelectItem
+                    key={token.address}
                     value={token.address}
                     className="text-white hover:bg-slate-700"
                   >
@@ -258,23 +267,33 @@ export function AddPositionModal({ trigger, children }: AddPositionModalProps) {
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Protocolo:</span>
-                    <span className="text-white">{selectedProtocolData.name}</span>
+                    <span className="text-white">
+                      {selectedProtocolData.name}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Token:</span>
-                    <span className="text-white">{selectedTokenData.symbol}</span>
+                    <span className="text-white">
+                      {selectedTokenData.symbol}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Quantidade:</span>
-                    <span className="text-white">{amount} {selectedTokenData.symbol}</span>
+                    <span className="text-white">
+                      {amount} {selectedTokenData.symbol}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Nível de Risco:</span>
-                    <span className={`${
-                      selectedProtocolData.risk === 'Baixo' ? 'text-green-400' :
-                      selectedProtocolData.risk === 'Médio' ? 'text-yellow-400' :
-                      'text-red-400'
-                    }`}>
+                    <span
+                      className={`${
+                        selectedProtocolData.risk === "Baixo"
+                          ? "text-green-400"
+                          : selectedProtocolData.risk === "Médio"
+                          ? "text-yellow-400"
+                          : "text-red-400"
+                      }`}
+                    >
                       {selectedProtocolData.risk}
                     </span>
                   </div>
@@ -286,7 +305,13 @@ export function AddPositionModal({ trigger, children }: AddPositionModalProps) {
           {/* Submit Button */}
           <Button
             onClick={handleSubmit}
-            disabled={!isConnected || !selectedProtocol || !selectedToken || !amount || isLoading}
+            disabled={
+              !isConnected ||
+              !selectedProtocol ||
+              !selectedToken ||
+              !amount ||
+              isLoading
+            }
             className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
           >
             {isLoading ? (
