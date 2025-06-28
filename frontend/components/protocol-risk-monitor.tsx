@@ -71,7 +71,7 @@ export function ProtocolRiskMonitor() {
       setLoading(true)
       setError(null)
 
-      console.log('🔄 Carregando riscos de protocolos...')
+      console.log('🔄 Loading protocol risks...')
       
       // Load market risk
       const market = await getMarketRisk()
@@ -96,7 +96,7 @@ export function ProtocolRiskMonitor() {
             tvl: protocol.tvl
           } as ProtocolRiskData
         } catch (err) {
-          console.warn(`⚠️ Erro ao carregar risco para ${protocol.name}:`, err)
+          console.warn(`⚠️ Error loading risk for ${protocol.name}:`, err)
           // Return mock data if contract call fails
           return {
             address: protocol.address,
@@ -114,12 +114,12 @@ export function ProtocolRiskMonitor() {
       setProtocolsData(results)
       setLastRefresh(new Date())
       
-      console.log('✅ Riscos de protocolos carregados:', results)
-      console.log('📊 Risco de mercado:', market)
+      console.log('✅ Protocol risks loaded:', results)
+      console.log('📊 Market risk:', market)
 
     } catch (err: unknown) {
-      console.error('❌ Erro ao carregar riscos de protocolos:', err)
-      setError(err instanceof Error ? err.message : 'Erro ao carregar dados de risco')
+      console.error('❌ Error loading protocol risks:', err)
+      setError(err instanceof Error ? err.message : 'Error loading risk data')
     } finally {
       setLoading(false)
     }
@@ -138,9 +138,9 @@ export function ProtocolRiskMonitor() {
   }
 
   const getRiskLabel = (riskScore: number) => {
-    if (riskScore < 30) return 'Baixo'
-    if (riskScore < 70) return 'Moderado'
-    return 'Alto'
+    if (riskScore < 30) return 'Low'
+    if (riskScore < 70) return 'Moderate'
+    return 'High'
   }
 
   const getTrendIcon = (trend: string) => {
@@ -170,9 +170,9 @@ export function ProtocolRiskMonitor() {
   const getMarketRiskStatus = () => {
     if (!marketRisk) return { label: 'N/A', color: 'text-gray-500' }
     
-    if (marketRisk < 30) return { label: 'Estável', color: 'text-green-600' }
-    if (marketRisk < 70) return { label: 'Volátil', color: 'text-yellow-600' }
-    return { label: 'Crítico', color: 'text-red-600' }
+    if (marketRisk < 30) return { label: 'Stable', color: 'text-green-600' }
+    if (marketRisk < 70) return { label: 'Volatile', color: 'text-yellow-600' }
+    return { label: 'Critical', color: 'text-red-600' }
   }
 
   useEffect(() => {
@@ -198,17 +198,17 @@ export function ProtocolRiskMonitor() {
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <Activity className="h-5 w-5 text-green-400" />
-            Monitor de Risco de Protocolos
+            Protocol Risk Monitor
           </CardTitle>
           <CardDescription className="text-slate-400">
-            Conecte sua carteira no topo da página para monitorar riscos de protocolos DeFi
+            Connect your wallet at the top of the page to monitor DeFi protocol risks
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Alert className="border-green-500/50 bg-green-500/10">
             <Activity className="h-4 w-4 text-green-400" />
             <AlertDescription className="text-green-400">
-              ⚠️ Carteira não conectada. Use o botão de conexão no header da página.
+              ⚠️ Wallet not connected. Use the connection button in the page header.
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -222,13 +222,13 @@ export function ProtocolRiskMonitor() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
-            Monitor de Risco de Protocolos
+            Protocol Risk Monitor
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin" />
-            <span className="ml-2">Carregando dados de risco...</span>
+            <span className="ml-2">Loading risk data...</span>
           </div>
         </CardContent>
       </Card>
@@ -241,7 +241,7 @@ export function ProtocolRiskMonitor() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
-            Monitor de Risco de Protocolos
+            Protocol Risk Monitor
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -252,7 +252,7 @@ export function ProtocolRiskMonitor() {
             </AlertDescription>
           </Alert>
           <Button onClick={loadProtocolRisks} className="w-full mt-4">
-            Tentar Novamente
+            Try Again
           </Button>
         </CardContent>
       </Card>
@@ -270,10 +270,10 @@ export function ProtocolRiskMonitor() {
             <div>
               <CardTitle className="flex items-center gap-2">
                 <Activity className="h-5 w-5" />
-                Monitor de Risco de Protocolos
+                Protocol Risk Monitor
               </CardTitle>
               <CardDescription>
-                Monitoramento em tempo real dos riscos de protocolos DeFi
+                Real-time monitoring of DeFi protocol risks
               </CardDescription>
             </div>
             <Button onClick={loadProtocolRisks} variant="outline" size="sm" disabled={loading}>
@@ -289,7 +289,7 @@ export function ProtocolRiskMonitor() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Risco de Mercado</span>
+                <span className="text-sm font-medium">Market Risk</span>
                 <Badge variant={marketRisk ? getRiskBadgeVariant(marketRisk) : 'secondary'}>
                   {marketStatus.label}
                 </Badge>
@@ -300,14 +300,14 @@ export function ProtocolRiskMonitor() {
             </div>
             
             <div className="space-y-2">
-              <span className="text-sm font-medium">Protocolos Monitorados</span>
+              <span className="text-sm font-medium">Monitored Protocols</span>
               <p className="text-2xl font-bold">{protocolsData.length}</p>
             </div>
             
             <div className="space-y-2">
-              <span className="text-sm font-medium">Última Atualização</span>
+              <span className="text-sm font-medium">Last Update</span>
               <p className="text-sm text-muted-foreground">
-                {lastRefresh ? lastRefresh.toLocaleTimeString('pt-BR') : 'Nunca'}
+                {lastRefresh ? lastRefresh.toLocaleTimeString('en-US') : 'Never'}
               </p>
             </div>
           </div>
@@ -317,18 +317,18 @@ export function ProtocolRiskMonitor() {
       {/* Protocols List */}
       <Card>
         <CardHeader>
-          <CardTitle>Riscos por Protocolo</CardTitle>
+          <CardTitle>Risks by Protocol</CardTitle>
           <CardDescription>
-            Análise detalhada de risco para cada protocolo DeFi
+            Detailed risk analysis for each DeFi protocol
           </CardDescription>
         </CardHeader>
         <CardContent>
           {protocolsData.length === 0 ? (
             <div className="text-center py-8">
               <Activity className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-muted-foreground mb-4">Nenhum dado de protocolo disponível</p>
+              <p className="text-muted-foreground mb-4">No protocol data available</p>
               <Button onClick={loadProtocolRisks}>
-                Carregar Dados
+                Load Data
               </Button>
             </div>
           ) : (
@@ -362,7 +362,7 @@ export function ProtocolRiskMonitor() {
                   
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Score de Risco</span>
+                      <span className="text-sm text-muted-foreground">Risk Score</span>
                       <span className={`text-sm font-medium ${getRiskColor(protocol.riskScore)}`}>
                         {protocol.riskScore.toFixed(1)}%
                       </span>
@@ -371,8 +371,8 @@ export function ProtocolRiskMonitor() {
                   </div>
                   
                   <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
-                    <span>Endereço: {protocol.address.slice(0, 10)}...{protocol.address.slice(-8)}</span>
-                    <span>Atualizado: {new Date(protocol.lastUpdated).toLocaleTimeString('pt-BR')}</span>
+                    <span>Address: {protocol.address.slice(0, 10)}...{protocol.address.slice(-8)}</span>
+                    <span>Updated: {new Date(protocol.lastUpdated).toLocaleTimeString('en-US')}</span>
                   </div>
                 </div>
               ))}

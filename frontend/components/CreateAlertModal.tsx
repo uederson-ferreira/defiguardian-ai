@@ -41,22 +41,22 @@ import {
 const ALERT_TYPES = [
   {
     id: "risk_threshold",
-    name: "Limite de Risco",
-    description: "Alerta quando risk score exceder o limite",
+    name: "Risk Threshold",
+    description: "Alert when risk score exceeds the limit",
     icon: AlertTriangle,
     color: "text-red-400",
   },
   {
     id: "portfolio_value",
-    name: "Valor do Portfolio",
-    description: "Alerta para mudanças no valor total",
+    name: "Portfolio Value",
+    description: "Alert for changes in total value",
     icon: TrendingUp,
     color: "text-green-400",
   },
   {
     id: "protocol_risk",
-    name: "Risco de Protocolo",
-    description: "Alerta para mudanças em protocolos específicos",
+    name: "Protocol Risk",
+    description: "Alert for changes in specific protocols",
     icon: Shield,
     color: "text-blue-400",
   },
@@ -64,7 +64,7 @@ const ALERT_TYPES = [
 
 // Canais de notificação
 const NOTIFICATION_CHANNELS = [
-  { id: "browser", name: "Notificação do Navegador", enabled: true },
+  { id: "browser", name: "Browser Notification", enabled: true },
   { id: "email", name: "Email", enabled: false },
   { id: "webhook", name: "Webhook/Discord", enabled: false },
 ];
@@ -128,7 +128,7 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
       setUseCustomThreshold(false);
       setIsOpen(false);
     } catch (error) {
-      console.error("Erro ao criar alerta:", error);
+      console.error("Error creating alert:", error);
     } finally {
       setIsLoading(false);
     }
@@ -142,24 +142,24 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
   const getRiskLevel = (score: number) => {
     if (score <= 30)
       return {
-        level: "Baixo",
+        level: "Low",
         color: "text-green-400",
         bgColor: "bg-green-500/20",
       };
     if (score <= 60)
       return {
-        level: "Moderado",
+        level: "Moderate",
         color: "text-yellow-400",
         bgColor: "bg-yellow-500/20",
       };
     if (score <= 80)
       return {
-        level: "Alto",
+        level: "High",
         color: "text-orange-400",
         bgColor: "bg-orange-500/20",
       };
     return {
-      level: "Crítico",
+      level: "Critical",
       color: "text-red-400",
       bgColor: "bg-red-500/20",
     };
@@ -176,7 +176,7 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
             className="border-slate-600 text-slate-300 hover:bg-slate-700"
           >
             <Bell className="mr-2 h-4 w-4" />
-            Criar Alerta
+            Create Alert
           </Button>
         )}
       </DialogTrigger>
@@ -185,10 +185,10 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Bell className="h-5 w-5 text-yellow-400" />
-            Configurar Alerta Inteligente
+            Configure Smart Alert
           </DialogTitle>
           <DialogDescription className="text-slate-400">
-            Receba notificações automáticas sobre mudanças importantes no seu
+            Receive automatic notifications about important changes in your
             portfolio
           </DialogDescription>
         </DialogHeader>
@@ -198,7 +198,7 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
             <Card className="bg-yellow-500/10 border-yellow-500/20">
               <CardContent className="p-4">
                 <p className="text-yellow-400 text-sm">
-                  ⚠️ Conecte sua carteira para criar alertas
+                  ⚠️ Connect your wallet to create alerts
                 </p>
               </CardContent>
             </Card>
@@ -206,7 +206,7 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
 
           {/* Tipo de Alerta */}
           <div className="space-y-3">
-            <Label className="text-sm font-medium">Tipo de Alerta</Label>
+            <Label className="text-sm font-medium">Alert Type</Label>
             <div className="grid gap-3">
               {ALERT_TYPES.map((type) => {
                 const Icon = type.icon;
@@ -246,14 +246,14 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
           {alertType && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium">Limite de Disparo</Label>
+                <Label className="text-sm font-medium">Trigger Threshold</Label>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setUseCustomThreshold(!useCustomThreshold)}
                   className="text-xs text-purple-400 hover:text-purple-300"
                 >
-                  {useCustomThreshold ? "Usar Slider" : "Valor Personalizado"}
+                  {useCustomThreshold ? "Use Slider" : "Custom Value"}
                 </Button>
               </div>
 
@@ -269,7 +269,7 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
                     className="bg-slate-700 border-slate-600 text-white"
                   />
                   <p className="text-xs text-slate-400">
-                    Digite um valor entre 0 e 100
+                    Enter a value between 0 and 100
                   </p>
                 </div>
               ) : (
@@ -283,11 +283,11 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-slate-400">
-                    <span>0% (Sem Risco)</span>
+                    <span>0% (No Risk)</span>
                     <span className="font-mono text-white">
                       {threshold[0]}%
                     </span>
-                    <span>100% (Risco Máximo)</span>
+                    <span>100% (Maximum Risk)</span>
                   </div>
                 </div>
               )}
@@ -302,7 +302,7 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
                 <CardContent className="p-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-slate-300">
-                      Nível de Risco:
+                      Risk Level:
                     </span>
                     <span className={`font-medium ${riskInfo.color}`}>
                       {riskInfo.level} ({finalThreshold}%)
@@ -319,29 +319,29 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
               <CardContent className="p-4 space-y-3">
                 <h4 className="font-medium text-white flex items-center gap-2">
                   <Bell className="h-4 w-4 text-yellow-400" />
-                  Preview do Alerta
+                  Alert Preview
                 </h4>
 
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Tipo:</span>
+                    <span className="text-slate-400">Type:</span>
                     <span className="text-white">{selectedAlertType.name}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Limite:</span>
+                    <span className="text-slate-400">Threshold:</span>
                     <span className="text-white">{finalThreshold}%</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Sensibilidade:</span>
+                    <span className="text-slate-400">Sensitivity:</span>
                     <span className={riskInfo.color}>{riskInfo.level}</span>
                   </div>
                 </div>
 
                 <div className="border-t border-slate-600 pt-3 mt-3">
                   <p className="text-xs text-slate-400">
-                    <strong>Exemplo:</strong> Você receberá um alerta quando seu
-                    risk score ultrapassar {finalThreshold}%, indicando nível de
-                    risco {riskInfo.level.toLowerCase()}.
+                    <strong>Example:</strong> You will receive an alert when your
+                    risk score exceeds {finalThreshold}%, indicating {riskInfo.level.toLowerCase()}
+                    risk level.
                   </p>
                 </div>
               </CardContent>
@@ -350,7 +350,7 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
 
           {/* Canais de Notificação */}
           <div className="space-y-3">
-            <Label className="text-sm font-medium">Canais de Notificação</Label>
+            <Label className="text-sm font-medium">Notification Channels</Label>
             <div className="space-y-2">
               {NOTIFICATION_CHANNELS.map((channel) => (
                 <div
@@ -365,7 +365,7 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
                         : "bg-slate-600/20 text-slate-400"
                     }`}
                   >
-                    {channel.enabled ? "Ativo" : "Em breve"}
+                    {channel.enabled ? "Active" : "Coming Soon"}
                   </span>
                 </div>
               ))}
@@ -381,12 +381,12 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Criando Alerta...
+                Creating Alert...
               </>
             ) : (
               <>
                 <Bell className="mr-2 h-4 w-4" />
-                Criar Alerta ({finalThreshold}%)
+                Create Alert ({finalThreshold}%)
               </>
             )}
           </Button>

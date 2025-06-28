@@ -43,7 +43,7 @@ export function useTransactionDebug() {
   // Função de teste simples
   const testSimpleTransaction = async () => {
     if (!address) {
-      toast.error('Conecte sua carteira primeiro');
+      toast.error('Connect your wallet first');
       return;
     }
 
@@ -80,19 +80,20 @@ export function useTransactionDebug() {
 
       return txHash;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      console.error('❌ TESTE: Erro detalhado:', error);
+      console.error('❌ TEST: Detailed error:', error);
       
       // Análise detalhada do erro
-      let errorMessage = 'Erro na transação';
+      let errorMessage = 'Transaction error';
       
       if (error.message) {
         if (error.message.includes('insufficient funds')) {
-          errorMessage = 'Saldo AVAX insuficiente para gas';
+          errorMessage = 'Insufficient AVAX balance for gas';
         } else if (error.message.includes('execution reverted')) {
-          errorMessage = 'Transação rejeitada pelo contrato';
+          errorMessage = 'Transaction rejected by contract';
         } else if (error.message.includes('user rejected')) {
-          errorMessage = 'Transação cancelada pelo usuário';
+          errorMessage = 'Transaction cancelled by user';
         } else {
           errorMessage = error.message;
         }
@@ -127,18 +128,18 @@ export function useTransactionDebug() {
       console.log('🏗️ Código do contrato:', code);
 
       if (code === '0x') {
-        console.error('❌ CONTRATO NÃO EXISTE!');
-        toast.error('Contrato não encontrado no endereço especificado');
+        console.error('❌ CONTRACT DOES NOT EXIST!');
+        toast.error('Contract not found at specified address');
         return false;
       } else {
-        console.log('✅ Contrato existe!');
-        toast.success('Contrato encontrado');
+        console.log('✅ Contract exists!');
+        toast.success('Contract found');
         return true;
       }
 
     } catch (error) {
-      console.error('❌ Erro ao verificar contrato:', error);
-      toast.error('Erro ao verificar contrato');
+      console.error('❌ Error verifying contract:', error);
+      toast.error('Error verifying contract');
       return false;
     }
   };

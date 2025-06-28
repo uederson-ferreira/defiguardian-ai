@@ -28,12 +28,12 @@ export async function GET() {
     })
 
   } catch (error) {
-    console.error('❌ Erro na API Test:', error)
+    console.error('❌ Error in Test API:', error)
     
     return NextResponse.json({
       success: false,
-      error: 'Erro interno do servidor',
-      details: error instanceof Error ? error.message : 'Erro desconhecido'
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
 }

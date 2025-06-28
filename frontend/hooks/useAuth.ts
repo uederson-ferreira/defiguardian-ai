@@ -33,6 +33,7 @@ export function useAuth() {
     } else {
       setProfile(null);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status]);
 
   const loadUserProfile = async () => {
@@ -47,7 +48,7 @@ export function useAuth() {
         .single();
 
       if (error) {
-        console.error("Erro ao carregar perfil:", error);
+        console.error("Error loading profile:", error);
         return;
       }
 
@@ -63,7 +64,7 @@ export function useAuth() {
         });
       }
     } catch (error) {
-      console.error("Erro ao carregar perfil do usuário:", error);
+      console.error("Error loading user profile:", error);
     } finally {
       setLoading(false);
     }
@@ -71,7 +72,7 @@ export function useAuth() {
 
   const updateWalletAddress = async (walletAddress: string): Promise<boolean> => {
     if (!session?.user?.email) {
-      console.error("Usuário não autenticado");
+      console.error("User not authenticated");
       return false;
     }
 
@@ -86,7 +87,7 @@ export function useAuth() {
         .eq("email", session.user.email);
 
       if (error) {
-        console.error("Erro ao atualizar wallet:", error);
+        console.error("Error updating wallet:", error);
         return false;
       }
 
@@ -95,10 +96,10 @@ export function useAuth() {
         setProfile({ ...profile, walletAddress });
       }
 
-      console.log("Carteira conectada com sucesso!");
+      console.log("Wallet connected successfully!");
       return true;
     } catch (error) {
-      console.error("Erro ao salvar endereço da carteira:", error);
+      console.error("Error saving wallet address:", error);
       return false;
     } finally {
       setLoading(false);

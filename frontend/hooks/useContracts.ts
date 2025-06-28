@@ -166,18 +166,18 @@ export function useContracts() {
     amount: string
   ) => {
     if (!address) {
-      toast.error("Conecte sua carteira primeiro");
+      toast.error("Connect your wallet first");
       return;
     }
 
     // ✅ VALIDAÇÃO: Prevenir endereços zero
     if (tokenAddress === "0x0000000000000000000000000000000000000000") {
-      toast.error("Selecione um token válido");
+      toast.error("Select a valid token");
       return;
     }
 
     if (protocolAddress === "0x0000000000000000000000000000000000000000") {
-      toast.error("Selecione um protocolo válido");
+      toast.error("Select a valid protocol");
       return;
     }
 
@@ -212,15 +212,15 @@ export function useContracts() {
 
       return txHash;
     } catch (error: unknown) {
-      console.error("❌ REAL: Erro ao adicionar posição:", error);
+      console.error("❌ REAL: Error adding position:", error);
 
-      let errorMessage = "Erro ao adicionar posição";
+      let errorMessage = "Error adding position";
       if (error instanceof Error && error.message?.includes("insufficient funds")) {
-        errorMessage = "Saldo AVAX insuficiente para gas";
+        errorMessage = "Insufficient AVAX balance for gas";
       } else if (error instanceof Error && error.message?.includes("execution reverted")) {
-        errorMessage = "Transação rejeitada pelo contrato";
+        errorMessage = "Transaction rejected by contract";
       } else if (error instanceof Error && error.message?.includes("user rejected")) {
-        errorMessage = "Transação cancelada pelo usuário";
+        errorMessage = "Transaction cancelled by user";
       }
 
       toast.error(errorMessage);
@@ -231,7 +231,7 @@ export function useContracts() {
   // ✍️ ESCRITA: Criar Alerta - CORRIGINDO TIPO UINT8
   const createAlert = async (alertType: number, threshold: number) => {
     if (!address) {
-      toast.error("Conecte sua carteira primeiro");
+      toast.error("Connect your wallet first");
       return;
     }
 
@@ -242,7 +242,7 @@ export function useContracts() {
         threshold,
       });
 
-      toast.loading("Criando alerta...");
+      toast.loading("Creating alert...");
 
       // Endereço zero para alertas genéricos
       const protocolAddress = "0x0000000000000000000000000000000000000000";
@@ -267,15 +267,15 @@ export function useContracts() {
 
       return txHash;
     } catch (error: unknown) {
-      console.error("❌ REAL: Erro ao criar alerta:", error);
+      console.error("❌ REAL: Error creating alert:", error);
 
-      let errorMessage = "Erro ao criar alerta";
+      let errorMessage = "Error creating alert";
       if (error instanceof Error && error.message?.includes("insufficient funds")) {
-        errorMessage = "Saldo AVAX insuficiente para gas";
+        errorMessage = "Insufficient AVAX balance for gas";
       } else if (error instanceof Error && error.message?.includes("execution reverted")) {
-        errorMessage = "Transação rejeitada pelo contrato";
+        errorMessage = "Transaction rejected by contract";
       } else if (error instanceof Error && error.message?.includes("user rejected")) {
-        errorMessage = "Transação cancelada pelo usuário";
+        errorMessage = "Transaction cancelled by user";
       }
 
       toast.error(errorMessage);
@@ -289,7 +289,7 @@ export function useContracts() {
     coverageAmount: string
   ) => {
     if (!address) {
-      toast.error("Conecte sua carteira primeiro");
+      toast.error("Connect your wallet first");
       return;
     }
 
@@ -300,7 +300,7 @@ export function useContracts() {
         coverageAmount,
       });
 
-      toast.loading("Criando apólice de seguro...");
+      toast.loading("Creating insurance policy...");
 
       // Converter coverage para Wei se necessário
       const coverage = BigInt(coverageAmount);
@@ -318,18 +318,18 @@ export function useContracts() {
         value: premium,
       });
 
-      console.log("✅ REAL: Seguro criado:", txHash);
-      toast.success("Seguro criado com sucesso!");
+      console.log("✅ REAL: Insurance created:", txHash);
+      toast.success("Insurance created successfully!");
 
       return txHash;
     } catch (error: unknown) {
-      console.error("❌ REAL: Erro ao criar seguro:", error);
+      console.error("❌ REAL: Error creating insurance:", error);
 
-      let errorMessage = "Erro ao criar seguro";
+      let errorMessage = "Error creating insurance";
       if (error instanceof Error && error.message?.includes("insufficient funds")) {
-        errorMessage = "Saldo insuficiente para premium + gas";
+        errorMessage = "Insufficient balance for premium + gas";
       } else if (error instanceof Error && error.message?.includes("execution reverted")) {
-        errorMessage = "Transação rejeitada pelo contrato";
+        errorMessage = "Transaction rejected by contract";
       }
 
       toast.error(errorMessage);
@@ -343,7 +343,7 @@ export function useContracts() {
   // 📈 FUNÇÃO: Analisar Portfolio
   const analyzePortfolio = () => {
     if (!isConnected) {
-      toast.error("Conecte sua carteira para analisar portfolio");
+      toast.error("Connect your wallet to analyze portfolio");
       return;
     }
 
@@ -356,8 +356,8 @@ export function useContracts() {
         toast.success("Análise de portfolio atualizada!");
       })
       .catch((error) => {
-        console.error("❌ REAL: Erro na análise:", error);
-        toast.error("Erro ao analisar portfolio");
+        console.error("❌ REAL: Error in analysis:", error);
+        toast.error("Error analyzing portfolio");
       });
   };
 

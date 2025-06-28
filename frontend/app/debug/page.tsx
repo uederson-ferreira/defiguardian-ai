@@ -46,15 +46,15 @@ export default function DebugPage() {
       testResults.push({
         name: 'API Test Route',
         status: response.ok ? 'success' : 'error',
-        message: response.ok ? 'API funcionando' : 'API com erro',
+        message: response.ok ? 'API working' : 'API error',
         details: data
       })
     } catch (error) {
       testResults.push({
         name: 'API Test Route',
         status: 'error',
-        message: 'Erro na conexão com API',
-        details: error instanceof Error ? error.message : 'Erro desconhecido'
+        message: 'API connection error',
+        details: error instanceof Error ? error.message : 'Unknown error'
       })
     }
 
@@ -65,15 +65,15 @@ export default function DebugPage() {
       testResults.push({
         name: 'Environment Variables',
         status: response.ok ? 'success' : 'error',
-        message: response.ok ? 'Variáveis carregadas' : 'Erro nas variáveis ENV',
+        message: response.ok ? 'Variables loaded' : 'ENV variables error',
         details: data.environment_check
       })
     } catch (error) {
       testResults.push({
         name: 'Environment Variables',
         status: 'error',
-        message: 'Erro ao verificar ENV',
-        details: error instanceof Error ? error.message : 'Erro desconhecido'
+        message: 'Error checking ENV',
+        details: error instanceof Error ? error.message : 'Unknown error'
       })
     }
 
@@ -84,15 +84,15 @@ export default function DebugPage() {
       testResults.push({
         name: 'NextAuth Providers',
         status: response.ok ? 'success' : 'error',
-        message: response.ok ? 'NextAuth configurado' : 'NextAuth com erro',
+        message: response.ok ? 'NextAuth configured' : 'NextAuth error',
         details: data
       })
     } catch (error) {
       testResults.push({
         name: 'NextAuth Providers',
         status: 'error',
-        message: 'NextAuth não responde',
-        details: error instanceof Error ? error.message : 'Erro desconhecido'
+        message: 'NextAuth not responding',
+        details: error instanceof Error ? error.message : 'Unknown error'
       })
     }
 
@@ -110,8 +110,8 @@ export default function DebugPage() {
       testResults.push({
         name: 'NextAuth Session',
         status: 'error',
-        message: 'Erro ao verificar sessão',
-        details: error instanceof Error ? error.message : 'Erro desconhecido'
+        message: 'Error checking session',
+        details: error instanceof Error ? error.message : 'Unknown error'
       })
     }
 

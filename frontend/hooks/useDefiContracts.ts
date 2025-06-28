@@ -4,7 +4,7 @@
  * DESCRIÇÃO: Hook sem auto-execução e com loading controlado
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useAccount } from 'wagmi';
 
 interface PortfolioData {
@@ -84,8 +84,8 @@ export function useDefiContracts() {
 
       console.log('✅ Dados do portfolio carregados');
     } catch (err) {
-      console.error('❌ Erro ao carregar dados:', err);
-      setError('Erro ao carregar dados do portfolio');
+      console.error('❌ Error loading data:', err);
+      setError('Error loading portfolio data');
     } finally {
       setLoading(false);
     }
@@ -93,7 +93,7 @@ export function useDefiContracts() {
 
   const createAlert = useCallback(async (threshold: number) => {
     if (!isConnected) {
-      throw new Error('Wallet não conectada');
+      throw new Error('Wallet not connected');
     }
 
     try {
@@ -114,7 +114,7 @@ export function useDefiContracts() {
       
       console.log('✅ Alerta criado:', newAlert);
     } catch (err) {
-      console.error('❌ Erro ao criar alerta:', err);
+      console.error('❌ Error creating alert:', err);
       throw err;
     } finally {
       setIsTransactionPending(false);
@@ -123,7 +123,7 @@ export function useDefiContracts() {
 
   const createInsurancePolicy = useCallback(async (asset: string, coverage: string) => {
     if (!isConnected) {
-      throw new Error('Wallet não conectada');
+      throw new Error('Wallet not connected');
     }
 
     try {
@@ -145,7 +145,7 @@ export function useDefiContracts() {
       
       console.log('✅ Política criada:', newPolicy);
     } catch (err) {
-      console.error('❌ Erro ao criar política:', err);
+      console.error('❌ Error creating policy:', err);
       throw err;
     } finally {
       setIsTransactionPending(false);

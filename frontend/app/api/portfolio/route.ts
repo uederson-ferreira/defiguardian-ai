@@ -50,7 +50,7 @@ export async function GET() {
     
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'Usuário não autenticado' },
+        { error: 'User not authenticated' },
         { status: 401 }
       )
     }
@@ -64,7 +64,7 @@ export async function GET() {
 
     if (userError || !userData) {
       return NextResponse.json(
-        { error: 'Usuário não encontrado' },
+        { error: 'User not found' },
         { status: 404 }
       )
     }
@@ -80,9 +80,9 @@ export async function GET() {
       .order('created_at', { ascending: false })
 
     if (portfoliosError) {
-      console.error('❌ Erro ao buscar portfolios:', portfoliosError)
+      console.error('❌ Error fetching portfolios:', portfoliosError)
       return NextResponse.json(
-        { error: 'Erro ao buscar portfolios' },
+        { error: 'Error fetching portfolios' },
         { status: 500 }
       )
     }
@@ -109,9 +109,9 @@ export async function GET() {
     })
 
   } catch (error) {
-    console.error('❌ Erro na API de portfolios GET:', error)
+    console.error('❌ Error in portfolios GET API:', error)
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
     
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'Usuário não autenticado' },
+        { error: 'User not authenticated' },
         { status: 401 }
       )
     }
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
 
     if (!name || !walletAddress) {
       return NextResponse.json(
-        { error: 'Nome e endereço da wallet são obrigatórios' },
+        { error: 'Name and wallet address are required' },
         { status: 400 }
       )
     }
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
     const ethereumAddressRegex = /^0x[a-fA-F0-9]{40}$/
     if (!ethereumAddressRegex.test(walletAddress)) {
       return NextResponse.json(
-        { error: 'Endereço da wallet inválido' },
+        { error: 'Invalid wallet address' },
         { status: 400 }
       )
     }
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
 
     if (userError || !userData) {
       return NextResponse.json(
-        { error: 'Usuário não encontrado' },
+        { error: 'User not found' },
         { status: 404 }
       )
     }
@@ -178,9 +178,9 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (portfolioError) {
-      console.error('❌ Erro ao criar portfolio:', portfolioError)
+      console.error('❌ Error creating portfolio:', portfolioError)
       return NextResponse.json(
-        { error: 'Erro ao criar portfolio' },
+        { error: 'Error creating portfolio' },
         { status: 500 }
       )
     }
@@ -192,9 +192,9 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('❌ Erro na API de portfolios POST:', error)
+    console.error('❌ Error in portfolios POST API:', error)
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }

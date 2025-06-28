@@ -73,12 +73,12 @@ export function RiskAlerts() {
 
   const handleCreateAlert = async () => {
     if (!newAlert.type || !newAlert.threshold) {
-      toast.error("Preencha todos os campos");
+      toast.error("Fill in all fields");
       return;
     }
 
     if (!address) {
-      toast.error("Conecte sua carteira primeiro");
+      toast.error("Connect your wallet first");
       return;
     }
 
@@ -102,9 +102,9 @@ export function RiskAlerts() {
       setNewAlert({ type: "", threshold: "" });
       setIsCreateDialogOpen(false);
     } catch (err: unknown) {
-      console.error("❌ Erro ao criar alerta:", err);
+      console.error("❌ Error creating alert:", err);
       const errorMessage =
-        err instanceof Error ? err.message : "Erro ao criar alerta";
+        err instanceof Error ? err.message : "Error creating alert";
       toast.error(errorMessage);
     } finally {
       setCreating(false);
@@ -190,10 +190,9 @@ export function RiskAlerts() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Criar Novo Alerta</DialogTitle>
+                <DialogTitle>Create New Alert</DialogTitle>
                 <DialogDescription>
-                  Configure um alerta personalizado para monitorar riscos
-                  específicos
+                  Configure a custom alert to monitor specific risks
                 </DialogDescription>
               </DialogHeader>
 

@@ -70,14 +70,14 @@ export function WalletButton() {
     try {
       if (CHAIN_CONFIG.chainId) {
         await switchNetwork(CHAIN_CONFIG.chainId);
-        toast.success("Rede alterada com sucesso!");
+        toast.success("Network changed successfully!");
       } else {
         await switchToFujiNetwork();
-        toast.success("Rede alterada com sucesso!");
+        toast.success("Network changed successfully!");
       }
     } catch (error) {
       console.error("Failed to switch network:", error);
-      toast.error("Falha ao alterar rede");
+      toast.error("Failed to change network");
     }
   };
 
@@ -88,7 +88,7 @@ export function WalletButton() {
       toast.success("Saldo atualizado!");
     } catch (error) {
       console.error("Failed to refresh balance:", error);
-      toast.error("Falha ao atualizar saldo");
+      toast.error("Failed to update balance");
     } finally {
       setIsRefreshing(false);
     }
@@ -158,7 +158,7 @@ export function WalletButton() {
         ) : (
           <Wallet className="h-4 w-4" />
         )}
-        {connecting ? "Conectando..." : "Conectar Carteira"}
+        {connecting ? "Connecting..." : "Connect Wallet"}
       </Button>
     );
   }
@@ -176,7 +176,7 @@ export function WalletButton() {
         ) : (
           <Wallet className="h-4 w-4" />
         )}
-        {web3Loading ? "Conectando Web3..." : "Conectar Web3"}
+        {web3Loading ? "Connecting Web3..." : "Connect Web3"}
       </Button>
     );
   }
@@ -195,7 +195,7 @@ export function WalletButton() {
           className="flex items-center gap-1"
         >
           <AlertTriangle className="h-3 w-3" />
-          Rede Incorreta
+          Wrong Network
         </Button>
       )}
 
@@ -244,7 +244,7 @@ export function WalletButton() {
 
             {chainId && (
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-xs text-muted-foreground">Rede:</span>
+                <span className="text-xs text-muted-foreground">Network:</span>
                 <Badge
                   variant={
                     chainId === CHAIN_CONFIG.chainId ? "default" : "destructive"
@@ -270,11 +270,11 @@ export function WalletButton() {
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleCopyAddress}>
             <Copy className="mr-2 h-4 w-4" />
-            Copiar Endereço
+            Copy Address
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleViewOnExplorer}>
             <ExternalLink className="mr-2 h-4 w-4" />
-            Ver no Explorer
+            View on Explorer
           </DropdownMenuItem>
           {isWrongNetwork && (
             <DropdownMenuItem onClick={handleSwitchNetwork}>
@@ -285,7 +285,7 @@ export function WalletButton() {
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={logout}>
             <LogOut className="mr-2 h-4 w-4" />
-            Desconectar
+            Disconnect
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -1,7 +1,7 @@
 /**
- * MÓDULO: Página de Login Simples
- * LOCALIZAÇÃO: app/login/page.tsx
- * DESCRIÇÃO: Login simples com email e social (Google/GitHub)
+ * MODULE: Simple Login Page
+ * LOCATION: app/login/page.tsx
+ * DESCRIPTION: Simple login with email and social (Google/GitHub)
  */
 
 'use client'
@@ -47,14 +47,14 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
-        setError(`Erro no login: ${result.error}`)
+        setError(`Login error: ${result.error}`)
       } else if (result?.ok) {
-        toast.success('Login realizado com sucesso!')
+        toast.success('Login successful!')
         router.push('/dashboard')
       }
     } catch (error) {
-      setError('Erro inesperado no login')
-      console.error('Erro no login social:', error)
+      setError('Unexpected login error')
+      console.error('Social login error:', error)
     } finally {
       setIsLoading(false)
     }
@@ -66,12 +66,12 @@ export default function LoginPage() {
       setError(null)
 
       if (!email.trim() || !password.trim()) {
-        setError('Email e senha são obrigatórios')
+        setError('Email and password are required')
         return
       }
 
       if (mode === 'register' && !name.trim()) {
-        setError('Nome é obrigatório para cadastro')
+        setError('Name is required for registration')
         return
       }
 
@@ -85,17 +85,17 @@ export default function LoginPage() {
 
       if (result?.error) {
         if (result.error.includes('CredentialsSignin')) {
-          setError('Email ou senha incorretos')
+          setError('Incorrect email or password')
         } else {
           setError(result.error)
         }
       } else if (result?.ok) {
-        toast.success(mode === 'login' ? 'Login realizado!' : 'Conta criada com sucesso!')
+        toast.success(mode === 'login' ? 'Login successful!' : 'Account created successfully!')
         router.push('/dashboard')
       }
     } catch (error) {
-      setError('Erro inesperado na autenticação')
-      console.error('Erro no login por email:', error)
+      setError('Unexpected authentication error')
+      console.error('Email login error:', error)
     } finally {
       setIsLoading(false)
     }
@@ -118,7 +118,7 @@ export default function LoginPage() {
         className="absolute top-6 left-6 text-white hover:bg-white/10 p-2"
       >
         <ArrowLeft className="h-5 w-5 mr-2" />
-        Voltar
+        Back
       </Button>
       
       <Card className="w-full max-w-md bg-slate-800/50 border-slate-700 backdrop-blur-xl">
@@ -132,7 +132,7 @@ export default function LoginPage() {
             DefiGuardian AI
           </CardTitle>
           <p className="text-slate-400">
-            {mode === 'login' ? 'Entre na sua conta' : 'Crie sua conta'}
+            {mode === 'login' ? 'Sign in to your account' : 'Create your account'}
           </p>
         </CardHeader>
 
@@ -159,7 +159,7 @@ export default function LoginPage() {
               }`}
             >
               <Lock className="mr-2 h-4 w-4" />
-              Entrar
+              Sign In
             </Button>
             <Button
               onClick={() => setMode('register')}
@@ -171,7 +171,7 @@ export default function LoginPage() {
               }`}
             >
               <UserPlus className="mr-2 h-4 w-4" />
-              Cadastrar
+              Register
             </Button>
           </div>
 
@@ -180,7 +180,7 @@ export default function LoginPage() {
             {mode === 'register' && (
               <Input
                 type="text"
-                placeholder="Nome completo"
+                placeholder="Full name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="h-12 bg-white/10 border-white/20 text-white placeholder:text-slate-400"
@@ -199,7 +199,7 @@ export default function LoginPage() {
             
             <Input
               type="password"
-              placeholder="Senha"
+              placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="h-12 bg-white/10 border-white/20 text-white placeholder:text-slate-400"
@@ -214,10 +214,10 @@ export default function LoginPage() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {mode === 'login' ? 'Entrando...' : 'Criando conta...'}
+                  {mode === 'login' ? 'Signing in...' : 'Creating account...'}
                 </>
               ) : (
-                mode === 'login' ? 'Entrar' : 'Criar conta'
+                mode === 'login' ? 'Sign In' : 'Create Account'
               )}
             </Button>
           </div>
@@ -228,7 +228,7 @@ export default function LoginPage() {
               <span className="w-full border-t border-slate-600" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-slate-800 px-2 text-slate-400">ou continue com</span>
+              <span className="bg-slate-800 px-2 text-slate-400">or continue with</span>
             </div>
           </div>
 
@@ -241,7 +241,7 @@ export default function LoginPage() {
               className="w-full h-12 bg-white/10 border-white/20 text-white hover:bg-white/20"
             >
               <Chrome className="mr-2 h-4 w-4" />
-              Continuar com Google
+              Continue with Google
             </Button>
 
             <Button
@@ -251,7 +251,7 @@ export default function LoginPage() {
               className="w-full h-12 bg-white/10 border-white/20 text-white hover:bg-white/20"
             >
               <Github className="mr-2 h-4 w-4" />
-              Continuar com GitHub
+              Continue with GitHub
             </Button>
           </div>
         </CardContent>

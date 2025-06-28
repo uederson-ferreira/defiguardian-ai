@@ -61,7 +61,7 @@ export function useWeb3Contracts() {
   const switchToFujiNetwork = useCallback(async () => {
     try {
       if (!window.ethereum) {
-        throw new Error("MetaMask não está instalado");
+        throw new Error("MetaMask is not installed");
       }
 
       await window.ethereum.request({
@@ -102,7 +102,7 @@ export function useWeb3Contracts() {
       setError(null);
 
       if (typeof window === "undefined" || !window.ethereum) {
-        throw new Error("MetaMask não está instalado");
+        throw new Error("MetaMask is not installed");
       }
 
       let provider = new ethers.BrowserProvider(window.ethereum);
@@ -123,7 +123,7 @@ export function useWeb3Contracts() {
 
           if (Number(newNetwork.chainId) !== CHAIN_CONFIG.chainId) {
             throw new Error(
-              `Por favor, conecte-se à rede ${CHAIN_CONFIG.chainName}`
+              `Please connect to ${CHAIN_CONFIG.chainName} network`
             );
           }
 
@@ -136,7 +136,7 @@ export function useWeb3Contracts() {
           signer = newSigner;
           account = newAccount;
         } catch (switchError) {
-          console.error("❌ Erro ao trocar de rede:", switchError);
+          console.error("❌ Error switching network:", switchError);
           throw new Error(
             `Por favor, conecte-se à rede ${CHAIN_CONFIG.chainName}`
           );

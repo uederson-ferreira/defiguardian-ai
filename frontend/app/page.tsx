@@ -52,7 +52,7 @@ export default function HomePage() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="flex items-center space-x-2">
           <Loader2 className="h-6 w-6 animate-spin text-purple-400" />
-          <span className="text-gray-300">Carregando...</span>
+          <span className="text-gray-300">Loading...</span>
         </div>
       </div>
     );
@@ -84,7 +84,7 @@ export default function HomePage() {
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                "Entrar"
+                "Enter"
               )}
             </Button>
           </div>
@@ -104,18 +104,18 @@ export default function HomePage() {
             </div>
 
             <h1 className="text-5xl md:text-7xl font-black text-white leading-tight">
-              Proteja seu{" "}
+              Protect your{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-purple-600 animate-pulse">
                 DeFi
               </span>
               <br />
-              com Inteligência Artificial
+              with Artificial Intelligence
             </h1>
 
             <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              A primeira plataforma de gerenciamento de riscos DeFi alimentada
-              por IA que protege seus investimentos em tempo real com alertas
-              inteligentes e hedge automatizado.
+              The first AI-powered DeFi risk management platform that protects
+              your investments in real-time with intelligent alerts and
+              automated hedging.
             </p>
           </div>
 
@@ -130,7 +130,7 @@ export default function HomePage() {
                 <Loader2 className="mr-2 h-6 w-6 animate-spin" />
               ) : (
                 <>
-                  Iniciar Sistema
+                  Start System
                   <ChevronRight className="ml-2 h-6 w-6" />
                 </>
               )}
@@ -138,7 +138,7 @@ export default function HomePage() {
 
             <Button className="h-16 px-10 bg-transparent border-2 border-slate-600 text-gray-300 hover:bg-slate-800/50 hover:border-purple-500/50 font-bold text-lg backdrop-blur-sm">
               <Target className="mr-2 h-5 w-5" />
-              Ver Demonstração
+              View Demo
             </Button>
           </div>
 
@@ -148,7 +148,7 @@ export default function HomePage() {
               <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">
                 $2.5M+
               </div>
-              <div className="text-gray-400 font-medium">Valor Protegido</div>
+              <div className="text-gray-400 font-medium">Protected Value</div>
             </div>
             <div className="text-center space-y-2">
               <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-600">
@@ -161,14 +161,14 @@ export default function HomePage() {
                 15+
               </div>
               <div className="text-gray-400 font-medium">
-                Protocolos Suportados
+                Supported Protocols
               </div>
             </div>
             <div className="text-center space-y-2">
               <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-600">
                 500+
               </div>
-              <div className="text-gray-400 font-medium">Usuários Ativos</div>
+              <div className="text-gray-400 font-medium">Active Users</div>
             </div>
           </div>
         </div>
@@ -178,10 +178,10 @@ export default function HomePage() {
       <section className="container mx-auto px-6 py-20">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-white mb-4">
-            Recursos Revolucionários
+            Revolutionary Features
           </h2>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Tecnologia de ponta para proteger seus investimentos DeFi
+            Cutting-edge technology to protect your DeFi investments
           </p>
         </div>
 
@@ -192,11 +192,11 @@ export default function HomePage() {
                 <TrendingUp className="h-8 w-8 text-white" />
               </div>
               <CardTitle className="text-white text-xl">
-                Análise de Portfólio
+                Portfolio Analysis
               </CardTitle>
               <CardDescription className="text-gray-300 text-base">
-                Monitore seus investimentos DeFi em tempo real com métricas
-                avançadas e insights de IA
+                Monitor your DeFi investments in real-time with advanced
+                metrics and AI insights
               </CardDescription>
             </CardHeader>
           </Card>
@@ -207,11 +207,11 @@ export default function HomePage() {
                 <AlertTriangle className="h-8 w-8 text-white" />
               </div>
               <CardTitle className="text-white text-xl">
-                Alertas Inteligentes
+                Smart Alerts
               </CardTitle>
               <CardDescription className="text-gray-300 text-base">
-                Receba notificações instantâneas sobre riscos, oportunidades e
-                mudanças de mercado
+                Receive instant notifications about risks, opportunities and
+                market changes
               </CardDescription>
             </CardHeader>
           </Card>
@@ -221,10 +221,10 @@ export default function HomePage() {
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                 <Bot className="h-8 w-8 text-white" />
               </div>
-              <CardTitle className="text-white text-xl">IA Avançada</CardTitle>
+              <CardTitle className="text-white text-xl">Advanced AI</CardTitle>
               <CardDescription className="text-gray-300 text-base">
-                Algoritmos de machine learning para predição de riscos e hedge
-                automatizado
+                Machine learning algorithms for risk prediction and automated
+                hedging
               </CardDescription>
             </CardHeader>
           </Card>
@@ -236,10 +236,10 @@ export default function HomePage() {
         <div className="bg-gradient-to-r from-purple-900/20 to-pink-900/20 rounded-3xl border border-purple-500/20 backdrop-blur-xl p-12">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-white mb-4">
-              Tecnologia de Ponta
+              Cutting-Edge Technology
             </h2>
             <p className="text-xl text-gray-300">
-              Construído com as melhores tecnologias blockchain e IA
+              Built with the best blockchain and AI technologies
             </p>
           </div>
 
@@ -252,7 +252,7 @@ export default function HomePage() {
                 Chromia Blockchain
               </h3>
               <p className="text-gray-300">
-                Armazenamento descentralizado de dados históricos de risco
+                Decentralized storage of historical risk data
               </p>
             </div>
 
@@ -264,7 +264,7 @@ export default function HomePage() {
                 Avalanche Network
               </h3>
               <p className="text-gray-300">
-                Smart contracts otimizados para análise de riscos em tempo real
+                Optimized smart contracts for real-time risk analysis
               </p>
             </div>
 
@@ -274,7 +274,7 @@ export default function HomePage() {
               </div>
               <h3 className="text-white font-bold text-lg">Next.js 14</h3>
               <p className="text-gray-300">
-                Interface moderna e responsiva com autenticação social
+                Modern and responsive interface with social authentication
               </p>
             </div>
           </div>
@@ -285,11 +285,11 @@ export default function HomePage() {
       <section className="container mx-auto px-6 py-20 text-center">
         <div className="max-w-3xl mx-auto space-y-8">
           <h2 className="text-4xl md:text-5xl font-bold text-white">
-            Pronto para Proteger seu DeFi?
+            Ready to Protect your DeFi?
           </h2>
           <p className="text-xl text-gray-300">
-            Junte-se a centenas de investidores que já protegem seus ativos com
-            nossa IA
+            Join hundreds of investors who already protect their assets with
+            our AI
           </p>
           <Button
             onClick={handleStartSystem}
@@ -300,7 +300,7 @@ export default function HomePage() {
               <Loader2 className="mr-2 h-6 w-6 animate-spin" />
             ) : (
               <>
-                Começar Agora
+                Start Now
                 <ChevronRight className="ml-2 h-6 w-6" />
               </>
             )}
@@ -320,11 +320,11 @@ export default function HomePage() {
             </div>
             <div className="text-gray-400 text-center">
               <p>
-                &copy; 2025 DefiGuardian AI. Desenvolvido para Hackathon
-                Chromion.
+                &copy; 2025 DefiGuardian AI. Developed for Chromion
+                Hackathon.
               </p>
               <p className="text-sm mt-1">
-                Protegendo o futuro das finanças descentralizadas
+                Protecting the future of decentralized finance
               </p>
             </div>
           </div>

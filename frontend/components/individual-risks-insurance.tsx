@@ -150,10 +150,10 @@ export function IndividualRisksInsurance() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white">
-            Riscos e Seguros Individuais
+            Individual Risks and Insurance
           </h2>
           <p className="text-slate-400">
-            Monitore cada posição e cobertura de seguro
+            Monitor each position and insurance coverage
           </p>
         </div>
         <Button
@@ -166,7 +166,7 @@ export function IndividualRisksInsurance() {
           <RefreshCw
             className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
           />
-          Atualizar
+          Update
         </Button>
       </div>
 
@@ -183,7 +183,7 @@ export function IndividualRisksInsurance() {
           ) : (
             <EyeOff className="h-4 w-4 mr-2" />
           )}
-          Riscos ({risks.length})
+          Risks ({risks.length})
         </Button>
         <Button
           onClick={() => setShowInsurance(!showInsurance)}
@@ -196,7 +196,7 @@ export function IndividualRisksInsurance() {
           ) : (
             <EyeOff className="h-4 w-4 mr-2" />
           )}
-          Seguros ({insurancePolicies.length})
+          Insurance ({insurancePolicies.length})
         </Button>
         <Button
           onClick={() => setShowAlerts(!showAlerts)}
@@ -209,20 +209,20 @@ export function IndividualRisksInsurance() {
           ) : (
             <EyeOff className="h-4 w-4 mr-2" />
           )}
-          Alertas
+          Alerts
         </Button>
       </div>
 
-      {/* Riscos Individuais */}
+      {/* Individual Risks */}
       {showRisks && (
         <Card className="bg-slate-800/50 border-slate-700">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-orange-400" />
-              Riscos por Protocolo
+              Risks by Protocol
             </CardTitle>
             <CardDescription className="text-slate-400">
-              Análise detalhada de risco para cada posição
+              Detailed risk analysis for each position
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -258,7 +258,7 @@ export function IndividualRisksInsurance() {
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-sm text-slate-400">
-                          Score de Risco
+                          Risk Score
                         </span>
                         <span className="text-sm font-medium text-white">
                           {risk.riskScore}/100
@@ -290,16 +290,16 @@ export function IndividualRisksInsurance() {
         </Card>
       )}
 
-      {/* Seguros Contratados */}
+      {/* Contracted Insurance */}
       {showInsurance && (
         <Card className="bg-slate-800/50 border-slate-700">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Shield className="h-5 w-5 text-blue-400" />
-              Seguros Contratados
+              Contracted Insurance
             </CardTitle>
             <CardDescription className="text-slate-400">
-              Apólices ativas e cobertura de proteção
+              Active policies and protection coverage
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -349,8 +349,8 @@ export function IndividualRisksInsurance() {
                 <Alert className="border-blue-500/50 bg-blue-500/10">
                   <Shield className="h-4 w-4 text-blue-400" />
                   <AlertDescription className="text-blue-400">
-                    Nenhum seguro contratado. Considere proteger suas posições
-                    de alto risco.
+                    No insurance contracted. Consider protecting your high-risk
+                    positions.
                   </AlertDescription>
                 </Alert>
               )}
@@ -359,7 +359,7 @@ export function IndividualRisksInsurance() {
         </Card>
       )}
 
-      {/* Componentes de Alertas */}
+      {/* Alert Components */}
       {showAlerts && (
         <div className="grid gap-6 lg:grid-cols-2">
           <RiskAlerts />

@@ -1,7 +1,7 @@
 /**
- * MÓDULO: Dashboard Completo com Contratos
- * LOCALIZAÇÃO: app/dashboard/page.tsx
- * DESCRIÇÃO: Dashboard com funcionalidades DeFi reais usando contratos
+ * MODULE: Complete Dashboard with Contracts
+ * LOCATION: app/dashboard/page.tsx
+ * DESCRIPTION: Dashboard with real DeFi functionalities using contracts
  */
 
 "use client";
@@ -76,7 +76,7 @@ export default function DashboardPage() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-white text-center">
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-purple-400" />
-          <p>Inicializando sistema...</p>
+          <p>Initializing system...</p>
         </div>
       </div>
     );
@@ -95,10 +95,10 @@ export default function DashboardPage() {
   };
 
   const getRiskLevel = (score: number) => {
-    if (score <= 30) return "Baixo Risco";
-    if (score <= 60) return "Risco Moderado";
-    if (score <= 80) return "Alto Risco";
-    return "Risco Crítico";
+    if (score <= 30) return "Low Risk";
+    if (score <= 60) return "Moderate Risk";
+    if (score <= 80) return "High Risk";
+    return "Critical Risk";
   };
 
   return (
@@ -164,7 +164,7 @@ export default function DashboardPage() {
               className="text-slate-400 hover:text-white"
             >
               <LogOut className="h-4 w-4 mr-2" />
-              Sair
+              Exit
             </Button>
           </div>
         </div>
@@ -175,11 +175,10 @@ export default function DashboardPage() {
         {/* Welcome */}
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold text-white">
-            Bem-vindo, {session?.user?.name?.split(" ")[0]}! 👋
+            Welcome, {session?.user?.name?.split(" ")[0]}! 👋
           </h1>
           <p className="text-slate-400 text-lg">
-            Gerencie seus investimentos DeFi com segurança e inteligência
-            artificial
+            Manage your DeFi investments safely with artificial intelligence
           </p>
         </div>
 
@@ -189,8 +188,8 @@ export default function DashboardPage() {
           <Alert className="border-green-500/50 bg-green-500/10">
             <CheckCircle className="h-4 w-4 text-green-400" />
             <AlertDescription className="text-green-400">
-              ✅ Sistema operacional. Conecte sua carteira para começar a
-              análise de riscos.
+              ✅ System operational. Connect your wallet to start risk
+              analysis.
             </AlertDescription>
           </Alert>
 
@@ -199,9 +198,9 @@ export default function DashboardPage() {
             <Alert className="border-red-500/50 bg-red-500/10">
               <AlertTriangle className="h-4 w-4 text-red-400" />
               <AlertDescription className="text-red-400">
-                ⚠️ Atenção! Seu portfolio apresenta alto nível de risco (
-                {portfolioData.riskScore}/100). Considere rebalancear suas
-                posições.
+                ⚠️ Warning! Your portfolio shows high risk level (
+                {portfolioData.riskScore}/100). Consider rebalancing your
+                positions.
               </AlertDescription>
             </Alert>
           )}
@@ -212,7 +211,7 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Wallet className="h-5 w-5" />
-              Status da Carteira
+              Wallet Status
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -221,11 +220,11 @@ export default function DashboardPage() {
                 <Wallet className="h-16 w-16 mx-auto text-slate-500" />
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-2">
-                    Carteira não conectada
+                    Wallet not connected
                   </h3>
                   <p className="text-slate-400 mb-6">
-                    Conecte sua carteira para acessar análise de riscos e
-                    funcionalidades DeFi
+                    Connect your wallet to access risk analysis and DeFi
+                    functionalities
                   </p>
 
                   {/* RainbowKit Connect Button */}
@@ -237,14 +236,14 @@ export default function DashboardPage() {
                 <Alert className="border-green-500/50 bg-green-500/10">
                   <CheckCircle className="h-4 w-4 text-green-400" />
                   <AlertDescription className="text-green-400">
-                    ✅ Carteira conectada com sucesso! Analisando dados...
+                    ✅ Wallet connected successfully! Analyzing data...
                   </AlertDescription>
                 </Alert>
 
                 <div className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg">
                   <div className="space-y-1">
                     <p className="text-sm text-slate-400">
-                      Endereço conectado:
+                      Connected address:
                     </p>
                     <p className="text-white font-mono">
                       {address?.slice(0, 6)}...{address?.slice(-4)}
@@ -262,7 +261,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Quick Stats - DADOS REAIS DOS CONTRATOS */}
+        {/* Quick Stats - REAL DATA FROM CONTRACTS */}
         <div className="grid md:grid-cols-3 gap-6">
           <Card className="bg-slate-800/50 border-slate-700">
             <CardContent className="p-6">
@@ -281,7 +280,7 @@ export default function DashboardPage() {
                   </p>
                   {isConnected && portfolioData.totalValue > 0 && (
                     <p className="text-xs text-green-400 mt-1">
-                      +2.5% últimas 24h
+                      +2.5% last 24h
                     </p>
                   )}
                 </div>
@@ -332,7 +331,7 @@ export default function DashboardPage() {
                     )}
                   </p>
                   <p className="text-xs text-slate-400 mt-1">
-                    Monitoramento 24/7
+                    24/7 Monitoring
                   </p>
                 </div>
                 <AlertTriangle className="h-8 w-8 text-yellow-400" />
@@ -353,14 +352,14 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-400">Protocolos ativos:</span>
+                  <span className="text-slate-400">Active protocols:</span>
                   <span className="text-white font-medium">
                     {Math.round(portfolioData.protocolCount)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-slate-400">
-                    Score de diversificação:
+                    Diversification score:
                   </span>
                   <span className="text-white font-medium">
                     {Math.round(portfolioData.diversificationScore * 100) / 100}
@@ -368,7 +367,7 @@ export default function DashboardPage() {
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-400">Última análise:</span>
+                  <span className="text-slate-400">Last analysis:</span>
                   <span className="text-white font-medium">
                     {new Date().toLocaleTimeString()}
                   </span>
@@ -382,12 +381,12 @@ export default function DashboardPage() {
                   {isLoadingContracts ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Analisando...
+                      Analyzing...
                     </>
                   ) : (
                     <>
                       <RefreshCw className="mr-2 h-4 w-4" />
-                      Atualizar Análise
+                      Update Analysis
                     </>
                   )}
                 </Button>
@@ -398,7 +397,7 @@ export default function DashboardPage() {
               <CardHeader>
                 <CardTitle className="text-white flex items-center gap-2">
                   <Activity className="h-5 w-5 text-green-400" />
-                  Atividade Recente
+                  Recent Activity
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -408,27 +407,27 @@ export default function DashboardPage() {
                       <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                       <div className="flex-1">
                         <p className="text-sm text-white">
-                          Portfolio analisado
+                          Portfolio analyzed
                         </p>
                         <p className="text-xs text-slate-400">
-                          Há alguns minutos
+                          A few minutes ago
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-slate-700/30 rounded-lg">
                       <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                       <div className="flex-1">
-                        <p className="text-sm text-white">Carteira conectada</p>
-                        <p className="text-xs text-slate-400">Hoje</p>
+                        <p className="text-sm text-white">Wallet connected</p>
+                        <p className="text-xs text-slate-400">Today</p>
                       </div>
                     </div>
                   </>
                 ) : (
                   <div className="text-center py-6">
                     <p className="text-slate-400 text-sm">
-                      Nenhuma atividade ainda.
+                      No activity yet.
                       <br />
-                      Adicione posições para começar.
+                      Add positions to get started.
                     </p>
                   </div>
                 )}
@@ -440,7 +439,7 @@ export default function DashboardPage() {
         {/* Next Steps - COM FUNCIONALIDADES REAIS */}
         <Card className="bg-slate-800/50 border-slate-700">
           <CardHeader>
-            <CardTitle className="text-white">Próximos Passos</CardTitle>
+            <CardTitle className="text-white">Next Steps</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4">
@@ -459,12 +458,12 @@ export default function DashboardPage() {
                   )}
                   <div>
                     <h3 className="font-medium text-white">
-                      1. Conectar Carteira
+                      1. Connect Wallet
                     </h3>
                     <p className="text-sm text-slate-400">
                       {isConnected
-                        ? "✅ Carteira conectada com sucesso!"
-                        : "Conecte sua carteira MetaMask ou outras"}
+                        ? "✅ Wallet connected successfully!"
+                        : "Connect your MetaMask or other wallets"}
                     </p>
                   </div>
                 </div>
@@ -486,12 +485,12 @@ export default function DashboardPage() {
                     )}
                     <div>
                       <h3 className="font-medium text-white">
-                        2. Analisar Portfolio
+                        2. Analyze Portfolio
                       </h3>
                       <p className="text-sm text-slate-400">
                         {isConnected && (portfolioData.protocolCount ?? 0) > 0
-                          ? `✅ ${portfolioData.protocolCount} protocolo(s) encontrado(s)`
-                          : "Configure análise de seus investimentos DeFi"}
+                          ? `✅ ${portfolioData.protocolCount} protocol(s) found`
+                          : "Configure analysis of your DeFi investments"}
                       </p>
                     </div>
                   </div>
@@ -505,7 +504,7 @@ export default function DashboardPage() {
                       {isLoadingContracts ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        "Analisar"
+                        "Analyze"
                       )}
                     </Button>
                   )}
@@ -530,15 +529,13 @@ export default function DashboardPage() {
                     )}
                     <div>
                       <h3 className="font-medium text-white">
-                        3. Configurar Alertas
+                        3. Configure Alerts
                       </h3>
                       <p className="text-sm text-slate-400">
                         {isConnected &&
                         (portfolioData.alertsCount > 0 || alertsConfigured)
-                          ? `✅ ${
-                              portfolioData.alertsCount || 0
-                            } alerta(s) ativo(s)`
-                          : "Crie alertas inteligentes de risco"}
+                          ? `✅ ${portfolioData.alertsCount || 0} active alert(s)`
+                          : "Create intelligent risk alerts"}
                       </p>
                     </div>
                   </div>
@@ -551,7 +548,7 @@ export default function DashboardPage() {
                         onClick={() => setAlertsConfigured(true)}
                       >
                         <Bell className="h-4 w-4 mr-2" />
-                        Configurar
+                        Configure
                       </Button>
                     </CreateAlertModal>
                   )}
@@ -569,7 +566,7 @@ export default function DashboardPage() {
               <AddPositionModal>
                 <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white">
                   <Plus className="mr-2 h-4 w-4" />
-                  Cadastrar Riscos
+                  Register Risks
                 </Button>
               </AddPositionModal>
 
@@ -579,7 +576,7 @@ export default function DashboardPage() {
                   className="border-slate-600 text-slate-300 hover:bg-slate-700"
                 >
                   <Shield className="mr-2 h-4 w-4" />
-                  Criar Seguro
+                  Create Insurance
                 </Button>
               </CreateInsuranceModal>
             </div>
@@ -609,7 +606,7 @@ export default function DashboardPage() {
                 ) : (
                   <TrendingUp className="mr-2 h-4 w-4" />
                 )}
-                Atualizar Análise
+                Update Analysis
               </Button>
             </div>
           </div>
@@ -627,7 +624,7 @@ export default function DashboardPage() {
             DefiGuardian AI v1.0 - Hackathon Chromion 2025
           </p>
           <p className="text-slate-600 text-xs mt-1">
-            Conectado à Avalanche Fuji Testnet
+            Connected to Avalanche Fuji Testnet
           </p>
         </div>
       </main>

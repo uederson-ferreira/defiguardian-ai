@@ -102,30 +102,30 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
   };
 
   const getRiskLabel = (riskScore: number) => {
-    if (riskScore < 30) return "Baixo Risco";
-    if (riskScore < 70) return "Risco Moderado";
-    return "Alto Risco";
+    if (riskScore < 30) return "Low Risk";
+    if (riskScore < 70) return "Moderate Risk";
+    return "High Risk";
   };
 
   // Removido useEffect automático para evitar loop infinito
-  // A análise será feita apenas quando o usuário clicar no botão
+  // Analysis will only be done when the user clicks the button
 
   if (!isConnected) {
     return (
       <Card className="bg-gray-50 border-gray-200">
         <CardHeader>
-          <CardTitle className="text-gray-700">Análise de Portfolio</CardTitle>
+          <CardTitle className="text-gray-700">Portfolio Analysis</CardTitle>
           <CardDescription className="text-gray-600">
-            Conecte sua carteira no topo da página para analisar seu portfólio
-            DeFi
+            Connect your wallet at the top of the page to analyze your DeFi
+            portfolio
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Alert className="border-gray-300 bg-gray-100">
             <TrendingUp className="h-4 w-4 text-gray-600" />
             <AlertDescription className="text-gray-700">
-              ⚠️ Carteira não conectada. Use o botão de conexão no header da
-              página.
+              ⚠️ Wallet not connected. Use the connection button in the page
+              header.
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -139,13 +139,13 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Análise de Portfólio
+            Portfolio Analysis
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin" />
-            <span className="ml-2">Analisando portfólio...</span>
+            <span className="ml-2">Analyzing portfolio...</span>
           </div>
         </CardContent>
       </Card>
@@ -158,7 +158,7 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Análise de Portfólio
+            Portfolio Analysis
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -167,7 +167,7 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
           <Button onClick={handleRefresh} className="w-full mt-4">
-            Tentar Novamente
+            Try Again
           </Button>
         </CardContent>
       </Card>
@@ -180,19 +180,19 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Análise de Portfólio
+            Portfolio Analysis
           </CardTitle>
           <CardDescription>
-            Endereço: {targetAddress?.slice(0, 6)}...{targetAddress?.slice(-4)}
+            Address: {targetAddress?.slice(0, 6)}...{targetAddress?.slice(-4)}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
             <p className="text-muted-foreground mb-4">
-              Nenhum dado de portfólio encontrado
+              No portfolio data found
             </p>
             <Button onClick={handleRefresh} disabled={loading}>
-              Analisar Portfólio
+              Analyze Portfolio
             </Button>
           </div>
         </CardContent>
@@ -207,10 +207,10 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Análise de Portfólio
+            Portfolio Analysis
           </CardTitle>
           <CardDescription>
-            Endereço: {targetAddress?.slice(0, 6)}...{targetAddress?.slice(-4)}
+            Address: {targetAddress?.slice(0, 6)}...{targetAddress?.slice(-4)}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -218,7 +218,7 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
             {/* Risk Score */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Score de Risco</span>
+                <span className="text-sm font-medium">Risk Score</span>
                 <Badge variant={getRiskBadgeVariant(portfolioData.riskScore)}>
                   {getRiskLabel(portfolioData.riskScore)}
                 </Badge>
@@ -241,7 +241,7 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <DollarSign className="h-4 w-4" />
-                <span className="text-sm font-medium">Valor Total</span>
+                <span className="text-sm font-medium">Total Value</span>
               </div>
               <p className="text-2xl font-bold">
                 $
@@ -260,7 +260,7 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
                 ) : (
                   <TrendingUp className="h-4 w-4 text-green-500" />
                 )}
-                <span className="text-sm font-medium">Risco de Mercado</span>
+                <span className="text-sm font-medium">Market Risk</span>
               </div>
               <p
                 className={`text-2xl font-bold ${
@@ -285,7 +285,7 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
               variant="outline"
               className="w-full"
             >
-              Atualizar Análise
+              Update Analysis
             </Button>
           </div>
         </CardContent>
@@ -295,12 +295,12 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
       {portfolioData && parseFloat(portfolioData.totalValue) > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Análise Detalhada</CardTitle>
+            <CardTitle>Detailed Analysis</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-gray-50 p-4 rounded-lg border">
-                <h4 className="font-medium text-gray-700">Valor Total</h4>
+                <h4 className="font-medium text-gray-700">Total Value</h4>
                 <p className="text-2xl font-bold text-blue-600">
                   $
                   {parseFloat(portfolioData.totalValue || "0").toLocaleString("pt-BR", {
@@ -310,13 +310,13 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
                 </p>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg border">
-                <h4 className="font-medium text-gray-700">Protocolos</h4>
+                <h4 className="font-medium text-gray-700">Protocols</h4>
                 <p className="text-2xl font-bold text-green-600">
                   {Math.round(portfolioData.protocolCount || 0)}
                 </p>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg border">
-                <h4 className="font-medium text-gray-700">Diversificação</h4>
+                <h4 className="font-medium text-gray-700">Diversification</h4>
                 <p className="text-2xl font-bold text-purple-600">
                   {Math.round((portfolioData.diversificationScore || 0) * 100) /
                     100}
@@ -324,7 +324,7 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
                 </p>
               </div>
               <div className="bg-gray-50 p-4 rounded-lg border">
-                <h4 className="font-medium text-gray-700">Alertas Ativos</h4>
+                <h4 className="font-medium text-gray-700">Active Alerts</h4>
                 <p className="text-2xl font-bold text-orange-600">
                   {portfolioData.alertsCount || 0}
                 </p>
@@ -342,11 +342,11 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
               <div>
                 <CardTitle className="flex items-center gap-2">
                   <DollarSign className="h-5 w-5" />
-                  Resumo do Portfólio
+                  Portfolio Summary
                 </CardTitle>
                 <CardDescription>
-                  {portfolioData.protocolCount} protocolo(s) detectado(s) no seu
-                  portfólio
+                  {portfolioData.protocolCount} protocol(s) detected in your
+                  portfolio
                 </CardDescription>
               </div>
               <Button
@@ -359,7 +359,7 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
                 <RefreshCw
                   className={`h-4 w-4 ${loading ? "animate-spin" : ""}`}
                 />
-                Atualizar
+                Update
               </Button>
             </div>
           </CardHeader>
@@ -368,7 +368,7 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 border rounded-lg bg-gray-50">
                   <h4 className="font-medium mb-2 text-gray-700">
-                    Score de Risco Geral
+                    Overall Risk Score
                   </h4>
                   <div className="flex items-center gap-2">
                     <Progress
@@ -389,7 +389,7 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
                 </div>
                 <div className="p-4 border rounded-lg bg-gray-50">
                   <h4 className="font-medium mb-2 text-gray-700">
-                    Diversificação
+                    Diversification
                   </h4>
                   <div className="flex items-center gap-2">
                     <Progress
@@ -412,8 +412,8 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
 
               <div className="text-center py-4 bg-gray-50 rounded-lg">
                 <p className="text-sm text-muted-foreground">
-                  Dados detalhados das posições serão exibidos quando
-                  disponíveis nos contratos
+                  Detailed position data will be displayed when available in
+                  contracts
                 </p>
               </div>
             </div>
@@ -425,15 +425,15 @@ export function PortfolioAnalysis({ userAddress }: PortfolioAnalysisProps) {
       {portfolioData && parseFloat(portfolioData.totalValue) > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Alocação de Ativos</CardTitle>
+            <CardTitle>Asset Allocation</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <h4 className="font-medium">Alocação de Ativos</h4>
+              <h4 className="font-medium">Asset Allocation</h4>
               <div className="space-y-2">
                 <div className="text-center py-4">
                   <p className="text-sm text-muted-foreground">
-                    Dados de alocação serão exibidos quando disponíveis
+                    Allocation data will be displayed when available
                   </p>
                 </div>
               </div>

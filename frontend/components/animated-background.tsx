@@ -19,7 +19,7 @@ export function AnimatedBackground() {
   const [particles, setParticles] = useState<Particle[]>([])
 
   useEffect(() => {
-    // Criar partículas iniciais
+    // Create initial particles
     const initialParticles: Particle[] = Array.from({ length: 50 }, (_, i) => ({
       id: i,
       x: Math.random() * window.innerWidth,

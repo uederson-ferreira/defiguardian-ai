@@ -75,7 +75,7 @@ export function RiskInsurance() {
       const risks: Record<string, number> = {};
 
       for (const protocol of MOCK_PROTOCOLS_LIST) {
-        // Mock risk data para demonstração
+        // Mock risk data for demonstration
         const risk = Math.floor(Math.random() * 100);
         if (risk !== null) {
           risks[protocol.address] = risk;
@@ -83,9 +83,9 @@ export function RiskInsurance() {
       }
 
       setProtocolRisks(risks);
-      console.log("✅ Riscos de protocolo carregados:", risks);
+      console.log("✅ Protocol risks loaded:", risks);
     } catch (err: unknown) {
-      console.error("❌ Erro ao carregar riscos de protocolo:", err);
+      console.error("❌ Error loading protocol risks:", err);
     }
   }, []);
 
@@ -122,12 +122,12 @@ export function RiskInsurance() {
 
   const handleCreatePolicy = async () => {
     if (!newPolicy.protocol || !newPolicy.coverage || !newPolicy.premium) {
-      toast.error("Preencha todos os campos");
+      toast.error("Fill in all fields");
       return;
     }
 
     if (!address) {
-      toast.error("Conecte sua carteira primeiro");
+      toast.error("Connect your wallet first");
       return;
     }
 
@@ -137,7 +137,7 @@ export function RiskInsurance() {
       const coverage = parseFloat(newPolicy.coverage);
       const premium = parseFloat(newPolicy.premium);
 
-      console.log("🔄 Criando apólice de seguro...", {
+      console.log("🔄 Creating insurance policy...", {
         protocol: newPolicy.protocol,
         coverage,
         premium,
@@ -146,7 +146,7 @@ export function RiskInsurance() {
 
       await createInsurancePolicy(newPolicy.protocol, coverage.toString());
 
-      toast.success("Apólice de seguro criada com sucesso!");
+      toast.success("Insurance policy created successfully!");
 
       // Reset form
       setNewPolicy({ protocol: "", coverage: "", premium: "" });
@@ -155,9 +155,9 @@ export function RiskInsurance() {
       // Reload policies
       setPolicies(mockPolicies);
     } catch (err: unknown) {
-      console.error("❌ Erro ao criar apólice:", err);
+      console.error("❌ Error creating policy:", err);
       const errorMessage =
-        err instanceof Error ? err.message : "Erro ao criar apólice de seguro";
+        err instanceof Error ? err.message : "Error creating insurance policy";
       toast.error(errorMessage);
     } finally {
       setCreating(false);
@@ -212,18 +212,18 @@ export function RiskInsurance() {
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <Shield className="h-5 w-5 text-blue-400" />
-            Seguros de Risco
+            Risk Insurance
           </CardTitle>
           <CardDescription className="text-slate-400">
-            Conecte sua carteira no topo da página para gerenciar seguros
+            Connect your wallet at the top of the page to manage insurance
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Alert className="border-blue-500/50 bg-blue-500/10">
             <Shield className="h-4 w-4 text-blue-400" />
             <AlertDescription className="text-blue-400">
-              ⚠️ Carteira não conectada. Use o botão de conexão no header da
-              página.
+              ⚠️ Wallet not connected. Use the connection button in the page
+              header.
             </AlertDescription>
           </Alert>
         </CardContent>
@@ -237,13 +237,13 @@ export function RiskInsurance() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5" />
-            Seguro de Risco
+            Risk Insurance
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin" />
-            <span className="ml-2">Carregando seguros...</span>
+            <span className="ml-2">Loading insurance...</span>
           </div>
         </CardContent>
       </Card>
@@ -268,7 +268,7 @@ export function RiskInsurance() {
             onClick={() => setPolicies(mockPolicies)}
             className="w-full mt-4"
           >
-            Tentar Novamente
+            Try Again
           </Button>
         </CardContent>
       </Card>
@@ -285,7 +285,7 @@ export function RiskInsurance() {
               Seguro de Risco
             </CardTitle>
             <CardDescription>
-              Proteja seus investimentos DeFi com seguros personalizados
+              Protect your DeFi investments with custom insurance
             </CardDescription>
           </div>
 
@@ -296,21 +296,21 @@ export function RiskInsurance() {
             <DialogTrigger asChild>
               <Button size="sm">
                 <Plus className="h-4 w-4 mr-2" />
-                Nova Apólice
+                New Policy
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-md">
               <DialogHeader>
-                <DialogTitle>Criar Nova Apólice</DialogTitle>
+                <DialogTitle>Create New Policy</DialogTitle>
                 <DialogDescription>
-                  Configure uma apólice de seguro para proteger seus
-                  investimentos
+                  Configure an insurance policy to protect your
+                  investments
                 </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="protocol">Protocolo</Label>
+                  <Label htmlFor="protocol">Protocol</Label>
                   <select
                     className="w-full p-2 border rounded-md"
                     value={newPolicy.protocol}
@@ -321,13 +321,13 @@ export function RiskInsurance() {
                       }))
                     }
                   >
-                    <option value="">Selecione um protocolo</option>
+                    <option value="">Select a protocol</option>
                     {MOCK_PROTOCOLS_LIST.map((protocol) => {
                       const risk = protocolRisks[protocol.address];
                       return (
                         <option key={protocol.address} value={protocol.address}>
                           {protocol.name}{" "}
-                          {risk ? `(Risco: ${risk.toFixed(1)}%)` : ""}
+                          {risk ? `(Risk: ${risk.toFixed(1)}%)` : ""}
                         </option>
                       );
                     })}
@@ -335,7 +335,7 @@ export function RiskInsurance() {
                   {newPolicy.protocol && protocolRisks[newPolicy.protocol] && (
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-muted-foreground">
-                        Risco do protocolo:
+                        Protocol risk:
                       </span>
                       <Badge
                         variant={getRiskBadgeVariant(
@@ -349,7 +349,7 @@ export function RiskInsurance() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="coverage">Cobertura (AVAX)</Label>
+                  <Label htmlFor="coverage">Coverage (AVAX)</Label>
                   <Input
                     id="coverage"
                     type="number"
@@ -366,7 +366,7 @@ export function RiskInsurance() {
                   />
                   {newPolicy.coverage && newPolicy.protocol && (
                     <div className="text-sm text-muted-foreground">
-                      Prêmio estimado:{" "}
+                      Estimated premium:{" "}
                       {formatCurrency(
                         calculatePremium(newPolicy.coverage, newPolicy.protocol)
                       )}{" "}
@@ -381,13 +381,13 @@ export function RiskInsurance() {
                   variant="outline"
                   onClick={() => setIsCreateDialogOpen(false)}
                 >
-                  Cancelar
+                  Cancel
                 </Button>
                 <Button onClick={handleCreatePolicy} disabled={creating}>
                   {creating && (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   )}
-                  Criar Apólice
+                  Create Policy
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -400,10 +400,10 @@ export function RiskInsurance() {
           <div className="text-center py-8">
             <Shield className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <p className="text-muted-foreground mb-4">
-              Nenhuma apólice de seguro ativa
+              No active insurance policies
             </p>
             <Button onClick={() => setIsCreateDialogOpen(true)}>
-              Criar Primeira Apólice
+              Create First Policy
             </Button>
           </div>
         ) : (
@@ -426,16 +426,16 @@ export function RiskInsurance() {
                           className="flex items-center gap-1"
                         >
                           <CheckCircle className="h-3 w-3" />
-                          Ativa
+                          Active
                         </Badge>
                       ) : (
-                        <Badge variant="secondary">Inativa</Badge>
+                        <Badge variant="secondary">Inactive</Badge>
                       )}
                     </div>
 
                     {protocolRisk && (
                       <Badge variant={getRiskBadgeVariant(protocolRisk)}>
-                        Risco: {protocolRisk.toFixed(1)}%
+                        Risk: {protocolRisk.toFixed(1)}%
                       </Badge>
                     )}
                   </div>
@@ -444,7 +444,7 @@ export function RiskInsurance() {
                     <div>
                       <div className="flex items-center gap-1 text-muted-foreground mb-1">
                         <DollarSign className="h-3 w-3" />
-                        Cobertura
+                        Coverage
                       </div>
                       <div className="font-medium">
                         {formatCurrency(policy.coverage)}
@@ -454,7 +454,7 @@ export function RiskInsurance() {
                     <div>
                       <div className="flex items-center gap-1 text-muted-foreground mb-1">
                         <DollarSign className="h-3 w-3" />
-                        Prêmio
+                        Premium
                       </div>
                       <div className="font-medium">
                         {formatCurrency(policy.premium)}
@@ -464,7 +464,7 @@ export function RiskInsurance() {
                     <div>
                       <div className="flex items-center gap-1 text-muted-foreground mb-1">
                         <Calendar className="h-3 w-3" />
-                        Criada em
+                        Created on
                       </div>
                       <div className="font-medium">
                         {new Date(policy.createdAt).toLocaleDateString("pt-BR")}
@@ -474,7 +474,7 @@ export function RiskInsurance() {
                     <div>
                       <div className="flex items-center gap-1 text-muted-foreground mb-1">
                         <Calendar className="h-3 w-3" />
-                        Expira em
+                        Expires in
                       </div>
                       <div
                         className={`font-medium ${
@@ -485,7 +485,7 @@ export function RiskInsurance() {
                             : "text-green-600"
                         }`}
                       >
-                        {daysUntilExpiry} dias
+                        {daysUntilExpiry} days
                       </div>
                     </div>
                   </div>
@@ -504,7 +504,7 @@ export function RiskInsurance() {
                 variant="outline"
                 className="w-full"
               >
-                Atualizar Apólices
+                Update Policies
               </Button>
             </div>
           </div>

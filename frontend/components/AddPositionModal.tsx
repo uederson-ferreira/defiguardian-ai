@@ -147,7 +147,7 @@ export function AddPositionModal({ trigger, children }: AddPositionModalProps) {
         {children || trigger || (
           <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700">
             <Plus className="mr-2 h-4 w-4" />
-            Cadastrar Riscos
+            Register Risks
           </Button>
         )}
       </DialogTrigger>
@@ -156,10 +156,10 @@ export function AddPositionModal({ trigger, children }: AddPositionModalProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-purple-400" />
-            Cadastrar Nova Posição DeFi
+            Register New DeFi Position
           </DialogTitle>
           <DialogDescription className="text-slate-400">
-            Adicione uma posição para análise de risco do seu portfolio
+            Add a position for risk analysis of your portfolio
           </DialogDescription>
         </DialogHeader>
 

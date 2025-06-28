@@ -1,7 +1,7 @@
 /**
- * MÓDULO: Modal para Criar Seguro
- * LOCALIZAÇÃO: components/CreateInsuranceModal.tsx
- * DESCRIÇÃO: Modal para criar apólices de seguro DeFi
+ * MODULE: Create Insurance Modal
+ * LOCATION: components/CreateInsuranceModal.tsx
+ * DESCRIPTION: Modal for creating DeFi insurance policies
  */
 
 "use client";
@@ -34,49 +34,49 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-// Protocolos disponíveis para seguro
+// Available protocols for insurance
 const INSURANCE_PROTOCOLS = [
   {
     name: "Uniswap V3",
     address: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
-    description: "Seguro contra impermanent loss",
-    riskLevel: "Baixo",
+    description: "Insurance against impermanent loss",
+    riskLevel: "Low",
     premium: "2.5%",
   },
   {
     name: "Aave",
     address: "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
-    description: "Seguro contra default de protocolo",
-    riskLevel: "Médio",
+    description: "Insurance against protocol default",
+    riskLevel: "Medium",
     premium: "4.0%",
   },
   {
     name: "Compound",
     address: "0xc3d688B66703497DAA19211EEdff47f25384cdc3",
-    description: "Seguro contra liquidação forçada",
-    riskLevel: "Médio",
+    description: "Insurance against forced liquidation",
+    riskLevel: "Medium",
     premium: "3.5%",
   },
   {
     name: "Curve",
     address: "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46",
-    description: "Seguro contra depeg de stablecoin",
-    riskLevel: "Alto",
+    description: "Insurance against stablecoin depeg",
+    riskLevel: "High",
     premium: "6.0%",
   },
 ];
 
-// Períodos de cobertura
+// Coverage periods
 const COVERAGE_PERIODS = [
-  { label: "30 dias", value: "30", multiplier: 1 },
-  { label: "90 dias", value: "90", multiplier: 0.9 },
-  { label: "180 dias", value: "180", multiplier: 0.8 },
-  { label: "365 dias", value: "365", multiplier: 0.7 },
+  { label: "30 days", value: "30", multiplier: 1 },
+  { label: "90 days", value: "90", multiplier: 0.9 },
+  { label: "180 days", value: "180", multiplier: 0.8 },
+  { label: "365 days", value: "365", multiplier: 0.7 },
 ];
 
 interface CreateInsuranceModalProps {
   trigger?: React.ReactNode;
-  children?: React.ReactNode; // 🔧 FIX: Adicionado children
+  children?: React.ReactNode; // 🔧 FIX: Added children
 }
 
 export function CreateInsuranceModal({
@@ -112,7 +112,7 @@ export function CreateInsuranceModal({
       setCoveragePeriod("");
       setIsOpen(false);
     } catch (error) {
-      console.error("Erro ao criar seguro:", error);
+      console.error("Error creating insurance:", error);
     } finally {
       setIsLoading(false);
     }
@@ -150,7 +150,7 @@ export function CreateInsuranceModal({
             className="border-slate-600 text-slate-300 hover:bg-slate-700"
           >
             <Shield className="mr-2 h-4 w-4" />
-            Criar Seguro
+            Create Insurance
           </Button>
         )}
       </DialogTrigger>
@@ -159,10 +159,10 @@ export function CreateInsuranceModal({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-blue-400" />
-            Criar Apólice de Seguro DeFi
+            Create DeFi Insurance Policy
           </DialogTitle>
           <DialogDescription className="text-slate-400">
-            Proteja seus investimentos contra riscos de protocolos DeFi
+            Protect your investments against DeFi protocol risks
           </DialogDescription>
         </DialogHeader>
 
@@ -171,23 +171,23 @@ export function CreateInsuranceModal({
             <Card className="bg-yellow-500/10 border-yellow-500/20">
               <CardContent className="p-4">
                 <p className="text-yellow-400 text-sm">
-                  ⚠️ Conecte sua carteira para criar seguros
+                  ⚠️ Connect your wallet to create insurance
                 </p>
               </CardContent>
             </Card>
           )}
 
-          {/* Protocolo */}
+          {/* Protocol */}
           <div className="space-y-2">
             <Label htmlFor="protocol" className="text-sm font-medium">
-              Protocolo para Segurar
+              Protocol to Insure
             </Label>
             <Select
               value={selectedProtocol}
               onValueChange={setSelectedProtocol}
             >
               <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                <SelectValue placeholder="Selecione um protocolo" />
+                <SelectValue placeholder="Select a protocol" />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700">
                 {INSURANCE_PROTOCOLS.map((protocol) => (
@@ -213,10 +213,10 @@ export function CreateInsuranceModal({
             </Select>
           </div>
 
-          {/* Valor de Cobertura */}
+          {/* Coverage Amount */}
           <div className="space-y-2">
             <Label htmlFor="coverage" className="text-sm font-medium">
-              Valor de Cobertura (USDC)
+              Coverage Amount (USDC)
             </Label>
             <div className="relative">
               <DollarSign className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
@@ -235,14 +235,14 @@ export function CreateInsuranceModal({
             </div>
           </div>
 
-          {/* Período de Cobertura */}
+          {/* Coverage Period */}
           <div className="space-y-2">
             <Label htmlFor="period" className="text-sm font-medium">
-              Período de Cobertura
+              Coverage Period
             </Label>
             <Select value={coveragePeriod} onValueChange={setCoveragePeriod}>
               <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
-                <SelectValue placeholder="Selecione o período" />
+                <SelectValue placeholder="Select the period" />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700">
                 {COVERAGE_PERIODS.map((period) => (
@@ -255,7 +255,7 @@ export function CreateInsuranceModal({
                       <span>{period.label}</span>
                       {period.multiplier < 1 && (
                         <span className="text-xs text-green-400">
-                          -{Math.round((1 - period.multiplier) * 100)}% desconto
+                          -{Math.round((1 - period.multiplier) * 100)}% discount
                         </span>
                       )}
                     </div>
@@ -265,39 +265,39 @@ export function CreateInsuranceModal({
             </Select>
           </div>
 
-          {/* Preview da Apólice */}
+          {/* Policy Preview */}
           {selectedProtocolData && coverageAmount && coveragePeriod && (
             <Card className="bg-slate-700/50 border-slate-600">
               <CardContent className="p-4 space-y-3">
                 <h4 className="font-medium text-white flex items-center gap-2">
                   <Shield className="h-4 w-4 text-blue-400" />
-                  Preview da Apólice
+                  Policy Preview
                 </h4>
 
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Protocolo:</span>
+                    <span className="text-slate-400">Protocol:</span>
                     <span className="text-white">
                       {selectedProtocolData.name}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Cobertura:</span>
+                    <span className="text-slate-400">Coverage:</span>
                     <span className="text-white">${coverageAmount} USDC</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Período:</span>
-                    <span className="text-white">{coveragePeriod} dias</span>
+                    <span className="text-slate-400">Period:</span>
+                    <span className="text-white">{coveragePeriod} days</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Taxa Base:</span>
+                    <span className="text-slate-400">Base Rate:</span>
                     <span className="text-white">
                       {selectedProtocolData.premium}
                     </span>
                   </div>
                   {selectedPeriodData && selectedPeriodData.multiplier < 1 && (
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Desconto:</span>
+                      <span className="text-slate-400">Discount:</span>
                       <span className="text-green-400">
                         -{Math.round((1 - selectedPeriodData.multiplier) * 100)}
                         %
@@ -309,7 +309,7 @@ export function CreateInsuranceModal({
                 <div className="border-t border-slate-600 pt-3 mt-3">
                   <div className="flex justify-between items-center">
                     <span className="font-medium text-slate-300">
-                      Premium Total:
+                      Total Premium:
                     </span>
                     <span className="font-bold text-white text-lg">
                       ${premium.toFixed(2)} USDC
@@ -320,13 +320,13 @@ export function CreateInsuranceModal({
                 {/* Risk Level Indicator */}
                 <div className="flex items-center gap-2 pt-2">
                   <span className="text-slate-400 text-sm">
-                    Nível de Risco:
+                    Risk Level:
                   </span>
                   <span
                     className={`text-xs px-2 py-1 rounded ${
-                      selectedProtocolData.riskLevel === "Baixo"
+                      selectedProtocolData.riskLevel === "Low"
                         ? "bg-green-500/20 text-green-400"
-                        : selectedProtocolData.riskLevel === "Médio"
+                        : selectedProtocolData.riskLevel === "Medium"
                         ? "bg-yellow-500/20 text-yellow-400"
                         : "bg-red-500/20 text-red-400"
                     }`}
@@ -345,12 +345,12 @@ export function CreateInsuranceModal({
                 <CheckCircle className="h-5 w-5 text-blue-400 mt-0.5" />
                 <div className="space-y-1">
                   <p className="text-blue-400 text-sm font-medium">
-                    Cobertura Automática
+                    Automatic Coverage
                   </p>
                   <p className="text-blue-300 text-xs">
-                    Seu seguro será ativado automaticamente após a confirmação
-                    da transação. Em caso de sinistro, o pagamento será
-                    processado automaticamente via smart contract.
+                    Your insurance will be activated automatically after transaction
+                    confirmation. In case of a claim, payment will be
+                    processed automatically via smart contract.
                   </p>
                 </div>
               </div>
@@ -372,12 +372,12 @@ export function CreateInsuranceModal({
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Criando Apólice...
+                Creating Policy...
               </>
             ) : (
               <>
                 <Shield className="mr-2 h-4 w-4" />
-                Criar Seguro (${premium.toFixed(2)} USDC)
+                Create Insurance (${premium.toFixed(2)} USDC)
               </>
             )}
           </Button>

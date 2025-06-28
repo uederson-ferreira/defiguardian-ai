@@ -120,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Check if MetaMask is installed
       if (!window.ethereum) {
-        const error = "MetaMask não encontrado. Por favor, instale o MetaMask.";
+        const error = "MetaMask not found. Please install MetaMask.";
         setError(error);
         toast.error(error);
         return;
@@ -156,7 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           "code" in err &&
           err.code === 4001
         ) {
-          const error = "Assinatura rejeitada pelo usuário";
+          const error = "Signature rejected by user";
           setError(error);
           toast.error(error);
           return;
@@ -206,7 +206,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error: unknown) {
       console.error("Wallet connection failed:", error);
       const errorMessage =
-        error instanceof Error ? error.message : "Falha ao conectar carteira";
+        error instanceof Error ? error.message : "Failed to connect wallet";
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {

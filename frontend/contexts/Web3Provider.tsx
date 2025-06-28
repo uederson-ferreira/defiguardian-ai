@@ -97,7 +97,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
       setError(null);
 
       if (!window.ethereum) {
-        throw new Error("MetaMask não está instalado");
+        throw new Error("MetaMask is not installed");
       }
 
       console.log('🔗 Inicializando Web3 provider...');
@@ -114,7 +114,7 @@ export function Web3Provider({ children }: { children: ReactNode }) {
         }) as string[];
         
         if (newAccounts.length === 0) {
-          throw new Error("Nenhuma conta selecionada");
+          throw new Error("No account selected");
         }
       }
 
@@ -133,13 +133,14 @@ export function Web3Provider({ children }: { children: ReactNode }) {
 
       toast.success("Web3 conectado com sucesso!");
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      console.error("❌ Falha ao inicializar Web3 provider:", error);
-      setError(error.message || "Falha ao inicializar Web3");
+      console.error("❌ Failed to initialize Web3 provider:", error);
+      setError(error.message || "Failed to initialize Web3");
       setProvider(null);
       setSigner(null);
       setChainId(null);
-      toast.error(error.message || "Falha ao conectar Web3");
+      toast.error(error.message || "Failed to connect Web3");
     } finally {
       setLoading(false);
     }
@@ -148,25 +149,26 @@ export function Web3Provider({ children }: { children: ReactNode }) {
   const switchToCorrectNetwork = async () => {
     try {
       if (!window.ethereum) {
-        throw new Error("MetaMask não encontrado");
+        throw new Error("MetaMask not found");
       }
 
-      console.log('🔄 Mudando para rede correta...');
+      console.log('🔄 Switching to correct network...');
 
       await window.ethereum.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId: `0x${CHAIN_CONFIG.chainId.toString(16)}` }],
       });
 
-      toast.success("Rede alterada com sucesso!");
+      toast.success("Network changed successfully!");
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error.code === 4902) {
         // Network not added, try to add it
         await addNetwork();
       } else {
-        console.error("❌ Erro ao mudar rede:", error);
-        toast.error("Falha ao mudar rede");
+        console.error("❌ Error switching network:", error);
+        toast.error("Failed to switch network");
         throw error;
       }
     }
@@ -175,10 +177,10 @@ export function Web3Provider({ children }: { children: ReactNode }) {
   const addNetwork = async () => {
     try {
       if (!window.ethereum) {
-        throw new Error("MetaMask não encontrado");
+        throw new Error("MetaMask not found");
       }
 
-      console.log('➕ Adicionando rede...');
+      console.log('➕ Adding network...');
 
       await window.ethereum.request({
         method: "wallet_addEthereumChain",
@@ -193,17 +195,18 @@ export function Web3Provider({ children }: { children: ReactNode }) {
         ],
       });
 
-      toast.success("Rede adicionada com sucesso!");
+      toast.success("Network added successfully!");
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      console.error("❌ Falha ao adicionar rede:", error);
-      toast.error("Falha ao adicionar rede");
+      console.error("❌ Failed to add network:", error);
+      toast.error("Failed to add network");
       throw error;
     }
   };
 
   const disconnect = () => {
-    console.log('🔌 Desconectando Web3...');
+    console.log('🔌 Disconnecting Web3...');
     setProvider(null);
     setSigner(null);
     setChainId(null);

@@ -43,7 +43,7 @@ export const authOptions = {
         });
 
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Email e senha são obrigatórios");
+          throw new Error("Email and password are required");
         }
 
         const { email, password, action, name } = credentials;
@@ -54,7 +54,7 @@ export const authOptions = {
             console.log("📝 Criando novo usuário...");
 
             if (!name?.trim()) {
-              throw new Error("Nome é obrigatório para cadastro");
+              throw new Error("Name is required for registration");
             }
 
             // Verificar se usuário já existe
@@ -65,7 +65,7 @@ export const authOptions = {
               .single();
 
             if (existingUser) {
-              throw new Error("Email já cadastrado");
+              throw new Error("Email already registered");
             }
 
             // Hash da senha
@@ -84,8 +84,8 @@ export const authOptions = {
               .single();
 
             if (userError) {
-              console.error("❌ Erro ao criar usuário:", userError);
-              throw new Error("Erro ao criar usuário: " + userError.message);
+              console.error("❌ Error creating user:", userError);
+              throw new Error("Error creating user: " + userError.message);
             }
 
             // Salvar senha na tabela separada
@@ -97,11 +97,11 @@ export const authOptions = {
               });
 
             if (passwordError) {
-              console.error("❌ Erro ao salvar senha:", passwordError);
+              console.error("❌ Error saving password:", passwordError);
               // Remover usuário se der erro na senha
               await supabase.from("users").delete().eq("id", newUser.id);
 
-              throw new Error("Erro ao salvar senha");
+              throw new Error("Error saving password");
             }
 
             console.log("✅ Usuário criado com sucesso:", newUser.email);
@@ -125,9 +125,9 @@ export const authOptions = {
               .single();
 
             if (userError || !user) {
-              console.error("❌ Usuário não encontrado:", userError);
+              console.error("❌ User not found:", userError);
               throw new Error(
-                "Email não encontrado. Verifique o email ou crie uma conta."
+                "Email not found. Check your email or create an account."
               );
             }
 
@@ -139,8 +139,8 @@ export const authOptions = {
               .single();
 
             if (passwordError || !passwordData) {
-              console.error("❌ Senha não encontrada:", passwordError);
-              throw new Error("Dados de login inválidos");
+              console.error("❌ Password not found:", passwordError);
+              throw new Error("Invalid login credentials");
             }
 
             // Verificar senha
@@ -149,8 +149,8 @@ export const authOptions = {
               passwordData.password_hash
             );
             if (!isValidPassword) {
-              console.error("❌ Senha incorreta");
-              throw new Error("Senha incorreta");
+              console.error("❌ Incorrect password");
+              throw new Error("Incorrect password");
             }
 
             console.log("✅ Login realizado com sucesso:", user.email);
@@ -163,7 +163,7 @@ export const authOptions = {
             };
           }
         } catch (error) {
-          console.error("❌ Erro na autenticação:", error);
+          console.error("❌ Authentication error:", error);
           throw error;
         }
       },

@@ -1,5 +1,5 @@
 // components/wallet/WalletConnect.tsx
-// ✅ COMPONENTE DE CONEXÃO DE CARTEIRAS - IGUAL À IMAGEM
+// ✅ WALLET CONNECTION COMPONENT - MATCHES THE IMAGE
 
 'use client'
 
@@ -37,7 +37,7 @@ export function WalletConnect({ onConnect, onDisconnect }: WalletConnectProps) {
         onConnect(address)
       }
     } catch (error) {
-      console.error('Erro ao conectar carteira:', error)
+      console.error('Error connecting wallet:', error)
     } finally {
       setIsConnecting(false)
     }
@@ -66,17 +66,17 @@ export function WalletConnect({ onConnect, onDisconnect }: WalletConnectProps) {
   const getConnectorName = (connectorId: string) => {
     switch (connectorId) {
       case 'injected':
-        return 'Conectar Injected'
+        return 'Connect Injected'
       case 'metaMask':
-        return 'Conectar MetaMask'
+        return 'Connect MetaMask'
       case 'walletConnect':
-        return 'Conectar WalletConnect'
+        return 'Connect WalletConnect'
       default:
-        return `Conectar ${connectorId}`
+        return `Connect ${connectorId}`
     }
   }
 
-  // Se já estiver conectado, mostrar informações da carteira
+  // If already connected, show wallet information
   if (isConnected && address) {
     return (
       <Card className="w-full max-w-md mx-auto bg-gradient-to-br from-green-50 to-blue-50 border-green-200">
@@ -85,17 +85,17 @@ export function WalletConnect({ onConnect, onDisconnect }: WalletConnectProps) {
             <CheckCircle className="h-8 w-8" />
           </div>
           <CardTitle className="text-green-800 text-xl">
-            Carteira Conectada
+            Wallet Connected
           </CardTitle>
           <p className="text-green-600 text-sm">
-            Sua carteira Web3 está conectada com sucesso
+            Your Web3 wallet is successfully connected
           </p>
         </CardHeader>
         
         <CardContent className="space-y-4">
           <div className="bg-white/70 rounded-lg p-4 space-y-3">
             <div>
-              <p className="text-xs text-gray-500 uppercase tracking-wider">Endereço</p>
+              <p className="text-xs text-gray-500 uppercase tracking-wider">Address</p>
               <p className="font-mono text-sm break-all">
                 {address.slice(0, 6)}...{address.slice(-4)}
               </p>
@@ -103,7 +103,7 @@ export function WalletConnect({ onConnect, onDisconnect }: WalletConnectProps) {
             
             {chain && (
               <div>
-                <p className="text-xs text-gray-500 uppercase tracking-wider">Rede</p>
+                <p className="text-xs text-gray-500 uppercase tracking-wider">Network</p>
                 <p className="text-sm font-medium">{chain.name}</p>
               </div>
             )}
@@ -115,7 +115,7 @@ export function WalletConnect({ onConnect, onDisconnect }: WalletConnectProps) {
               variant="outline"
               className="flex-1"
             >
-              Desconectar
+              Disconnect
             </Button>
             
             <Button
@@ -131,7 +131,7 @@ export function WalletConnect({ onConnect, onDisconnect }: WalletConnectProps) {
     )
   }
 
-  // Tela de conexão de carteiras
+  // Wallet connection screen
   return (
     <div className="w-full max-w-md mx-auto">
       <Card className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 border-slate-700 shadow-2xl">
@@ -143,20 +143,20 @@ export function WalletConnect({ onConnect, onDisconnect }: WalletConnectProps) {
             </div>
           </div>
           <CardTitle className="text-white text-2xl font-bold mb-2">
-            Carteira Necessária
+            Wallet Required
           </CardTitle>
           <p className="text-slate-300 text-sm">
-            Conecte sua carteira para jogar
+            Connect your wallet to play
           </p>
         </CardHeader>
         
         <CardContent className="pb-8">
           <div className="bg-slate-800/50 rounded-xl p-6 mb-6">
             <h3 className="text-white text-xl font-semibold mb-4 text-center">
-              Conectar Carteira
+              Connect Wallet
             </h3>
             <p className="text-slate-400 text-sm text-center mb-6">
-              Conecte sua carteira para jogar. Suporte para múltiplas carteiras.
+              Connect your wallet to play. Support for multiple wallets.
             </p>
             
             <div className="space-y-3">
@@ -180,10 +180,10 @@ export function WalletConnect({ onConnect, onDisconnect }: WalletConnectProps) {
             </div>
           </div>
 
-          {/* Info sobre carteiras suportadas */}
+          {/* Info about supported wallets */}
           <div className="bg-blue-900/30 rounded-lg p-4 border border-blue-700/50">
             <h4 className="text-blue-300 font-semibold mb-3 text-center">
-              Carteiras suportadas:
+              Supported wallets:
             </h4>
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2 text-blue-200">
@@ -196,7 +196,7 @@ export function WalletConnect({ onConnect, onDisconnect }: WalletConnectProps) {
               </div>
               <div className="flex items-center gap-2 text-blue-200">
                 <div className="w-1 h-1 bg-blue-400 rounded-full"></div>
-                Injected wallets e extensões
+                Injected wallets and extensions
               </div>
             </div>
           </div>
@@ -205,7 +205,7 @@ export function WalletConnect({ onConnect, onDisconnect }: WalletConnectProps) {
           <div className="mt-6 text-center">
             <div className="flex items-center justify-center gap-2 text-slate-500 text-xs">
               <Shield className="h-3 w-3" />
-              <span>Powered by Wagmi - Conexão segura com carteiras Web3</span>
+              <span>Powered by Wagmi - Secure connection with Web3 wallets</span>
             </div>
           </div>
         </CardContent>

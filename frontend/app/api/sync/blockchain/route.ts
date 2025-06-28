@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'Usuário não autenticado' },
+        { error: 'User not authenticated' },
         { status: 401 }
       )
     }
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     if (!walletAddress) {
       return NextResponse.json(
-        { error: 'Endereço da wallet é obrigatório' },
+        { error: 'Wallet address is required' },
         { status: 400 }
       )
     }
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
     // Validar endereço Ethereum
     if (!ethers.isAddress(walletAddress)) {
       return NextResponse.json(
-        { error: 'Endereço da wallet inválido' },
+        { error: 'Invalid wallet address' },
         { status: 400 }
       )
     }
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     if (userError || !userData) {
       return NextResponse.json(
-        { error: 'Usuário não encontrado' },
+        { error: 'User not found' },
         { status: 404 }
       )
     }
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
               .single()
 
             if (portfolioError) {
-              syncResults.errors.push(`Erro ao atualizar portfolio: ${portfolioError.message}`)
+              syncResults.errors.push(`Error updating portfolio: ${portfolioError.message}`)
             } else {
               syncResults.portfolio = updatedPortfolio
             }
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
           console.log('✅ Portfolio sincronizado:', { totalValue, riskScore })
 
         } catch (contractError) {
-          console.error('❌ Erro ao consultar contrato Portfolio Analyzer:', contractError)
+          console.error('❌ Error querying Portfolio Analyzer contract:', contractError)
           syncResults.errors.push(`Portfolio Analyzer: ${contractError}`)
         }
       }
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
             .select('*')
 
           if (positionsError) {
-            syncResults.errors.push(`Erro ao sincronizar posições: ${positionsError.message}`)
+            syncResults.errors.push(`Error synchronizing positions: ${positionsError.message}`)
           } else {
             syncResults.positions = newPositions
           }
@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
         console.log('✅ Posições sincronizadas:', mockPositions.length)
 
       } catch (positionsError) {
-        console.error('❌ Erro ao sincronizar posições:', positionsError)
+        console.error('❌ Error synchronizing positions:', positionsError)
         syncResults.errors.push(`Posições: ${positionsError}`)
       }
 
@@ -205,14 +205,14 @@ export async function POST(request: NextRequest) {
             ])
 
           if (alertError) {
-            syncResults.errors.push(`Erro ao criar alerta: ${alertError.message}`)
+            syncResults.errors.push(`Error creating alert: ${alertError.message}`)
           } else {
             console.log('⚠️ Alerta de risco criado')
           }
         }
 
       } catch (alertError) {
-        console.error('❌ Erro ao verificar riscos:', alertError)
+        console.error('❌ Error checking risks:', alertError)
         syncResults.errors.push(`Alertas: ${alertError}`)
       }
 

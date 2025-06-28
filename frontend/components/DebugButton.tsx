@@ -46,7 +46,7 @@ export function DebugButton() {
         <div className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
           <div className="flex items-center gap-2">
             <DollarSign className="h-4 w-4 text-green-400" />
-            <span className="text-sm text-slate-300">Saldo AVAX:</span>
+            <span className="text-sm text-slate-300">AVAX Balance:</span>
           </div>
           <div className="text-right">
             <div className="text-white font-medium">
@@ -54,16 +54,16 @@ export function DebugButton() {
             </div>
             <div className="text-xs text-slate-400">
               {balance && parseFloat(balance.formatted) < 0.01 && (
-                <span className="text-red-400">⚠️ Baixo para gas</span>
+                <span className="text-red-400">⚠️ Low for gas</span>
               )}
             </div>
           </div>
         </div>
 
-        {/* Status da Última Transação */}
+        {/* Last Transaction Status */}
         {lastTxHash && (
           <div className="space-y-2">
-            <div className="text-sm text-slate-300">Última Transação:</div>
+            <div className="text-sm text-slate-300">Last Transaction:</div>
             <div className="p-3 bg-slate-700/30 rounded-lg space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-400">Hash:</span>
@@ -87,7 +87,7 @@ export function DebugButton() {
                 }>
                   {isConfirming ? 'Confirmando...' :
                    isSuccess ? 'Sucesso' :
-                   isError ? 'Falhou' :
+                   isError ? 'Failed' :
                    'Pendente'}
                 </Badge>
               </div>
@@ -95,12 +95,12 @@ export function DebugButton() {
           </div>
         )}
 
-        {/* Erro Detalhado */}
+        {/* Detailed Error */}
         {isError && txError && (
           <Alert className="border-red-500/50 bg-red-500/10">
             <AlertTriangle className="h-4 w-4 text-red-400" />
             <AlertDescription className="text-red-400 text-xs">
-              <strong>Erro:</strong> {txError.message}
+              <strong>Error:</strong> {txError.message}
             </AlertDescription>
           </Alert>
         )}
@@ -149,13 +149,13 @@ export function DebugButton() {
           <Alert className="border-yellow-500/50 bg-yellow-500/10">
             <DollarSign className="h-4 w-4 text-yellow-400" />
             <AlertDescription className="text-yellow-400 text-xs">
-              Saldo baixo! Obtenha AVAX grátis no{' '}
+              Low balance! Get free AVAX at{' '}
               <a 
                 href="https://faucet.avax.network/" 
                 target="_blank"
                 className="text-yellow-300 underline hover:text-yellow-200"
               >
-                Faucet Oficial
+                Official Faucet
               </a>
             </AlertDescription>
           </Alert>

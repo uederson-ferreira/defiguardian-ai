@@ -1,835 +1,411 @@
-# 🛡️ RiskGuardian AI
+# 🛡️ DefiGuardian AI
 
-Sistema inteligente de análise de risco e automação de hedge para portfólios DeFi, utilizando Chainlink CCIP para operações cross-chain.
+> **Sistema Inteligente de Análise de Risco e Automação DeFi**
+
+Plataforma avançada de gestão de riscos para portfólios DeFi, utilizando inteligência artificial e automação cross-chain através do ecossistema Chainlink.
+
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Avalanche](https://img.shields.io/badge/Avalanche-Fuji-red.svg)
+![Chainlink](https://img.shields.io/badge/Chainlink-CCIP-blue.svg)
+![Next.js](https://img.shields.io/badge/Next.js-14-black.svg)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue.svg)
 
 ## 🎯 Visão Geral
 
-O RiskGuardian AI é uma plataforma avançada que combina contratos inteligentes e automação para proteger portfólios DeFi através de operações de hedge automatizadas entre diferentes blockchains. O sistema utiliza Chainlink Automation para execução de estratégias e CCIP (Cross-Chain Interoperability Protocol) para comunicação entre redes.
+O **DefiGuardian AI** é uma solução completa que combina contratos inteligentes, automação e inteligência artificial para proteger portfólios DeFi através de:
 
-## 📡 Serviços e Portas
+- 🤖 **Análise de Risco com IA**: Avaliação inteligente de portfólios usando ElizaOS
+- ⚡ **Automação Cross-Chain**: Operações automatizadas via Chainlink CCIP
+- 🛡️ **Hedge Inteligente**: Estratégias de proteção automatizadas
+- 📊 **Dashboard Avançado**: Interface moderna para monitoramento em tempo real
+- 🔔 **Sistema de Alertas**: Notificações proativas sobre riscos
 
-### Frontend (Next.js)
+## 🏗️ Arquitetura do Sistema
 
-- Porta: 3000
-- URL: <http://localhost:3000>
-- Comandos:
-
-  ```bash
-  # Docker
-  docker compose up -d frontend
-  docker compose logs -f frontend
-  
-  # Local
-  cd frontend
-  npm install
-  npm run dev
-  ```
-
-### Backend (Node.js)
-
-- Porta: 8002
-- URL: <http://localhost:8002>
-- Comandos:
-
-  ```bash
-  # Docker
-  docker compose up -d backend
-  docker compose logs -f backend
-  
-  # Local
-  cd backend
-  npm install
-  npm run dev
-  ```
-
-### ElizaOS Agent (IA)
-
-- Porta: 3001
-- URL: <http://localhost:3001>
-- WebSocket: ws://localhost:3001
-
-#### Comandos Básicos
-
-```bash
-# Docker
-docker compose up -d elizaos-agent
-docker compose logs -f elizaos-agent
-
-# Local
-cd elizaos-agent
-npm install
-npm run dev
+```mermaid
+graph TB
+    subgraph "Frontend Layer"
+        A[Next.js 14 + TypeScript]
+        B[RainbowKit + Wagmi]
+        C[TailwindCSS + Shadcn/ui]
+    end
+    
+    subgraph "Smart Contracts (Avalanche Fuji)"
+        D[Risk Registry]
+        E[Portfolio Analyzer]
+        F[Alert System]
+        G[Hedge Strategies]
+        H[Risk Insurance]
+    end
+    
+    subgraph "AI & Automation"
+        I[ElizaOS Agent]
+        J[Chainlink Automation]
+        K[Chainlink CCIP]
+    end
+    
+    subgraph "Backend (Em Construção)"
+        L[Node.js + Express]
+        M[Prisma ORM]
+        N[PostgreSQL]
+    end
+    
+    A --> D
+    A --> I
+    D --> J
+    G --> K
+    I --> L
 ```
 
-#### Endpoints REST
-
-```bash
-# Status do serviço
-curl http://localhost:3001/api/health
-
-# Análise de portfólio
-curl -X POST http://localhost:3001/api/analyze-portfolio \
-  -H "Content-Type: application/json" \
-  -d '{
-    "address": "0x742d35Cc6635C0532925a3b8D0D8f8Cc86d0AB8B",
-    "chain": "ethereum"
-  }'
-
-# Análise de risco
-curl -X POST http://localhost:3001/api/analyze-risk \
-  -H "Content-Type: application/json" \
-  -d '{
-    "portfolio": {
-      "assets": [
-        {"token": "ETH", "amount": "10.5"},
-        {"token": "USDC", "amount": "5000"}
-      ]
-    }
-  }'
-
-# Previsão de mercado
-curl -X POST http://localhost:3001/api/market-prediction \
-  -H "Content-Type: application/json" \
-  -d '{
-    "token": "ETH",
-    "timeframe": "1d"
-  }'
-```
-
-#### WebSocket API
-
-```javascript
-// Exemplo de conexão WebSocket
-const ws = new WebSocket('ws://localhost:3001');
-
-// Enviar mensagem
-ws.send(JSON.stringify({
-  type: 'analyze_portfolio',
-  data: {
-    address: '0x742d35Cc6635C0532925a3b8D0D8f8Cc86d0AB8B'
-  }
-}));
-
-// Receber atualizações
-ws.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-  console.log('Atualização:', data);
-};
-```
-
-#### Serviços Internos
-
-1. AI Agent Service
-
-```bash
-# Verificar status do serviço de IA
-curl http://localhost:3001/api/ai/status
-
-# Testar modelo específico
-curl -X POST http://localhost:3001/api/ai/test \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "gpt-4",
-    "prompt": "Analise este portfólio"
-  }'
-```
-
-2. Blockchain Service
-
-```bash
-# Verificar conexão com as redes
-curl http://localhost:3001/api/blockchain/status
-
-# Buscar saldo de tokens
-curl -X GET http://localhost:3001/api/blockchain/balance \
-  -H "Content-Type: application/json" \
-  -d '{
-    "address": "0x742d35Cc6635C0532925a3b8D0D8f8Cc86d0AB8B",
-    "chain": "ethereum"
-  }'
-```
-
-3. Cache Service
-
-```bash
-# Verificar status do cache
-curl http://localhost:3001/api/cache/status
-
-# Limpar cache
-curl -X POST http://localhost:3001/api/cache/clear
-```
-
-4. WebSocket Service
-
-```bash
-# Verificar conexões ativas
-curl http://localhost:3001/api/websocket/connections
+## 📦 Módulos do Projeto
 
-# Estatísticas de uso
-curl http://localhost:3001/api/websocket/stats
-```
+### 🎨 Frontend (`/frontend`)
 
-#### Monitoramento e Debug
+**Status**: ✅ **Funcional**
 
-```bash
-# Logs em tempo real
-docker compose logs -f elizaos-agent
+- **Framework**: Next.js 14 com App Router
+- **Linguagem**: TypeScript
+- **Gerenciador**: pnpm
+- **UI**: TailwindCSS + Shadcn/ui
+- **Web3**: RainbowKit + Wagmi + Viem
+- **Autenticação**: NextAuth.js
 
-# Métricas de performance
-curl http://localhost:3001/api/metrics
+**Funcionalidades**:
 
-# Status dos serviços
-curl http://localhost:3001/api/health/detailed
+- Dashboard interativo com análise de portfólio
+- Conexão com carteiras Web3
+- Sistema de alertas em tempo real
+- Interface para criação de seguros DeFi
+- Chat com IA integrado
 
-# Uso de memória
-curl http://localhost:3001/api/system/memory
+### ⚙️ Smart Contracts (`/contractsv2`)
 
-# Conexões ativas
-curl http://localhost:3001/api/system/connections
-```
+**Status**: ✅ **Deployado na Avalanche Fuji**
 
-#### Scripts de Manutenção
+- **Framework**: Foundry
+- **Linguagem**: Solidity
+- **Rede**: Avalanche Fuji Testnet
+- **Contratos**: 27 contratos deployados
 
-```bash
-# Reiniciar serviço
-docker compose restart elizaos-agent
+**Contratos Principais**:
 
-# Atualizar dependências
-cd elizaos-agent && npm update
+- `RiskRegistry`: Registro de protocolos e riscos
+- `PortfolioAnalyzer`: Análise de portfólios DeFi
+- `AlertSystem`: Sistema de alertas automatizados
+- `RiskInsurance`: Seguros descentralizados
+- `HedgeStrategies`: Estratégias de proteção
 
-# Limpar logs
-> elizaos-agent/logs/app.log
+### 🤖 ElizaOS Agent (`/elizaos-riskguardian`)
 
-# Backup de configurações
-cp elizaos-agent/.env-dev elizaos-agent/.env-dev.backup
-```
+**Status**: ✅ **Funcional**
 
-### Chromia Node (Mock)
+- **Framework**: ElizaOS
+- **Linguagem**: TypeScript
+- **Funcionalidade**: Agente de IA especializado em DeFi
 
-- Porta: 7740
-- URL: <http://localhost:7740>
-- Comandos:
+**Capacidades**:
 
-  ```bash
-  docker compose up -d chromia-node
-  docker compose logs -f chromia-node
-  ```
+- Análise inteligente de riscos
+- Recomendações personalizadas
+- Processamento de linguagem natural
+- Integração com contratos inteligentes
 
-### PostgreSQL
+### 🔧 Backend (`/backend`)
 
-- Porta: 5432
-- Credenciais padrão:
-  - Database: chromia
-  - Usuário: chromia
-  - Senha: chromia_password
-- Comandos:
+**Status**: 🚧 **Em Construção**
 
-  ```bash
-  # Iniciar
-  docker compose up -d postgres
-  
-  # Backup
-  docker compose exec postgres pg_dump -U chromia > backup.sql
-  
-  # Restaurar
-  docker compose exec -T postgres psql -U chromia < backup.sql
-  ```
+- **Framework**: Node.js + Express
+- **Linguagem**: TypeScript
+- **ORM**: Prisma
+- **Banco**: PostgreSQL
 
-### Redis
+**Utilidade Futura**:
 
-- Porta: 6379
-- Comandos:
+- API REST para dados históricos
+- Cache de análises complexas
+- Webhooks para notificações
+- Integração com serviços externos
 
-  ```bash
-  # Iniciar
-  docker compose up -d redis
-  
-  # CLI
-  docker compose exec redis redis-cli
-  ```
+### 🌐 Chromia Integration (`/chromia`)
 
-### Anvil (Ethereum Local)
+**Status**: 🚧 **Experimental**
 
-- Porta: 8545
-- URL: <http://localhost:8545>
-- Chain ID: 31337
-- Comandos:
+- **Blockchain**: Chromia
+- **Linguagem**: Rell
+- **Propósito**: Armazenamento descentralizado de dados
 
-  ```bash
-  docker compose up -d anvil
-  docker compose logs -f anvil
-  ```
-
-## 🔧 Comandos Úteis
-
-### Docker Compose
-
-```bash
-# Iniciar todos os serviços
-docker compose up -d
-
-# Parar todos os serviços
-docker compose down
-
-# Parar e remover volumes
-docker compose down -v
-
-# Reconstruir todos os serviços
-docker compose up -d --build
-
-# Status dos serviços
-docker compose ps
-
-# Uso de recursos
-docker compose top
-```
-
-### Scripts de Desenvolvimento
-
-```bash
-# Compilar contratos
-npm run compile
-
-# Executar testes
-npm run test
-
-# Deploy na testnet Sepolia
-npm run deploy:sepolia
-
-# Deploy na testnet Fuji
-npm run deploy:fuji
-
-# Estimar taxas CCIP
-npm run estimate-fees
-
-# Verificar saldo LINK
-npm run check-link-balance
-
-# Aprovar gastos LINK
-npm run approve-link
-```
-
-### Limpeza e Manutenção
-
-```bash
-# Limpar cache do Docker
-./scripts/docker-cleanup.sh
-
-# Parar todos os serviços
-./scripts/stop.sh
-
-# Iniciar ambiente de desenvolvimento
-./scripts/start-dev.sh
-```
-
-### Testes de API
-
-```bash
-# Teste do ElizaOS Agent
-curl -X POST http://localhost:3001/api/analyze-portfolio \
-  -H "Content-Type: application/json" \
-  -d '{"address": "0x742d35Cc6635C0532925a3b8D0D8f8Cc86d0AB8B"}'
-
-# Teste do Backend
-curl -X POST http://localhost:8002/api/analyze \
-  -H "Content-Type: application/json" \
-  -d '{"address": "0x742d35Cc6635C0532925a3b8D0D8f8Cc86d0AB8B"}'
-```
-
-## 🔐 Configuração
-
-### Variáveis de Ambiente
-
-#### Frontend (.env.local)
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8002
-NEXT_PUBLIC_ELIZAOS_URL=http://localhost:3001
-```
-
-#### Backend (.env-dev)
-
-```env
-# Server
-PORT=8002
-NODE_ENV=development
-LOG_LEVEL=debug
-
-# Database
-DATABASE_URL=postgresql://chromia:chromia_password@localhost:5432/chromia
-
-# Redis
-REDIS_URL=redis://localhost:6379
-
-# Blockchain
-ETHEREUM_RPC_URL=http://localhost:8545
-POLYGON_RPC_URL=https://polygon-mumbai.infura.io/v3/your-key
-BSC_RPC_URL=https://data-seed-prebsc-1-s1.binance.org:8545
-AVALANCHE_RPC_URL=https://api.avax-test.network/ext/bc/C/rpc
-```
-
-#### ElizaOS Agent (.env-dev)
-
-```env
-# Server
-PORT=3001
-NODE_ENV=development
-LOG_LEVEL=debug
-CORS_ORIGIN=*
-
-# API Keys (opcional - serviço funcionará em modo mock se não fornecidas)
-OPENAI_API_KEY=
-ANTHROPIC_API_KEY=
-
-# Rate Limiting
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
-
-# Cache
-CACHE_TTL=5
-CACHE_CHECK_PERIOD=1
-
-# Models
-OPENAI_MODEL=gpt-4-turbo-preview
-ANTHROPIC_MODEL=claude-3-opus-20240229
-```
-
-#### Blockchain (.env)
-
-```env
-# RPCs
-SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/your-key
-FUJI_RPC_URL=https://api.avax-test.network/ext/bc/C/rpc
-
-# Chaves
-PRIVATE_KEY=sua_chave_privada
-ETHERSCAN_API_KEY=sua_chave_etherscan
-
-# Contratos
-LINK_TOKEN_ADDRESS=0x779877A7B0D9E8603169DdbD7836e478b4624789
-CCIP_ROUTER_ADDRESS=0x0BF3dE8c5D3e8A2B34D2BEeB17ABfCeBaf363A59
-
-# Chain Selectors
-CHAIN_SELECTOR_FUJI=0x84
-CHAIN_SELECTOR_SEPOLIA=0x1
-```
-
-## ✨ Funcionalidades Principais
-
-### 🔄 Operações Cross-Chain
-
-- Hedge automatizado entre diferentes blockchains via CCIP
-- Suporte inicial para Ethereum (Sepolia) e Avalanche (Fuji)
-- Monitoramento de taxas e slippage
-- Execução segura de transações cross-chain
-
-### 🤖 Automação de Hedge
-
-- Execução automática via Chainlink Automation
-- Estratégias de proteção configuráveis
-- Monitoramento de preços em tempo real
-- Rebalanceamento automático de posições
-
-### 🔐 Segurança
-
-- Validações rigorosas de transações
-- Proteções contra slippage
-- Monitoramento de taxas
-- Verificações de saldo e allowance
-
-### 📊 Monitoramento
-
-- Acompanhamento de transações cross-chain
-- Alertas de status de operações
-- Monitoramento de saldos LINK
-- Estimativas de taxas em tempo real
-
-## 🛠️ Tecnologias
-
-### Smart Contracts
-
-- Solidity 0.8.x
-- Hardhat
-- Chainlink CCIP 0.7.6
-- Chainlink Automation
-- OpenZeppelin Contracts 4.9.3
-
-### Backend
-
-- Node.js & TypeScript
-- Ethers.js 5.7.2
-- Sistema de logging estruturado
-- Gerenciamento de ambiente via dotenv
-
-## 🚀 Começando
+## 🚀 Instalação e Execução
 
 ### Pré-requisitos
 
-- Docker e Docker Compose
 - Node.js 18+
-- npm ou yarn
-- PostgreSQL (opcional, para desenvolvimento local sem Docker)
-- Redis (opcional, para desenvolvimento local sem Docker)
+- pnpm (recomendado para o frontend)
+- Docker & Docker Compose
+- Git
 
-### Instalação com Docker (Recomendado)
-
-1. Clone o repositório:
+### 🎯 Execução Rápida (Recomendado)
 
 ```bash
-git clone https://github.com/seu-usuario/riskguardian-ai.git
-cd riskguardian-ai
+# Clone o repositório
+git clone https://github.com/seu-usuario/defiguardian-ai.git
+cd defiguardian-ai
+
+# Execute com Docker
+docker-compose up -d
 ```
 
-2. Configure as variáveis de ambiente:
+**Serviços Disponíveis**:
+
+- Frontend: <http://localhost:3000>
+- Backend: <http://localhost:8002> (em construção)
+- ElizaOS: <http://localhost:3001>
+
+### 🛠️ Desenvolvimento Local
+
+#### Frontend
 
 ```bash
-# Crie o arquivo .env na raiz do projeto
-cp .env.example .env
-
-# Edite o arquivo .env com suas configurações:
-# - Chaves de API (opcional - serviço funcionará em modo mock se não fornecidas)
-OPENAI_API_KEY=
-ANTHROPIC_API_KEY=
-OPENROUTER_API_KEY=
-CHAINLINK_API_KEY=
-ETHERSCAN_API_KEY=
-ALCHEMY_API_KEY=
-
-# - Configurações de IA
-AI_PROVIDER=openai
-AI_MODEL_RISK=gpt-4-turbo-preview
-AI_MODEL_CHAT=gpt-4-turbo-preview
-AI_MODEL_DATA=gpt-4-turbo-preview
-AI_MODEL_FALLBACK=gpt-3.5-turbo
-
-# - Segurança
-JWT_SECRET=seu_jwt_secret
-PRIVATE_KEY=sua_chave_privada
-```
-
-3. Inicie os serviços:
-
-```bash
-# Inicia todos os serviços em modo detached
-docker compose up -d
-
-# Para ver os logs de todos os serviços
-docker compose logs -f
-
-# Para ver logs de um serviço específico
-docker compose logs -f elizaos-agent
-```
-
-### Instalação Local (Desenvolvimento)
-
-1. Instale as dependências em cada componente:
-
-```bash
-# Frontend
 cd frontend
-npm install
-cp .env.example .env.local
-# Configure .env.local
 
-# Backend
-cd ../backend
-npm install
-cp .env.example .env-dev
-# Configure .env-dev
+# Instalar dependências com pnpm
+pnpm install
 
-# ElizaOS Agent
-cd ../elizaos-agent
-npm install
-cp .env.example .env-dev
-# Configure .env-dev
+# Executar em modo desenvolvimento
+pnpm dev
+
+# Build para produção
+pnpm build
+
+# Linting
+pnpm lint
 ```
 
-2. Inicie os serviços individualmente:
+#### Smart Contracts
 
 ```bash
-# Frontend
-cd frontend
-npm run dev
+cd contractsv2
 
-# Backend
-cd backend
-npm run dev
+# Instalar Foundry
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
 
-# ElizaOS Agent
-cd elizaos-agent
-npm run dev
-```
-
-## 📡 Service Ports and Configuration
-
-### Frontend (Next.js)
-
-- Porta: 3000
-- URL: <http://localhost:3000>
-- Comandos Docker:
-
-  ```bash
-  # Iniciar apenas o frontend
-  docker compose up -d frontend
-  
-  # Reconstruir e reiniciar
-  docker compose up -d --build frontend
-  
-  # Logs
-  docker compose logs -f frontend
-  ```
-
-### Backend (Node.js)
-
-- Porta: 8002
-- URL: <http://localhost:8002>
-- Endpoints principais:
-  - GET /api/health - Status do serviço
-  - POST /api/analyze - Análise de portfólio
-- Comandos Docker:
-
-  ```bash
-  # Iniciar apenas o backend
-  docker compose up -d backend
-  
-  # Reconstruir e reiniciar
-  docker compose up -d --build backend
-  
-  # Logs
-  docker compose logs -f backend
-  ```
-
-### ElizaOS Agent (IA)
-
-- Porta: 3001
-- URL: <http://localhost:3001>
-- Endpoints principais:
-  - POST /api/analyze-portfolio - Análise de portfólio com IA
-  - GET /api/health - Status do serviço
-- Comandos Docker:
-
-  ```bash
-  # Iniciar apenas o ElizaOS Agent
-  docker compose up -d elizaos-agent
-  
-  # Reconstruir e reiniciar
-  docker compose up -d --build elizaos-agent
-  
-  # Logs
-  docker compose logs -f elizaos-agent
-  ```
-
-### Chromia Node (Mock)
-
-- Porta: 7740
-- URL: <http://localhost:7740>
-- Comandos Docker:
-
-  ```bash
-  # Iniciar apenas o Chromia Node
-  docker compose up -d chromia-node
-  
-  # Logs
-  docker compose logs -f chromia-node
-  ```
-
-### PostgreSQL
-
-- Porta: 5432
-- Credenciais padrão:
-  - Database: chromia
-  - Usuário: chromia
-  - Senha: chromia_password
-- Comandos Docker:
-
-  ```bash
-  # Iniciar apenas o PostgreSQL
-  docker compose up -d postgres
-  
-  # Backup do banco
-  docker compose exec postgres pg_dump -U chromia > backup.sql
-  
-  # Restaurar backup
-  docker compose exec -T postgres psql -U chromia < backup.sql
-  ```
-
-### Redis Cache Service
-
-- Porta: 6379
-- Comandos Docker:
-
-  ```bash
-  # Iniciar apenas o Redis
-  docker compose up -d redis
-  
-  # CLI do Redis
-  docker compose exec redis redis-cli
-  ```
-
-### Anvil (Ethereum Local)
-
-- Porta: 8545
-- URL: <http://localhost:8545>
-- Chain ID: 31337
-- Comandos Docker:
-
-  ```bash
-  # Iniciar apenas o Anvil
-  docker compose up -d anvil
-  
-  # Logs
-  docker compose logs -f anvil
-  ```
-
-### PGAdmin (Interface PostgreSQL)
-
-- Porta: 5050
-- URL: <http://localhost:5050>
-- Credenciais padrão:
-  - Email: <admin@riskguardian.ai>
-  - Senha: admin123
-- Comandos Docker:
-
-  ```bash
-  # Iniciar PGAdmin (perfil tools)
-  docker compose --profile tools up -d pgadmin
-  ```
-
-## 🔧 Comandos Úteis
-
-### Docker Compose
-
-```bash
-# Iniciar todos os serviços
-docker compose up -d
-
-# Parar todos os serviços
-docker compose down
-
-# Parar e remover volumes
-docker compose down -v
-
-# Reconstruir todos os serviços
-docker compose up -d --build
-
-# Status dos serviços
-docker compose ps
-
-# Uso de recursos
-docker compose top
-```
-
-### Development Scripts and Commands
-
-```bash
 # Compilar contratos
-npm run compile
+forge build
 
 # Executar testes
-npm run test
+forge test
 
-# Deploy na testnet Sepolia
-npm run deploy:sepolia
-
-# Deploy na testnet Fuji
-npm run deploy:fuji
-
-# Estimar taxas CCIP
-npm run estimate-fees
-
-# Verificar saldo LINK
-npm run check-link-balance
-
-# Aprovar gastos LINK
-npm run approve-link
+# Deploy (configurar .env primeiro)
+forge script script/AvalanchePreciseDeploy.s.sol --rpc-url $AVALANCHE_FUJI_RPC --broadcast
 ```
 
-### System Cleanup and Maintenance
+#### ElizaOS Agent
 
 ```bash
-# Limpar cache do Docker
-./scripts/docker-cleanup.sh
+cd elizaos-riskguardian
 
-# Parar todos os serviços
-./scripts/stop.sh
+# Instalar dependências
+bun install
 
-# Iniciar ambiente de desenvolvimento
-./scripts/start-dev.sh
+# Executar agente
+bun start
 ```
-
-## 📝 Testes
-
-### Teste do ElizaOS Agent
-
-```bash
-# Análise de portfólio
-curl -X POST http://localhost:3001/api/analyze-portfolio \
-  -H "Content-Type: application/json" \
-  -d '{"address": "0x742d35Cc6635C0532925a3b8D0D8f8Cc86d0AB8B"}'
-
-# Status do serviço
-curl http://localhost:3001/api/health
-```
-
-### Teste do Backend
-
-```bash
-# Status do serviço
-curl http://localhost:8002/api/health
-
-# Análise de portfólio
-curl -X POST http://localhost:8002/api/analyze \
-  -H "Content-Type: application/json" \
-  -d '{"address": "0x742d35Cc6635C0532925a3b8D0D8f8Cc86d0AB8B"}'
-```
-
-## 🔒 Segurança
-
-### Práticas de Segurança
-
-- Validação rigorosa de parâmetros
-- Verificações de saldo e allowance
-- Proteções contra slippage
-- Monitoramento de taxas
-
-### Gerenciamento de Chaves
-
-- Uso de variáveis de ambiente para chaves
-- Nunca commitar arquivos .env
-- Rotação regular de chaves recomendada
-
-## 📊 Monitoramento
-
-### Logs & Verificações
-
-- Logs estruturados por operação
-- Verificações de status de transações
-- Monitoramento de saldos
-- Acompanhamento de taxas
 
 ## 🔧 Configuração
 
-### Variáveis de Ambiente Principais
+### Variáveis de Ambiente
 
-```env
-# Blockchain
-PRIVATE_KEY=sua_chave_privada
-SEPOLIA_RPC_URL=url_do_nó_sepolia
-FUJI_RPC_URL=url_do_nó_fuji
+Crie os arquivos `.env` baseados nos exemplos:
 
-# Contratos
-LINK_TOKEN_ADDRESS=endereço_do_token_link
-CCIP_ROUTER_ADDRESS=endereço_do_router_ccip
+```bash
+# Frontend (.env.local)
+cp frontend/.env.example frontend/.env.local
 
-# Configurações
-CHAIN_SELECTOR_FUJI=0x84
-CHAIN_SELECTOR_SEPOLIA=0x1
+# Backend (.env)
+cp backend/.env.example backend/.env
+
+# Contratos (.env)
+cp contractsv2/env.example.txt contractsv2/.env
 ```
 
-## 📝 Licença
+### Configuração da Carteira
+
+1. Adicione a rede Avalanche Fuji na sua carteira
+2. Obtenha AVAX de teste: <https://faucet.avax.network/>
+3. Configure as variáveis de ambiente com suas chaves
+
+## 🌟 Funcionalidades Principais
+
+### 📊 Dashboard Inteligente
+
+- Visão geral do portfólio em tempo real
+- Análise de risco automatizada
+- Métricas de performance
+- Alertas personalizáveis
+
+### 🛡️ Proteção Automatizada
+
+- Stop-loss inteligente
+- Rebalanceamento automático
+- Hedge de volatilidade
+- Operações cross-chain
+
+### 🤖 IA Integrada
+
+- Chat com especialista em DeFi
+- Recomendações personalizadas
+- Análise preditiva de riscos
+- Otimização de estratégias
+
+### 🔔 Sistema de Alertas
+
+- Notificações em tempo real
+- Alertas customizáveis
+- Integração com Chainlink Automation
+- Múltiplos canais de notificação
+
+## 🔗 Integrações
+
+### Chainlink Services
+
+- **Price Feeds**: Dados de preços em tempo real
+- **Automation**: Execução automatizada de estratégias
+- **CCIP**: Comunicação cross-chain
+- **VRF**: Randomização para seguros
+
+### Protocolos DeFi
+
+- Uniswap V3
+- Aave
+- Compound
+- Curve Finance
+
+## 📚 Documentação
+
+- [Guia de Desenvolvimento](docs/DEVELOPMENT_GUIDE.md)
+- [Arquitetura do Sistema](docs/ARCHITECTURE.md)
+- [Guia de Deploy](DEPLOYMENT_GUIDE.md)
+- [Documentação da API](backend/api-docs.md)
+
+### 🔗 Links para Arquivos que Usam Chainlink
+
+**Smart Contracts:**
+
+- [RiskRegistry.sol](contractsv2/src/core/RiskRegistry.sol) - Price Feeds
+- [AlertSystem.sol](contractsv2/src/automation/AlertSystem.sol) - Automation
+- [CrossChainHedge.sol](contractsv2/src/hedging/CrossChainHedge.sol) - CCIP
+- [RiskInsurance.sol](contractsv2/src/insurance/RiskInsurance.sol) - VRF
+- [ChainlinkFeeds.sol](contractsv2/src/libraries/ChainlinkFeeds.sol) - Price Feeds Library
+
+**Frontend Integration:**
+
+- [Chainlink Hooks](frontend/hooks/useChainlinkData.ts)
+- [Price Feed Components](frontend/components/chainlink/)
+- [Contract Interactions](frontend/contracts/)
+
+## 🧪 Testes
+
+```bash
+# Frontend
+cd frontend && pnpm test
+
+# Smart Contracts
+cd contractsv2 && forge test
+
+# Backend
+cd backend && npm test
+
+# ElizaOS
+cd elizaos-riskguardian && bun test
+```
+
+## 🚀 Deploy
+
+### Frontend (Vercel)
+
+```bash
+# Build otimizado
+pnpm build
+
+# Deploy automático via Git
+# Configure as variáveis de ambiente no Vercel
+```
+
+### Contract Deployment
+
+```bash
+# Deploy na Avalanche Fuji
+cd contractsv2
+./deploy_precise_avalanche.sh
+```
+
+## 🤝 Contribuição
+
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
+
+## 📄 Licença
 
 Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
 
-## 🤝 Contribuindo
+## 🎥 Demo do Projeto
 
-Contribuições são bem-vindas! Por favor, leia nosso [guia de contribuição](CONTRIBUTING.md) para detalhes sobre nosso código de conduta e processo de submissão de pull requests.
+- **Video Demo**: [Link para vídeo de 3-5 minutos demonstrando funcionalidades]
+- **Live Demo**: <http://localhost:3000> (Frontend funcional)
+- **Walkthrough**: Demonstração das funcionalidades principais:
+  - Conexão de carteira Web3
+  - Análise de portfólio com IA
+  - Sistema de alertas automatizados
+  - Criação de seguros DeFi
+  - Chat com agente especializado
+
+## 🏆 Hackathon Chromion - Chainlink Integration
+
+### 🔗 Serviços Chainlink Utilizados (Requisito Obrigatório)
+
+✅ **Price Feeds**: Dados de preços em tempo real para análise de risco  
+✅ **Automation**: Execução automatizada de estratégias de hedge  
+✅ **CCIP**: Operações cross-chain entre Ethereum e Avalanche  
+✅ **VRF**: Randomização para contratos de seguro descentralizado  
+
+### 📋 Contratos que Fazem Mudanças de Estado
+
+- **RiskRegistry.sol**: Registra protocolos e atualiza métricas de risco
+- **AlertSystem.sol**: Cria e processa alertas automatizados
+- **HedgeStrategies.sol**: Executa operações de hedge cross-chain
+- **RiskInsurance.sol**: Cria e gerencia apólices de seguro
+- **PortfolioAnalyzer.sol**: Analisa e atualiza dados de portfólio
+
+### 📊 Impacto e Métricas
+
+- **27 contratos** deployados na Avalanche Fuji
+- **4 serviços Chainlink** integrados em produção
+- **Cross-chain** entre múltiplas redes (Ethereum ↔ Avalanche)
+- **IA Avançada** com ElizaOS para análise de riscos
+- **Interface Moderna** com Next.js 14 e TypeScript
+
+### 🎯 Inovações do Projeto
+
+Este projeto foi desenvolvido para o **Hackathon Chromion**, demonstrando:
+
+- **Integração avançada** com 4 serviços Chainlink diferentes
+- **Uso inovador de IA** em DeFi através do ElizaOS
+- **Arquitetura cross-chain** robusta e escalável
+- **Interface de usuário moderna** e intuitiva
+- **Automação inteligente** de estratégias de proteção
+
+## 📞 Contato
+
+- **Desenvolvedor**: Uederson Ferreira
+- **Email**: <seu-email@exemplo.com>
+- **LinkedIn**: [Seu LinkedIn](https://linkedin.com/in/seu-perfil)
+- **GitHub**: [Seu GitHub](https://github.com/seu-usuario)
+
+---
+
+--
+**🛡️ Protegendo o futuro das finanças descentralizadas com IA 🤖**
+</div>
