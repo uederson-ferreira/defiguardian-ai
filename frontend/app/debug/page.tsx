@@ -131,7 +131,7 @@ export default function DebugPage() {
 
     setTests(testResults)
     setIsRunning(false)
-  }, [session])
+  }, [session, status])
 
   useEffect(() => {
     runTests()
@@ -265,12 +265,12 @@ export default function DebugPage() {
               <CardContent>
                 <p className="text-slate-300 mb-4">{test.message}</p>
                 
-                {test.details && (
+                {test.details != null && (
                   <div className="bg-black/20 p-4 rounded-lg border border-white/10">
-                    <p className="text-xs text-slate-400 mb-2">Detalhes:</p>
-                    <pre className="text-xs text-slate-300 overflow-auto">
+                    <p className="text-xs text-slate-400 mb-2">Details:</p>
+                    <pre className="text-xs text-slate-300 overflow-auto whitespace-pre-wrap break-words">
                       {typeof test.details === 'string' 
-                        ? test.details 
+                        ? test.details
                         : JSON.stringify(test.details, null, 2)
                       }
                     </pre>

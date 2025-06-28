@@ -7,7 +7,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Shield, PieChart, Settings, Menu, Home, Database, TrendingUp } from "lucide-react"
+import { PieChart, Settings, Menu, Home, Database, TrendingUp, Zap } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { AIChat } from "@/components/ai-chat"
 import { WalletButton } from "@/components/wallet-button"
@@ -30,7 +30,7 @@ function SidebarContent({ pathname }: { pathname: string }) {
     <div className="flex h-full flex-col">
       {/* Logo */}
       <div className="flex h-16 items-center border-b border-slate-700/50 px-6">
-        <Shield className="h-8 w-8 text-purple-400" />
+        <Zap className="h-8 w-8 text-purple-400" />
         <span className="ml-2 text-xl font-bold text-white">DefiGuardian</span>
       </div>
 
@@ -67,7 +67,12 @@ function SidebarContent({ pathname }: { pathname: string }) {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isClient, setIsClient] = useState(false)
   const { isAuthenticated, loading, user } = useAuth()
+  
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -138,7 +143,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </div>
             
             {/* Wallet Button */}
-            <WalletButton />
+            {isClient && <WalletButton />}
           </div>
         </div>
       </header>

@@ -5,6 +5,7 @@
 
 import { useState } from 'react'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
+import type { Connector } from 'wagmi'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { 
@@ -28,7 +29,7 @@ export function WalletConnect({ onConnect, onDisconnect }: WalletConnectProps) {
   const { disconnect } = useDisconnect()
   const [isConnecting, setIsConnecting] = useState(false)
 
-  const handleConnect = async (connector: any) => {
+  const handleConnect = async (connector: Connector) => {
     try {
       setIsConnecting(true)
       await connect({ connector })

@@ -38,6 +38,40 @@ const nextConfig = {
     // External modules for server-side rendering
     config.externals.push('pino-pretty', 'lokijs', 'encoding');
 
+    // Handle worker files and ES6 modules
+    config.module.rules.push({
+      test: /HeartbeatWorker.*\.js$/,
+      type: 'javascript/esm',
+    });
+
+    // Configure Terser to handle ES6 modules properly
+    if (!dev && config.optimization && config.optimization.minimizer) {
+      const TerserPlugin = config.optimization.minimizer.find(
+        (plugin) => plugin.constructor.name === 'TerserPlugin'
+      );
+      if (TerserPlugin) {
+        TerserPlugin.options.terserOptions = {
+          ...TerserPlugin.options.terserOptions,
+          parse: {
+            ...TerserPlugin.options.terserOptions?.parse,
+            ecma: 2020,
+          },
+          compress: {
+            ...TerserPlugin.options.terserOptions?.compress,
+            ecma: 2020,
+          },
+          mangle: {
+            ...TerserPlugin.options.terserOptions?.mangle,
+            safari10: true,
+          },
+          format: {
+            ...TerserPlugin.options.terserOptions?.format,
+            ecma: 2020,
+          },
+        };
+      }
+    }
+
     // Optimize for production
     if (!dev) {
       config.optimization = {

@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth'
+import type { Session } from 'next-auth'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -43,11 +44,11 @@ interface PortfolioWithStats extends PortfolioRecord {
 }
 
 // GET - Buscar portfolios do usuário
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const session = await getAuthSession()
+    const session = await getAuthSession() as Session | null
     
-    if (!session || !session.user?.email) {
+    if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'Usuário não autenticado' },
         { status: 401 }
@@ -119,9 +120,9 @@ export async function GET(request: NextRequest) {
 // POST - Criar novo portfolio
 export async function POST(request: NextRequest) {
   try {
-    const session = await getAuthSession()
+    const session = await getAuthSession() as Session | null
     
-    if (!session || !session.user?.email) {
+    if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'Usuário não autenticado' },
         { status: 401 }

@@ -1,7 +1,7 @@
 // app/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
-  Shield,
   TrendingUp,
   AlertTriangle,
   Bot,
@@ -31,12 +30,13 @@ export default function HomePage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  // Redirecionar se já estiver logado
-  useEffect(() => {
-    if (status === "authenticated") {
-      router.push("/dashboard");
-    }
-  }, [status, router]);
+  // ❌ REMOVIDO: Redirecionamento automático
+  // Agora o usuário deve clicar no botão para entrar no sistema
+  // useEffect(() => {
+  //   if (status === "authenticated") {
+  //     router.push("/dashboard");
+  //   }
+  // }, [status, router]);
 
   const handleStartSystem = () => {
     setIsLoading(true);
@@ -65,7 +65,7 @@ export default function HomePage() {
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
-              <Shield className="h-6 w-6 text-white" />
+              <Zap className="h-6 w-6 text-white" />
             </div>
             <div>
               <span className="text-xl font-bold text-white">DefiGuardian</span>
@@ -314,7 +314,7 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
-                <Shield className="h-5 w-5 text-white" />
+                <Zap className="h-5 w-5 text-white" />
               </div>
               <span className="text-white font-bold">DefiGuardian AI</span>
             </div>

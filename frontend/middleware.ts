@@ -8,9 +8,9 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token, req }) => {
+      authorized: ({ token, req: _req }) => {
         // Verificar se o usuário tem token válido
-        const { pathname } = req.nextUrl
+        const { pathname } = _req.nextUrl
         
         // Rotas que requerem autenticação
         const protectedPaths = ['/dashboard']

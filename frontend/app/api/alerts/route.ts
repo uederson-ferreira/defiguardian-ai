@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth'
+import type { Session } from 'next-auth'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -37,9 +38,9 @@ interface StatsRecord {
 // GET - Buscar alertas do usuário
 export async function GET(request: NextRequest) {
   try {
-    const session = await getAuthSession()
+    const session = await getAuthSession() as Session | null
     
-    if (!session || !session.user?.email) {
+    if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'Usuário não autenticado' },
         { status: 401 }
@@ -90,7 +91,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Estatísticas dos alertas
-    const { data: stats, error: statsError } = await supabase
+    const { data: stats } = await supabase
       .from('risk_alerts')
       .select('severity, is_read')
       .eq('user_id', userData.id)
@@ -124,9 +125,9 @@ export async function GET(request: NextRequest) {
 // POST - Criar novo alerta
 export async function POST(request: NextRequest) {
   try {
-    const session = await getAuthSession()
+    const session = await getAuthSession() as Session | null
     
-    if (!session || !session.user?.email) {
+    if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'Usuário não autenticado' },
         { status: 401 }
@@ -215,9 +216,9 @@ export async function POST(request: NextRequest) {
 // PATCH - Marcar alerta como lido/dispensado
 export async function PATCH(request: NextRequest) {
   try {
-    const session = await getAuthSession()
+    const session = await getAuthSession() as Session | null
     
-    if (!session || !session.user?.email) {
+    if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'Usuário não autenticado' },
         { status: 401 }

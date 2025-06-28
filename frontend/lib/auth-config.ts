@@ -1,5 +1,6 @@
 import type { JWT } from "next-auth/jwt";
 import type { Session, User } from "next-auth";
+
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -107,9 +108,9 @@ export const authOptions = {
 
             return {
               id: newUser.id.toString(),
-              email: newUser.email,
-              name: newUser.name,
-              image: newUser.image,
+              email: newUser.email as string,
+              name: newUser.name || "",
+              image: newUser.image || null,
             };
           } else {
             // ===== LOGIN =====
@@ -156,9 +157,9 @@ export const authOptions = {
 
             return {
               id: user.id.toString(),
-              email: user.email,
-              name: user.name,
-              image: user.image,
+              email: user.email as string,
+              name: user.name || "",
+              image: user.image || null,
             };
           }
         } catch (error) {
@@ -174,16 +175,21 @@ export const authOptions = {
       try {
         if (account?.provider === "google" || account?.provider === "github") {
           // Verificar se usuário já existe
+          if (!user.email) {
+            console.error("❌ User email is required for OAuth");
+            return false;
+          }
+
           const { data: existingUser } = await supabase
             .from("users")
             .select("*")
-            .eq("email", user.email!)
+            .eq("email", user.email)
             .single();
 
           if (!existingUser) {
             // Criar novo usuário OAuth
             const { error } = await supabase.from("users").insert({
-              email: user.email!,
+              email: user.email,
               name: user.name || "",
               avatar_url: user.image || "",
               provider: account.provider,
@@ -225,7 +231,7 @@ export const authOptions = {
   },
 
   session: {
-    strategy: "jwt",
+    strategy: "jwt" as const,
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 

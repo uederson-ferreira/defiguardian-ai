@@ -2,8 +2,8 @@
 // API PARA SALVAR ENDEREÇO DA WALLET NO SUPABASE
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
 import { getAuthSession } from '@/lib/auth'
+import type { Session } from 'next-auth'
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
@@ -14,9 +14,9 @@ const supabase = createClient(
 export async function POST(request: NextRequest) {
   try {
     // Verificar se usuário está autenticado
-    const session = await getAuthSession()
+    const session = await getAuthSession() as Session | null
     
-    if (!session || !session.user?.email) {
+    if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'Usuário não autenticado' },
         { status: 401 }
@@ -84,12 +84,12 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Verificar se usuário está autenticado
-    const session = await getAuthSession()
+    const session = await getAuthSession() as Session | null
     
-    if (!session || !session.user?.email) {
+    if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'Usuário não autenticado' },
         { status: 401 }

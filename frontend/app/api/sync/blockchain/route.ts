@@ -2,8 +2,9 @@
 // API PARA SINCRONIZAR DADOS DOS SMART CONTRACTS
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
+
 import { getAuthSession } from '@/lib/auth'
+import type { Session } from 'next-auth'
 import { createClient } from '@supabase/supabase-js'
 import { ethers } from 'ethers'
 
@@ -29,17 +30,14 @@ const PORTFOLIO_ANALYZER_ABI = [
   "function getPositions(address wallet) view returns (tuple(string protocol, address contractAddr, uint256 amount, uint256 valueUSD)[])"
 ]
 
-const RISK_ORACLE_ABI = [
-  "function getProtocolRisk(address protocol) view returns (uint256 riskScore, string riskLevel)",
-  "function getLatestPrice(address asset) view returns (uint256 price, uint256 timestamp)"
-]
+
 
 // POST - Sincronizar dados da blockchain
 export async function POST(request: NextRequest) {
   try {
-    const session = await getAuthSession()
+    const session = await getAuthSession() as Session | null
     
-    if (!session || !session.user?.email) {
+    if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'Usuário não autenticado' },
         { status: 401 }
@@ -80,9 +78,9 @@ export async function POST(request: NextRequest) {
     }
 
     const syncResults = {
-      portfolio: null as any,
-      positions: [] as any[],
-      risks: [] as any[],
+      portfolio: null as Record<string, unknown> | null,
+      positions: [] as Record<string, unknown>[],
+      risks: [] as Record<string, unknown>[],
       errors: [] as string[]
     }
 
@@ -243,11 +241,11 @@ export async function POST(request: NextRequest) {
 }
 
 // GET - Status da sincronização
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const session = await getAuthSession()
+    const session = await getAuthSession() as Session | null
     
-    if (!session || !session.user?.email) {
+    if (!session?.user?.email) {
       return NextResponse.json(
         { error: 'Usuário não autenticado' },
         { status: 401 }

@@ -45,12 +45,16 @@ class ApiClient {
 
   setToken(token: string) {
     this.token = token;
-    localStorage.setItem("auth_token", token);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("auth_token", token);
+    }
   }
 
   clearToken() {
     this.token = null;
-    localStorage.removeItem("auth_token");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("auth_token");
+    }
   }
 
   loadToken() {

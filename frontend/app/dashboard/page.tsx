@@ -37,6 +37,7 @@ import {
   RefreshCw,
   BarChart3,
   Activity,
+  Zap,
 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -107,7 +108,7 @@ export default function DashboardPage() {
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
-              <Shield className="h-6 w-6 text-white" />
+              <Zap className="h-6 w-6 text-white" />
             </div>
             <div>
               <span className="text-xl font-bold text-white">DefiGuardian</span>

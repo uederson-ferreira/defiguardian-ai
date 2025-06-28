@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -52,12 +52,30 @@ const portfolios = [
 export default function Portfolios() {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterRisk, setFilterRisk] = useState("all")
+  const [isClient, setIsClient] = useState(false)
+  
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
   const filteredPortfolios = portfolios.filter((portfolio) => {
     const matchesSearch = portfolio.name.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesFilter = filterRisk === "all" || portfolio.riskLevel.toLowerCase() === filterRisk
     return matchesSearch && matchesFilter
   })
+  
+  if (!isClient) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+            <p className="text-slate-400">Carregando portfolios...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    )
+  }
 
   return (
     <DashboardLayout>

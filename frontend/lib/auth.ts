@@ -6,7 +6,8 @@ import { authOptions } from "@/lib/auth-config";
 import type { Session } from "next-auth";
 
 // Função helper para obter sessão do servidor
-export const getAuthSession = () => getServerSession(authOptions);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const getAuthSession = () => getServerSession(authOptions as any);
 
 // Re-exportar authOptions para outros arquivos
 export { authOptions };

@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Chrome, Github, Loader2, Lock, Shield, UserPlus, AlertTriangle } from 'lucide-react'
+import { Chrome, Github, Loader2, Lock, UserPlus, AlertTriangle, ArrowLeft, Zap } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function LoginPage() {
@@ -111,11 +111,21 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+      {/* Botão de voltar para home */}
+      <Button
+        onClick={() => router.push('/')}
+        variant="ghost"
+        className="absolute top-6 left-6 text-white hover:bg-white/10 p-2"
+      >
+        <ArrowLeft className="h-5 w-5 mr-2" />
+        Voltar
+      </Button>
+      
       <Card className="w-full max-w-md bg-slate-800/50 border-slate-700 backdrop-blur-xl">
         <CardHeader className="text-center space-y-2">
           <div className="flex justify-center">
             <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
-              <Shield className="h-8 w-8 text-white" />
+              <Zap className="h-8 w-8 text-white" />
             </div>
           </div>
           <CardTitle className="text-2xl font-bold text-white">

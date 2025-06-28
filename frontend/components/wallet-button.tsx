@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -26,6 +26,12 @@ import { CHAIN_CONFIG } from "@/lib/web3-config";
 import { toast } from "sonner";
 
 export function WalletButton() {
+  const [isClient, setIsClient] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
   const {
     user,
     isAuthenticated,
@@ -107,6 +113,16 @@ export function WalletButton() {
   const displayAddress = account || user?.address;
   const isLoading = loading || web3Loading || connecting;
   const hasError = authError || web3Error;
+
+  // Prevent SSR issues
+  if (!isClient) {
+    return (
+      <Button disabled className="flex items-center gap-2">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        Carregando...
+      </Button>
+    );
+  }
 
   // Show error state
   if (hasError && !isAuthenticated) {

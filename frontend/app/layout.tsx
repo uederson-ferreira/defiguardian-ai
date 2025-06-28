@@ -13,6 +13,11 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata = {
   title: "DefiGuardian AI",
   description: "AI-Powered DeFi Risk Management Platform",
+  icons: {
+    icon: "/shield-favicon.svg",
+    shortcut: "/shield-favicon.svg",
+    apple: "/shield-favicon.svg",
+  },
 };
 
 export default function RootLayout({

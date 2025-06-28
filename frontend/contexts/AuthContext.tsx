@@ -46,8 +46,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   const logout = useCallback(() => {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("wallet_address");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("wallet_address");
+    }
     setUser(null);
     setError(null);
     toast.success("Desconectado com sucesso!");
@@ -79,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [logout]);
 
   const setupEventListeners = useCallback(() => {
-    if (window.ethereum) {
+    if (typeof window !== "undefined" && window.ethereum) {
       window.ethereum.on("accountsChanged", handleAccountsChanged);
       window.ethereum.on("chainChanged", handleChainChanged);
       window.ethereum.on("disconnect", handleDisconnect);
@@ -87,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [handleAccountsChanged, handleChainChanged, handleDisconnect]);
 
   const removeEventListeners = useCallback(() => {
-    if (window.ethereum) {
+    if (typeof window !== "undefined" && window.ethereum) {
       window.ethereum.removeListener("accountsChanged", handleAccountsChanged);
       window.ethereum.removeListener("chainChanged", handleChainChanged);
       window.ethereum.removeListener("disconnect", handleDisconnect);
@@ -105,6 +107,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // 🔧 FIX: Função MANUAL para conectar wallet (não automática)
   const connectWallet = async () => {
     if (connecting) return;
+    
+    // Prevent SSR issues
+    if (typeof window === "undefined") {
+      setError("Wallet connection not available on server");
+      return;
+    }
 
     try {
       setConnecting(true);
@@ -180,8 +188,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const loginData = await loginResponse.json();
 
       if (loginData.success) {
-        localStorage.setItem("auth_token", loginData.token);
-        localStorage.setItem("wallet_address", address);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("auth_token", loginData.token);
+          localStorage.setItem("wallet_address", address);
+        }
 
         setUser({
           address,
