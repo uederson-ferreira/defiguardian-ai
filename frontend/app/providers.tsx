@@ -13,6 +13,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode, useMemo } from "react";
 import { getWagmiConfig } from "@/lib/web3-config";
 import { Toaster } from "sonner";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 import "@rainbow-me/rainbowkit/styles.css";
 
@@ -45,8 +46,10 @@ export function Providers({ children }: ProvidersProps) {
             coolMode={false}
             modalSize="compact"
           >
-            {children}
-            <Toaster position="top-right" richColors closeButton />
+            <AuthProvider>
+              {children}
+              <Toaster position="top-right" richColors closeButton />
+            </AuthProvider>
           </RainbowKitProvider>
         </WagmiProvider>
       </SessionProvider>
