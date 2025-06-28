@@ -1,0 +1,18 @@
+{
+  "buildCommand": "pnpm run build",
+  "installCommand": "pnpm install --shamefully-hoist",
+  "framework": "nextjs",
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "build": {
+    "env": {
+      "NODE_OPTIONS": "--max-old-space-size=4096"
+    }
+  }
+}
