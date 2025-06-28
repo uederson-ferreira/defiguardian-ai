@@ -1,5 +1,5 @@
-import type { JWT } from "next-auth/jwt";
 import type { Session, User } from "next-auth";
+import type { JWT } from "next-auth/jwt";
 
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
@@ -226,8 +226,8 @@ export const authOptions = {
   },
 
   pages: {
-    signIn: "/auth/signin",
-    error: "/auth/error",
+    signIn: "/login",
+    error: "/login",
   },
 
   session: {
