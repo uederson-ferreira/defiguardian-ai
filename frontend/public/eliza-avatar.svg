@@ -1,0 +1,45 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="32" fill="url(#gradient1)"/>
+  
+  <!-- Face -->
+  <ellipse cx="32" cy="34" rx="18" ry="20" fill="#FFE4C4"/>
+  
+  <!-- Hair -->
+  <path d="M14 28C14 18 22 12 32 12C42 12 50 18 50 28C50 22 46 18 42 16C38 14 34 14 32 14C30 14 26 14 22 16C18 18 14 22 14 28Z" fill="#2D1B69"/>
+  <path d="M12 30C12 25 16 22 20 20C24 18 28 16 32 16C36 16 40 18 44 20C48 22 52 25 52 30C52 35 50 40 48 42C46 44 44 45 42 45C40 45 38 44 36 42C34 40 32 38 32 36C32 38 30 40 28 42C26 44 24 45 22 45C20 45 18 44 16 42C14 40 12 35 12 30Z" fill="#1A0F3A"/>
+  
+  <!-- Hair bangs -->
+  <path d="M20 20C22 18 26 16 30 16C28 18 26 20 24 22C22 24 20 26 20 28C20 24 20 22 20 20Z" fill="#2D1B69"/>
+  <path d="M44 20C42 18 38 16 34 16C36 18 38 20 40 22C42 24 44 26 44 28C44 24 44 22 44 20Z" fill="#2D1B69"/>
+  
+  <!-- Eyes -->
+  <ellipse cx="26" cy="30" rx="3" ry="4" fill="white"/>
+  <ellipse cx="38" cy="30" rx="3" ry="4" fill="white"/>
+  <circle cx="26" cy="30" r="2" fill="#FF6B35"/>
+  <circle cx="38" cy="30" r="2" fill="#FF6B35"/>
+  <circle cx="26.5" cy="29.5" r="0.8" fill="white"/>
+  <circle cx="38.5" cy="29.5" r="0.8" fill="white"/>
+  
+  <!-- Eyebrows -->
+  <path d="M22 26C24 25 27 25 29 26" stroke="#2D1B69" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M35 26C37 25 40 25 42 26" stroke="#2D1B69" stroke-width="1.5" stroke-linecap="round"/>
+  
+  <!-- Nose -->
+  <ellipse cx="32" cy="34" rx="1" ry="1.5" fill="#FFD4A3"/>
+  
+  <!-- Mouth -->
+  <path d="M29 38C30 39 32 39 34 39C33 40 31 40 29 38Z" fill="#FF8A80"/>
+  
+  <!-- Blush -->
+  <ellipse cx="22" cy="35" rx="2" ry="1.5" fill="#FFB3BA" opacity="0.6"/>
+  <ellipse cx="42" cy="35" rx="2" ry="1.5" fill="#FFB3BA" opacity="0.6"/>
+  
+  <!-- Gradient definitions -->
+  <defs>
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06B6D4;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

@@ -107,6 +107,9 @@ const RISK_INSURANCE_ABI = [
   },
 ] as const;
 
+// Export ABIs for use in other parts of the application
+export { RISK_ORACLE_ABI };
+
 export function useContracts() {
   const { address, isConnected } = useAccount();
   const { writeContractAsync } = useWriteContract();
@@ -208,15 +211,15 @@ export function useContracts() {
       }, 2000);
 
       return txHash;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("❌ REAL: Erro ao adicionar posição:", error);
 
       let errorMessage = "Erro ao adicionar posição";
-      if (error.message?.includes("insufficient funds")) {
+      if (error instanceof Error && error.message?.includes("insufficient funds")) {
         errorMessage = "Saldo AVAX insuficiente para gas";
-      } else if (error.message?.includes("execution reverted")) {
+      } else if (error instanceof Error && error.message?.includes("execution reverted")) {
         errorMessage = "Transação rejeitada pelo contrato";
-      } else if (error.message?.includes("user rejected")) {
+      } else if (error instanceof Error && error.message?.includes("user rejected")) {
         errorMessage = "Transação cancelada pelo usuário";
       }
 
@@ -263,15 +266,15 @@ export function useContracts() {
       }, 2000);
 
       return txHash;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("❌ REAL: Erro ao criar alerta:", error);
 
       let errorMessage = "Erro ao criar alerta";
-      if (error.message?.includes("insufficient funds")) {
+      if (error instanceof Error && error.message?.includes("insufficient funds")) {
         errorMessage = "Saldo AVAX insuficiente para gas";
-      } else if (error.message?.includes("execution reverted")) {
+      } else if (error instanceof Error && error.message?.includes("execution reverted")) {
         errorMessage = "Transação rejeitada pelo contrato";
-      } else if (error.message?.includes("user rejected")) {
+      } else if (error instanceof Error && error.message?.includes("user rejected")) {
         errorMessage = "Transação cancelada pelo usuário";
       }
 
@@ -319,13 +322,13 @@ export function useContracts() {
       toast.success("Seguro criado com sucesso!");
 
       return txHash;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("❌ REAL: Erro ao criar seguro:", error);
 
       let errorMessage = "Erro ao criar seguro";
-      if (error.message?.includes("insufficient funds")) {
+      if (error instanceof Error && error.message?.includes("insufficient funds")) {
         errorMessage = "Saldo insuficiente para premium + gas";
-      } else if (error.message?.includes("execution reverted")) {
+      } else if (error instanceof Error && error.message?.includes("execution reverted")) {
         errorMessage = "Transação rejeitada pelo contrato";
       }
 
@@ -358,21 +361,52 @@ export function useContracts() {
       });
   };
 
+  // 🔧 FUNÇÃO HELPER PARA CONVERSÃO INTELIGENTE
+  const smartConvert = (
+    value: bigint | undefined,
+    type: "percentage" | "count" | "wei"
+  ) => {
+    if (!value) return 0;
+
+    const bigIntValue = BigInt(value.toString());
+
+    switch (type) {
+      case "percentage":
+        // Se o valor é muito grande (provavelmente em wei), converter
+        if (bigIntValue > BigInt(1000)) {
+          const converted = Number(bigIntValue) / 1e16;
+          return Math.min(Math.max(converted, 0), 100);
+        }
+        // Se é um valor pequeno, tratar como percentual direto
+        const directPercent = Number(bigIntValue);
+        return Math.min(Math.max(directPercent, 0), 100);
+
+      case "count":
+        // Para contadores, converter diretamente e limitar
+        const count = Number(bigIntValue);
+        return Math.min(Math.max(count, 0), 50);
+
+      case "wei":
+        // Para valores monetários, sempre converter de wei para ether
+        return Number(bigIntValue) / 1e18;
+
+      default:
+        return Number(bigIntValue);
+    }
+  };
+
   // 📊 DADOS PROCESSADOS - CONVERSÕES BIGINT -> NUMBER SEGURAS
   const portfolioData = {
-    // Risk Score do contrato - CONVERSÃO SEGURA
-    riskScore: portfolioRisk ? Number(portfolioRisk.toString()) : 0,
+    // Risk Score do contrato - CONVERSÃO INTELIGENTE
+    riskScore: smartConvert(portfolioRisk, "percentage"),
 
     // Portfolio Analysis (se disponível) - CONVERSÕES SEGURAS
-    totalValue: portfolioAnalysis?.totalValue
-      ? Number(portfolioAnalysis.totalValue.toString())
-      : 0,
-    protocolCount: portfolioAnalysis?.protocolCount
-      ? Number(portfolioAnalysis.protocolCount.toString())
-      : 0,
-    diversificationScore: portfolioAnalysis?.diversificationScore
-      ? Number(portfolioAnalysis.diversificationScore.toString())
-      : 0,
+    totalValue: smartConvert(portfolioAnalysis?.totalValue, "wei"),
+    protocolCount: smartConvert(portfolioAnalysis?.protocolCount, "count"),
+    diversificationScore: smartConvert(
+      portfolioAnalysis?.diversificationScore,
+      "percentage"
+    ),
 
     // Active Alerts
     alertsCount: activeAlerts ? activeAlerts.length : 0,
@@ -380,13 +414,32 @@ export function useContracts() {
 
   const isLoading = isLoadingRisk || isLoadingAnalysis || isLoadingAlerts;
 
-  // 🔍 DEBUG: Logs detalhados
-  console.log("🔍 REAL DEBUG:", {
+  // 🔍 DEBUG: Logs detalhados com valores brutos
+  console.log("🔍 REAL DEBUG - VALORES BRUTOS:", {
     address,
     isConnected,
-    portfolioRisk: portfolioRisk?.toString(),
-    portfolioAnalysis,
-    activeAlerts,
+    portfolioRisk: {
+      raw: portfolioRisk?.toString(),
+      converted: smartConvert(portfolioRisk, "percentage"),
+    },
+    portfolioAnalysis: {
+      totalValue: {
+        raw: portfolioAnalysis?.totalValue?.toString(),
+        converted: smartConvert(portfolioAnalysis?.totalValue, "wei"),
+      },
+      protocolCount: {
+        raw: portfolioAnalysis?.protocolCount?.toString(),
+        converted: smartConvert(portfolioAnalysis?.protocolCount, "count"),
+      },
+      diversificationScore: {
+        raw: portfolioAnalysis?.diversificationScore?.toString(),
+        converted: smartConvert(
+          portfolioAnalysis?.diversificationScore,
+          "percentage"
+        ),
+      },
+    },
+    activeAlerts: activeAlerts?.length,
     portfolioData,
     isLoading,
   });

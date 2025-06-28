@@ -15,6 +15,9 @@ import { useContracts } from "@/hooks/useContracts";
 import { AddPositionModal } from "@/components/AddPositionModal";
 import { CreateInsuranceModal } from "@/components/CreateInsuranceModal";
 import { CreateAlertModal } from "@/components/CreateAlertModal";
+import { AIChat } from "@/components/ai-chat";
+import { PortfolioAnalysis } from "@/components/portfolio-analysis";
+import { IndividualRisksInsurance } from "@/components/individual-risks-insurance";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -41,6 +44,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const { address, isConnected } = useAccount(); // RainbowKit hook
   const [mounted, setMounted] = useState(false);
+  const [alertsConfigured, setAlertsConfigured] = useState(false);
 
   // 🔥 Hook dos contratos inteligentes
   const {
@@ -268,7 +272,10 @@ export default function DashboardPage() {
                     {isLoadingContracts ? (
                       <Loader2 className="h-6 w-6 animate-spin" />
                     ) : (
-                      `$${(portfolioData.totalValue / 1e18).toLocaleString()}`
+                      `$${portfolioData.totalValue.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}`
                     )}
                   </p>
                   {isConnected && portfolioData.totalValue > 0 && (
@@ -295,7 +302,7 @@ export default function DashboardPage() {
                     {isLoadingContracts ? (
                       <Loader2 className="h-6 w-6 animate-spin" />
                     ) : (
-                      `${portfolioData.riskScore}/100`
+                      `${Math.round(portfolioData.riskScore * 100) / 100}/100`
                     )}
                   </p>
                   <p
@@ -347,7 +354,7 @@ export default function DashboardPage() {
                 <div className="flex justify-between items-center">
                   <span className="text-slate-400">Protocolos ativos:</span>
                   <span className="text-white font-medium">
-                    {portfolioData.protocolCount}
+                    {Math.round(portfolioData.protocolCount)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -355,7 +362,8 @@ export default function DashboardPage() {
                     Score de diversificação:
                   </span>
                   <span className="text-white font-medium">
-                    {portfolioData.diversificationScore}/100
+                    {Math.round(portfolioData.diversificationScore * 100) / 100}
+                    /100
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -463,14 +471,14 @@ export default function DashboardPage() {
 
               <div
                 className={`p-4 rounded-lg border-2 ${
-                  isConnected && portfolioData.protocolCount > 0
+                  isConnected && (portfolioData.protocolCount ?? 0) > 0
                     ? "bg-green-500/10 border-green-500/30"
                     : "bg-slate-700/30 border-slate-600/30"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    {isConnected && portfolioData.protocolCount > 0 ? (
+                    {isConnected && (portfolioData.protocolCount ?? 0) > 0 ? (
                       <CheckCircle className="h-5 w-5 text-green-400" />
                     ) : (
                       <div className="h-5 w-5 rounded-full border-2 border-slate-500" />
@@ -480,7 +488,7 @@ export default function DashboardPage() {
                         2. Analisar Portfolio
                       </h3>
                       <p className="text-sm text-slate-400">
-                        {isConnected && portfolioData.protocolCount > 0
+                        {isConnected && (portfolioData.protocolCount ?? 0) > 0
                           ? `✅ ${portfolioData.protocolCount} protocolo(s) encontrado(s)`
                           : "Configure análise de seus investimentos DeFi"}
                       </p>
@@ -505,27 +513,47 @@ export default function DashboardPage() {
 
               <div
                 className={`p-4 rounded-lg border-2 ${
-                  isConnected && portfolioData.alertsCount > 0
+                  isConnected &&
+                  (portfolioData.alertsCount > 0 || alertsConfigured)
                     ? "bg-green-500/10 border-green-500/30"
                     : "bg-slate-700/30 border-slate-600/30"
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  {isConnected && portfolioData.alertsCount > 0 ? (
-                    <CheckCircle className="h-5 w-5 text-green-400" />
-                  ) : (
-                    <div className="h-5 w-5 rounded-full border-2 border-slate-500" />
-                  )}
-                  <div>
-                    <h3 className="font-medium text-white">
-                      3. Configurar Alertas
-                    </h3>
-                    <p className="text-sm text-slate-400">
-                      {isConnected && portfolioData.alertsCount > 0
-                        ? `✅ ${portfolioData.alertsCount} alerta(s) ativo(s)`
-                        : "Crie alertas inteligentes de risco"}
-                    </p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {isConnected &&
+                    (portfolioData.alertsCount > 0 || alertsConfigured) ? (
+                      <CheckCircle className="h-5 w-5 text-green-400" />
+                    ) : (
+                      <div className="h-5 w-5 rounded-full border-2 border-slate-500" />
+                    )}
+                    <div>
+                      <h3 className="font-medium text-white">
+                        3. Configurar Alertas
+                      </h3>
+                      <p className="text-sm text-slate-400">
+                        {isConnected &&
+                        (portfolioData.alertsCount > 0 || alertsConfigured)
+                          ? `✅ ${
+                              portfolioData.alertsCount || 0
+                            } alerta(s) ativo(s)`
+                          : "Crie alertas inteligentes de risco"}
+                      </p>
+                    </div>
                   </div>
+                  {isConnected && (
+                    <CreateAlertModal>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                        onClick={() => setAlertsConfigured(true)}
+                      >
+                        <Bell className="h-4 w-4 mr-2" />
+                        Configurar
+                      </Button>
+                    </CreateAlertModal>
+                  )}
                 </div>
               </div>
             </div>
@@ -586,6 +614,12 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Portfolio Analysis Component */}
+        {isConnected && <PortfolioAnalysis />}
+
+        {/* Individual Risks and Insurance */}
+        {isConnected && <IndividualRisksInsurance />}
+
         {/* Footer Info */}
         <div className="text-center pt-8 border-t border-slate-700/50">
           <p className="text-slate-500 text-sm">
@@ -596,6 +630,9 @@ export default function DashboardPage() {
           </p>
         </div>
       </main>
+
+      {/* AI Chat Component */}
+      <AIChat />
     </div>
   );
 }

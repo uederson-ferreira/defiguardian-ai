@@ -68,9 +68,9 @@ export function useWeb3Contracts() {
         method: "wallet_switchEthereumChain",
         params: [{ chainId: `0x${CHAIN_CONFIG.chainId.toString(16)}` }],
       });
-    } catch (switchError: any) {
+    } catch (switchError: unknown) {
       // This error code indicates that the chain has not been added to MetaMask
-      if (switchError.code === 4902) {
+      if (switchError && typeof switchError === 'object' && 'code' in switchError && (switchError as { code: number }).code === 4902) {
         try {
           await window.ethereum?.request({
             method: "wallet_addEthereumChain",
@@ -192,13 +192,13 @@ export function useWeb3Contracts() {
       console.log("✅ Web3 contracts initialized successfully");
       console.log("📍 Connected account:", account);
       console.log("🌐 Network:", CHAIN_CONFIG.chainName);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("❌ Failed to initialize Web3:", err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [switchToFujiNetwork, setLoading, setError, setState]);
 
   // Portfolio Analysis Functions
   const analyzePortfolio = useCallback(
@@ -228,7 +228,7 @@ export function useWeb3Contracts() {
         return {
           riskScore: Number(riskScore) / 100, // Convert to percentage
           analysis,
-          positions: positions.map((pos: any) => ({
+          positions: positions.map((pos: { protocol: string; token: string; amount: bigint }) => ({
             protocol: pos.protocol,
             token: pos.token,
             amount: ethers.formatEther(pos.amount),
@@ -236,12 +236,12 @@ export function useWeb3Contracts() {
           totalValue: ethers.formatEther(totalValue),
           assetAllocation: {
             assets,
-            percentages: percentages.map((p: any) => Number(p)),
+            percentages: percentages.map((p: bigint) => Number(p)),
           },
         };
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("❌ Error analyzing portfolio:", err);
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'Unknown error');
         return null;
       }
     },
@@ -260,9 +260,9 @@ export function useWeb3Contracts() {
           protocolAddress
         );
         return Number(risk) / 100; // Convert to percentage
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("❌ Error getting protocol risk:", err);
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'Unknown error');
         return null;
       }
     },
@@ -277,9 +277,9 @@ export function useWeb3Contracts() {
 
       const risk = await state.contracts.riskOracle.getMarketRisk();
       return Number(risk) / 100; // Convert to percentage
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("❌ Error getting market risk:", err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Unknown error');
       return null;
     }
   }, [state.contracts.riskOracle]);
@@ -303,9 +303,9 @@ export function useWeb3Contracts() {
         const receipt = await tx.wait();
         console.log("✅ Alert created successfully:", receipt.hash);
         return receipt.hash;
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("❌ Error creating alert:", err);
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'Unknown error');
         return null;
       }
     },
@@ -323,10 +323,10 @@ export function useWeb3Contracts() {
       const alerts = await state.contracts.alertSystem.getActiveAlerts(
         state.account
       );
-      return alerts.map((alert: any) => Number(alert));
-    } catch (err: any) {
+      return alerts.map((alert: bigint) => Number(alert));
+    } catch (err: unknown) {
       console.error("❌ Error getting user alerts:", err);
-      setError(err.message);
+      setError(err instanceof Error ? err.message : 'Unknown error');
       return null;
     }
   }, [state.contracts.alertSystem, state.account]);
@@ -354,9 +354,9 @@ export function useWeb3Contracts() {
         const receipt = await tx.wait();
         console.log("✅ Insurance policy created successfully:", receipt.hash);
         return receipt.hash;
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("❌ Error creating insurance policy:", err);
-        setError(err.message);
+        setError(err instanceof Error ? err.message : 'Unknown error');
         return null;
       }
     },
@@ -366,7 +366,8 @@ export function useWeb3Contracts() {
   // Listen for account and network changes
   useEffect(() => {
     if (typeof window !== "undefined" && window.ethereum) {
-      const handleAccountsChanged = (accounts: string[]) => {
+      const handleAccountsChanged = (...args: unknown[]) => {
+        const accounts = args[0] as string[];
         if (accounts.length === 0) {
           // User disconnected
           setState((prev) => ({

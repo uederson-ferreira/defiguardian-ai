@@ -46,7 +46,8 @@ export function Web3Provider({ children }: { children: ReactNode }) {
   // 🔧 FIX: Apenas listeners, SEM auto-inicialização
   useEffect(() => {
     if (typeof window !== 'undefined' && window.ethereum) {
-      const handleChainChanged = (newChainId: string) => {
+      const handleChainChanged = (...args: unknown[]) => {
+        const newChainId = args[0] as string;
         const parsedChainId = parseInt(newChainId, 16);
         setChainId(parsedChainId);
         console.log('🔄 Chain changed to:', parsedChainId);
@@ -55,7 +56,8 @@ export function Web3Provider({ children }: { children: ReactNode }) {
         // Apenas atualizar o chainId
       };
 
-      const handleAccountsChanged = (accounts: string[]) => {
+      const handleAccountsChanged = (...args: unknown[]) => {
+        const accounts = args[0] as string[];
         if (accounts.length === 0) {
           // Disconnected
           console.log('🔌 Wallet disconnected');
@@ -103,13 +105,13 @@ export function Web3Provider({ children }: { children: ReactNode }) {
       // Verificar se já há contas conectadas
       const accounts = await window.ethereum.request({ 
         method: 'eth_accounts' 
-      });
+      }) as string[];
 
       if (accounts.length === 0) {
         // Solicitar conexão
         const newAccounts = await window.ethereum.request({
           method: 'eth_requestAccounts'
-        });
+        }) as string[];
         
         if (newAccounts.length === 0) {
           throw new Error("Nenhuma conta selecionada");

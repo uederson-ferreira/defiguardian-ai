@@ -6,8 +6,15 @@
 
 "use client";
 
-import { useState } from 'react';
-import { useContracts } from '@/hooks/useContracts';
+// Global type declaration
+declare global {
+  interface Window {
+    refreshPortfolioData?: () => void;
+  }
+}
+
+import { useState } from "react";
+import { useContracts } from "@/hooks/useContracts";
 import {
   Dialog,
   DialogContent,
@@ -15,52 +22,51 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Slider } from "@/components/ui/slider";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
-import { Slider } from '@/components/ui/slider';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Bell, Loader2, AlertTriangle, CheckCircle, TrendingUp, Shield } from 'lucide-react';
+  Bell,
+  Loader2,
+  AlertTriangle,
+  CheckCircle,
+  TrendingUp,
+  Shield,
+} from "lucide-react";
 
 // Tipos de alerta
 const ALERT_TYPES = [
   {
-    id: 'risk_threshold',
-    name: 'Limite de Risco',
-    description: 'Alerta quando risk score exceder o limite',
+    id: "risk_threshold",
+    name: "Limite de Risco",
+    description: "Alerta quando risk score exceder o limite",
     icon: AlertTriangle,
-    color: 'text-red-400'
+    color: "text-red-400",
   },
   {
-    id: 'portfolio_value',
-    name: 'Valor do Portfolio',
-    description: 'Alerta para mudanças no valor total',
+    id: "portfolio_value",
+    name: "Valor do Portfolio",
+    description: "Alerta para mudanças no valor total",
     icon: TrendingUp,
-    color: 'text-green-400'
+    color: "text-green-400",
   },
   {
-    id: 'protocol_risk',
-    name: 'Risco de Protocolo',
-    description: 'Alerta para mudanças em protocolos específicos',
+    id: "protocol_risk",
+    name: "Risco de Protocolo",
+    description: "Alerta para mudanças em protocolos específicos",
     icon: Shield,
-    color: 'text-blue-400'
-  }
+    color: "text-blue-400",
+  },
 ];
 
 // Canais de notificação
 const NOTIFICATION_CHANNELS = [
-  { id: 'browser', name: 'Notificação do Navegador', enabled: true },
-  { id: 'email', name: 'Email', enabled: false },
-  { id: 'webhook', name: 'Webhook/Discord', enabled: false }
+  { id: "browser", name: "Notificação do Navegador", enabled: true },
+  { id: "email", name: "Email", enabled: false },
+  { id: "webhook", name: "Webhook/Discord", enabled: false },
 ];
 
 interface CreateAlertModalProps {
@@ -71,11 +77,11 @@ interface CreateAlertModalProps {
 export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Form states
-  const [alertType, setAlertType] = useState<string>('');
+  const [alertType, setAlertType] = useState<string>("");
   const [threshold, setThreshold] = useState<number[]>([75]);
-  const [customThreshold, setCustomThreshold] = useState<string>('');
+  const [customThreshold, setCustomThreshold] = useState<string>("");
   const [useCustomThreshold, setUseCustomThreshold] = useState(false);
 
   const { createAlert, isConnected } = useContracts();
@@ -87,44 +93,76 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
 
     try {
       setIsLoading(true);
-      
-      const finalThreshold = useCustomThreshold 
-        ? parseInt(customThreshold) 
+
+      const finalThreshold = useCustomThreshold
+        ? parseInt(customThreshold)
         : threshold[0];
 
       const getAlertTypeId = (type: string) => {
         switch (type) {
-            case 'risk_threshold': return 0;
-            case 'portfolio_value': return 1;
-            case 'protocol_risk': return 2;
-            default: return 0;
+          case "risk_threshold":
+            return 0;
+          case "portfolio_value":
+            return 1;
+          case "protocol_risk":
+            return 2;
+          default:
+            return 0;
         }
       };
-        
+
       const alertTypeId = getAlertTypeId(alertType);
       await createAlert(alertTypeId, finalThreshold);
-      
+
+      // Trigger global refresh if available
+      if (typeof window !== "undefined" && window.refreshPortfolioData) {
+        setTimeout(() => {
+          window.refreshPortfolioData?.();
+        }, 1000);
+      }
+
       // Reset form
-      setAlertType('');
+      setAlertType("");
       setThreshold([75]);
-      setCustomThreshold('');
+      setCustomThreshold("");
       setUseCustomThreshold(false);
       setIsOpen(false);
     } catch (error) {
-      console.error('Erro ao criar alerta:', error);
+      console.error("Erro ao criar alerta:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const selectedAlertType = ALERT_TYPES.find(a => a.id === alertType);
-  const finalThreshold = useCustomThreshold ? parseInt(customThreshold) || 0 : threshold[0];
+  const selectedAlertType = ALERT_TYPES.find((a) => a.id === alertType);
+  const finalThreshold = useCustomThreshold
+    ? parseInt(customThreshold) || 0
+    : threshold[0];
 
   const getRiskLevel = (score: number) => {
-    if (score <= 30) return { level: 'Baixo', color: 'text-green-400', bgColor: 'bg-green-500/20' };
-    if (score <= 60) return { level: 'Moderado', color: 'text-yellow-400', bgColor: 'bg-yellow-500/20' };
-    if (score <= 80) return { level: 'Alto', color: 'text-orange-400', bgColor: 'bg-orange-500/20' };
-    return { level: 'Crítico', color: 'text-red-400', bgColor: 'bg-red-500/20' };
+    if (score <= 30)
+      return {
+        level: "Baixo",
+        color: "text-green-400",
+        bgColor: "bg-green-500/20",
+      };
+    if (score <= 60)
+      return {
+        level: "Moderado",
+        color: "text-yellow-400",
+        bgColor: "bg-yellow-500/20",
+      };
+    if (score <= 80)
+      return {
+        level: "Alto",
+        color: "text-orange-400",
+        bgColor: "bg-orange-500/20",
+      };
+    return {
+      level: "Crítico",
+      color: "text-red-400",
+      bgColor: "bg-red-500/20",
+    };
   };
 
   const riskInfo = getRiskLevel(finalThreshold);
@@ -133,13 +171,16 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         {children || trigger || (
-          <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700">
+          <Button
+            variant="outline"
+            className="border-slate-600 text-slate-300 hover:bg-slate-700"
+          >
             <Bell className="mr-2 h-4 w-4" />
             Criar Alerta
           </Button>
         )}
       </DialogTrigger>
-      
+
       <DialogContent className="sm:max-w-lg bg-slate-800 border-slate-700 text-white max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -147,7 +188,8 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
             Configurar Alerta Inteligente
           </DialogTitle>
           <DialogDescription className="text-slate-400">
-            Receba notificações automáticas sobre mudanças importantes no seu portfolio
+            Receba notificações automáticas sobre mudanças importantes no seu
+            portfolio
           </DialogDescription>
         </DialogHeader>
 
@@ -169,12 +211,12 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
               {ALERT_TYPES.map((type) => {
                 const Icon = type.icon;
                 return (
-                  <Card 
+                  <Card
                     key={type.id}
                     className={`cursor-pointer transition-all ${
-                      alertType === type.id 
-                        ? 'bg-purple-500/20 border-purple-500/50' 
-                        : 'bg-slate-700/50 border-slate-600 hover:bg-slate-700/70'
+                      alertType === type.id
+                        ? "bg-purple-500/20 border-purple-500/50"
+                        : "bg-slate-700/50 border-slate-600 hover:bg-slate-700/70"
                     }`}
                     onClick={() => setAlertType(type.id)}
                   >
@@ -182,8 +224,12 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
                       <div className="flex items-start gap-3">
                         <Icon className={`h-5 w-5 ${type.color} mt-0.5`} />
                         <div className="flex-1">
-                          <h4 className="font-medium text-white">{type.name}</h4>
-                          <p className="text-sm text-slate-400 mt-1">{type.description}</p>
+                          <h4 className="font-medium text-white">
+                            {type.name}
+                          </h4>
+                          <p className="text-sm text-slate-400 mt-1">
+                            {type.description}
+                          </p>
                         </div>
                         {alertType === type.id && (
                           <CheckCircle className="h-5 w-5 text-purple-400" />
@@ -207,7 +253,7 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
                   onClick={() => setUseCustomThreshold(!useCustomThreshold)}
                   className="text-xs text-purple-400 hover:text-purple-300"
                 >
-                  {useCustomThreshold ? 'Usar Slider' : 'Valor Personalizado'}
+                  {useCustomThreshold ? "Usar Slider" : "Valor Personalizado"}
                 </Button>
               </div>
 
@@ -238,17 +284,26 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
                   />
                   <div className="flex justify-between text-xs text-slate-400">
                     <span>0% (Sem Risco)</span>
-                    <span className="font-mono text-white">{threshold[0]}%</span>
+                    <span className="font-mono text-white">
+                      {threshold[0]}%
+                    </span>
                     <span>100% (Risco Máximo)</span>
                   </div>
                 </div>
               )}
 
               {/* Risk Level Indicator */}
-              <Card className={`${riskInfo.bgColor} border-${riskInfo.color.replace('text-', '')}/20`}>
+              <Card
+                className={`${riskInfo.bgColor} border-${riskInfo.color.replace(
+                  "text-",
+                  ""
+                )}/20`}
+              >
                 <CardContent className="p-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-300">Nível de Risco:</span>
+                    <span className="text-sm text-slate-300">
+                      Nível de Risco:
+                    </span>
                     <span className={`font-medium ${riskInfo.color}`}>
                       {riskInfo.level} ({finalThreshold}%)
                     </span>
@@ -266,7 +321,7 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
                   <Bell className="h-4 w-4 text-yellow-400" />
                   Preview do Alerta
                 </h4>
-                
+
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Tipo:</span>
@@ -284,8 +339,9 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
 
                 <div className="border-t border-slate-600 pt-3 mt-3">
                   <p className="text-xs text-slate-400">
-                    <strong>Exemplo:</strong> Você receberá um alerta quando seu risk score 
-                    ultrapassar {finalThreshold}%, indicando nível de risco {riskInfo.level.toLowerCase()}.
+                    <strong>Exemplo:</strong> Você receberá um alerta quando seu
+                    risk score ultrapassar {finalThreshold}%, indicando nível de
+                    risco {riskInfo.level.toLowerCase()}.
                   </p>
                 </div>
               </CardContent>
@@ -297,17 +353,19 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
             <Label className="text-sm font-medium">Canais de Notificação</Label>
             <div className="space-y-2">
               {NOTIFICATION_CHANNELS.map((channel) => (
-                <div 
+                <div
                   key={channel.id}
                   className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg"
                 >
                   <span className="text-sm text-white">{channel.name}</span>
-                  <span className={`text-xs px-2 py-1 rounded ${
-                    channel.enabled 
-                      ? 'bg-green-500/20 text-green-400' 
-                      : 'bg-slate-600/20 text-slate-400'
-                  }`}>
-                    {channel.enabled ? 'Ativo' : 'Em breve'}
+                  <span
+                    className={`text-xs px-2 py-1 rounded ${
+                      channel.enabled
+                        ? "bg-green-500/20 text-green-400"
+                        : "bg-slate-600/20 text-slate-400"
+                    }`}
+                  >
+                    {channel.enabled ? "Ativo" : "Em breve"}
                   </span>
                 </div>
               ))}

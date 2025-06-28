@@ -180,7 +180,7 @@ export interface UserProfile {
   // API RESPONSE TYPES
   // ============================================================================
   
-  export interface ApiResponse<T = any> {
+  export interface ApiResponse<T = unknown> {
     success: boolean;
     message?: string;
     data?: T;
@@ -193,7 +193,7 @@ export interface UserProfile {
     message?: string;
   }
   
-  export interface ApiSuccessResponse<T = any> {
+  export interface ApiSuccessResponse<T = unknown> {
     success: true;
     data?: T;
     message?: string;
@@ -221,7 +221,7 @@ export interface UserProfile {
   // ============================================================================
   
   export interface UseAuthReturn {
-    user: any;
+    user: UserProfile | null;
     profile: UserProfile | null;
     loading: boolean;
     isAuthenticated: boolean;
@@ -230,7 +230,7 @@ export interface UserProfile {
     updateWalletAddress: (address: string) => Promise<boolean>;
     refreshProfile: () => Promise<void>;
     status: string;
-    supabase: any;
+    supabase: unknown;
   }
   
   export interface UseDefiContractsReturn {
@@ -245,9 +245,9 @@ export interface UserProfile {
     createAlert: (threshold: number) => Promise<void>;
     createInsurancePolicy: (protocol: string, coverage: string) => Promise<void>;
     transactionHash: string | undefined;
-    transactionError: any;
+    transactionError: Error | null;
     isTransactionConfirmed: boolean;
-    error: any;
+    error: Error | null;
   }
   
   // ============================================================================

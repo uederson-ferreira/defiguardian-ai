@@ -3,7 +3,7 @@
 
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -25,7 +25,7 @@ interface TestResult {
   name: string
   status: 'success' | 'error' | 'warning' | 'loading'
   message: string
-  details?: any
+  details?: unknown
 }
 
 export default function DebugPage() {
@@ -33,7 +33,7 @@ export default function DebugPage() {
   const [tests, setTests] = useState<TestResult[]>([])
   const [isRunning, setIsRunning] = useState(false)
 
-  const runTests = async () => {
+  const runTests = useCallback(async () => {
     setIsRunning(true)
     setTests([])
     
@@ -131,11 +131,11 @@ export default function DebugPage() {
 
     setTests(testResults)
     setIsRunning(false)
-  }
+  }, [session])
 
   useEffect(() => {
     runTests()
-  }, [session])
+  }, [session, runTests])
 
   const getStatusIcon = (status: TestResult['status']) => {
     switch (status) {
@@ -269,7 +269,10 @@ export default function DebugPage() {
                   <div className="bg-black/20 p-4 rounded-lg border border-white/10">
                     <p className="text-xs text-slate-400 mb-2">Detalhes:</p>
                     <pre className="text-xs text-slate-300 overflow-auto">
-                      {JSON.stringify(test.details, null, 2)}
+                      {typeof test.details === 'string' 
+                        ? test.details 
+                        : JSON.stringify(test.details, null, 2)
+                      }
                     </pre>
                   </div>
                 )}

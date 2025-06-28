@@ -121,12 +121,16 @@ export const DEV_CONFIG = {
   debugMode: process.env.NEXT_PUBLIC_DEBUG_MODE === 'true'
 };
 
-export default {
+const web3Config = {
   CHAIN_CONFIG,
   CONTRACT_ADDRESSES,
   MOCK_PROTOCOLS,
   CONTRACT_ABIS,
-  DEV_CONFIG,
+  getWagmiConfig,
+  getContractAddress,
+  getContractABI,
   NETWORK_CONFIG,
-  config
+  DEV_CONFIG
 };
+
+export default web3Config;

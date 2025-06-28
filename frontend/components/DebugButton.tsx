@@ -15,7 +15,6 @@ import {
   Bug, 
   TestTube, 
   CheckCircle, 
-  XCircle, 
   Loader2,
   DollarSign,
   AlertTriangle
@@ -140,7 +139,7 @@ export function DebugButton() {
         <div className="text-xs text-slate-400 space-y-1">
           <div>📝 <strong>Como usar:</strong></div>
           <div>1. Verifique se tem AVAX suficiente (min 0.01)</div>
-          <div>2. Clique "Verificar Contrato" primeiro</div>
+          <div>2. Clique &quot;Verificar Contrato&quot; primeiro</div>
           <div>3. Se OK, teste transação simples</div>
           <div>4. Veja logs no console (F12)</div>
         </div>

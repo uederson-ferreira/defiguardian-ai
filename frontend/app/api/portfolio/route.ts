@@ -2,7 +2,6 @@
 // API PARA GERENCIAR PORTFOLIOS - CORRIGIDA COM TIPAGEM
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
 import { getAuthSession } from '@/lib/auth'
 import { createClient } from '@supabase/supabase-js'
 

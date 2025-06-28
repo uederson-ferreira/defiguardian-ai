@@ -1,36 +1,53 @@
 // app/page.tsx
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Shield, TrendingUp, AlertTriangle, Bot, ChevronRight, Loader2, Zap, Target, Globe, Users } from 'lucide-react'
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Shield,
+  TrendingUp,
+  AlertTriangle,
+  Bot,
+  ChevronRight,
+  Loader2,
+  Zap,
+  Target,
+  Globe,
+  Users,
+} from "lucide-react";
+import { AIChat } from "@/components/ai-chat";
 
 export default function HomePage() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
+  const { status } = useSession();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   // Redirecionar se já estiver logado
   useEffect(() => {
-    if (status === 'authenticated') {
-      router.push('/dashboard')
+    if (status === "authenticated") {
+      router.push("/dashboard");
     }
-  }, [status, router])
+  }, [status, router]);
 
   const handleStartSystem = () => {
-    setIsLoading(true)
-    if (status === 'authenticated') {
-      router.push('/dashboard')
+    setIsLoading(true);
+    if (status === "authenticated") {
+      router.push("/dashboard");
     } else {
-      router.push('/login')
+      router.push("/login");
     }
-  }
+  };
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="flex items-center space-x-2">
@@ -38,7 +55,7 @@ export default function HomePage() {
           <span className="text-gray-300">Carregando...</span>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -59,7 +76,7 @@ export default function HomePage() {
             <Badge className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 border-purple-500/30 px-3 py-1">
               🏆 Hackathon Chromion
             </Badge>
-            <Button 
+            <Button
               onClick={handleStartSystem}
               disabled={isLoading}
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6"
@@ -67,7 +84,7 @@ export default function HomePage() {
               {isLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                'Entrar'
+                "Entrar"
               )}
             </Button>
           </div>
@@ -81,27 +98,30 @@ export default function HomePage() {
           <div className="space-y-6">
             <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-full">
               <Zap className="h-4 w-4 text-purple-400 mr-2" />
-              <span className="text-purple-300 text-sm font-medium">Powered by Chromia Blockchain</span>
+              <span className="text-purple-300 text-sm font-medium">
+                Powered by Chromia Blockchain
+              </span>
             </div>
-            
+
             <h1 className="text-5xl md:text-7xl font-black text-white leading-tight">
-              Proteja seu{' '}
+              Proteja seu{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-purple-600 animate-pulse">
                 DeFi
               </span>
               <br />
               com Inteligência Artificial
             </h1>
-            
+
             <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-              A primeira plataforma de gerenciamento de riscos DeFi alimentada por IA que protege 
-              seus investimentos em tempo real com alertas inteligentes e hedge automatizado.
+              A primeira plataforma de gerenciamento de riscos DeFi alimentada
+              por IA que protege seus investimentos em tempo real com alertas
+              inteligentes e hedge automatizado.
             </p>
           </div>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <Button 
+            <Button
               onClick={handleStartSystem}
               disabled={isLoading}
               className="h-16 px-10 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-lg shadow-2xl shadow-purple-500/25 transform hover:scale-105 transition-all duration-200"
@@ -115,10 +135,8 @@ export default function HomePage() {
                 </>
               )}
             </Button>
-            
-            <Button 
-              className="h-16 px-10 bg-transparent border-2 border-slate-600 text-gray-300 hover:bg-slate-800/50 hover:border-purple-500/50 font-bold text-lg backdrop-blur-sm"
-            >
+
+            <Button className="h-16 px-10 bg-transparent border-2 border-slate-600 text-gray-300 hover:bg-slate-800/50 hover:border-purple-500/50 font-bold text-lg backdrop-blur-sm">
               <Target className="mr-2 h-5 w-5" />
               Ver Demonstração
             </Button>
@@ -142,7 +160,9 @@ export default function HomePage() {
               <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
                 15+
               </div>
-              <div className="text-gray-400 font-medium">Protocolos Suportados</div>
+              <div className="text-gray-400 font-medium">
+                Protocolos Suportados
+              </div>
             </div>
             <div className="text-center space-y-2">
               <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-600">
@@ -164,16 +184,19 @@ export default function HomePage() {
             Tecnologia de ponta para proteger seus investimentos DeFi
           </p>
         </div>
-        
+
         <div className="grid md:grid-cols-3 gap-8">
           <Card className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-slate-700/50 backdrop-blur-xl hover:border-purple-500/50 transition-all duration-300 group">
             <CardHeader className="text-center">
               <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                 <TrendingUp className="h-8 w-8 text-white" />
               </div>
-              <CardTitle className="text-white text-xl">Análise de Portfólio</CardTitle>
+              <CardTitle className="text-white text-xl">
+                Análise de Portfólio
+              </CardTitle>
               <CardDescription className="text-gray-300 text-base">
-                Monitore seus investimentos DeFi em tempo real com métricas avançadas e insights de IA
+                Monitore seus investimentos DeFi em tempo real com métricas
+                avançadas e insights de IA
               </CardDescription>
             </CardHeader>
           </Card>
@@ -183,9 +206,12 @@ export default function HomePage() {
               <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                 <AlertTriangle className="h-8 w-8 text-white" />
               </div>
-              <CardTitle className="text-white text-xl">Alertas Inteligentes</CardTitle>
+              <CardTitle className="text-white text-xl">
+                Alertas Inteligentes
+              </CardTitle>
               <CardDescription className="text-gray-300 text-base">
-                Receba notificações instantâneas sobre riscos, oportunidades e mudanças de mercado
+                Receba notificações instantâneas sobre riscos, oportunidades e
+                mudanças de mercado
               </CardDescription>
             </CardHeader>
           </Card>
@@ -197,7 +223,8 @@ export default function HomePage() {
               </div>
               <CardTitle className="text-white text-xl">IA Avançada</CardTitle>
               <CardDescription className="text-gray-300 text-base">
-                Algoritmos de machine learning para predição de riscos e hedge automatizado
+                Algoritmos de machine learning para predição de riscos e hedge
+                automatizado
               </CardDescription>
             </CardHeader>
           </Card>
@@ -215,28 +242,32 @@ export default function HomePage() {
               Construído com as melhores tecnologias blockchain e IA
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center space-y-4">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center mx-auto">
                 <Globe className="h-6 w-6 text-white" />
               </div>
-              <h3 className="text-white font-bold text-lg">Chromia Blockchain</h3>
+              <h3 className="text-white font-bold text-lg">
+                Chromia Blockchain
+              </h3>
               <p className="text-gray-300">
                 Armazenamento descentralizado de dados históricos de risco
               </p>
             </div>
-            
+
             <div className="text-center space-y-4">
               <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mx-auto">
                 <Zap className="h-6 w-6 text-white" />
               </div>
-              <h3 className="text-white font-bold text-lg">Avalanche Network</h3>
+              <h3 className="text-white font-bold text-lg">
+                Avalanche Network
+              </h3>
               <p className="text-gray-300">
                 Smart contracts otimizados para análise de riscos em tempo real
               </p>
             </div>
-            
+
             <div className="text-center space-y-4">
               <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mx-auto">
                 <Users className="h-6 w-6 text-white" />
@@ -257,9 +288,10 @@ export default function HomePage() {
             Pronto para Proteger seu DeFi?
           </h2>
           <p className="text-xl text-gray-300">
-            Junte-se a centenas de investidores que já protegem seus ativos com nossa IA
+            Junte-se a centenas de investidores que já protegem seus ativos com
+            nossa IA
           </p>
-          <Button 
+          <Button
             onClick={handleStartSystem}
             disabled={isLoading}
             className="h-16 px-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-xl shadow-2xl shadow-purple-500/25 transform hover:scale-105 transition-all duration-200"
@@ -287,12 +319,20 @@ export default function HomePage() {
               <span className="text-white font-bold">DefiGuardian AI</span>
             </div>
             <div className="text-gray-400 text-center">
-              <p>&copy; 2025 DefiGuardian AI. Desenvolvido para Hackathon Chromion.</p>
-              <p className="text-sm mt-1">Protegendo o futuro das finanças descentralizadas</p>
+              <p>
+                &copy; 2025 DefiGuardian AI. Desenvolvido para Hackathon
+                Chromion.
+              </p>
+              <p className="text-sm mt-1">
+                Protegendo o futuro das finanças descentralizadas
+              </p>
             </div>
           </div>
         </div>
       </footer>
+
+      {/* AI Chat Component */}
+      <AIChat />
     </div>
-  )
+  );
 }

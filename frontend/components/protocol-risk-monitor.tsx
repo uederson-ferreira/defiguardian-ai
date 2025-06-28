@@ -1,14 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, TrendingUp, TrendingDown, AlertTriangle, Activity, RefreshCw } from 'lucide-react'
-import useWeb3Contracts from '@/hooks/useWeb3Contracts'
-import { CONTRACT_ADDRESSES, MOCK_PROTOCOLS } from '@/lib/web3-config';
+import { useWeb3Contracts } from '@/hooks/useWeb3Contracts'
+import { MOCK_PROTOCOLS } from '@/lib/web3-config';
 
 interface ProtocolRiskData {
   address: string
@@ -25,25 +25,29 @@ const MOCK_PROTOCOLS_LIST = [
     address: MOCK_PROTOCOLS.MOCK_AAVE,
     name: 'Aave (Mock)',
     category: 'Lending',
-    riskLevel: 'medium'
+    riskLevel: 'medium',
+    tvl: '$2.1B'
   },
   {
     address: MOCK_PROTOCOLS.MOCK_COMPOUND,
     name: 'Compound (Mock)',
     category: 'Lending',
-    riskLevel: 'low'
+    riskLevel: 'low',
+    tvl: '$1.8B'
   },
   {
     address: MOCK_PROTOCOLS.MOCK_UNISWAP,
     name: 'Uniswap (Mock)',
     category: 'DEX',
-    riskLevel: 'medium'
+    riskLevel: 'medium',
+    tvl: '$4.2B'
   },
   {
     address: MOCK_PROTOCOLS.CURVE,
     name: 'Curve (Mock)',
     category: 'DEX',
-    riskLevel: 'high'
+    riskLevel: 'high',
+    tvl: '$3.5B'
   }
 ]
 
@@ -53,8 +57,7 @@ export function ProtocolRiskMonitor() {
     getMarketRisk,
     isConnected,
     loading: web3Loading,
-    error: web3Error,
-    initializeWeb3
+    error: web3Error
   } = useWeb3Contracts()
 
   const [protocolsData, setProtocolsData] = useState<ProtocolRiskData[]>([])
@@ -63,7 +66,7 @@ export function ProtocolRiskMonitor() {
   const [error, setError] = useState<string | null>(null)
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
 
-  const loadProtocolRisks = async () => {
+  const loadProtocolRisks = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
@@ -75,7 +78,7 @@ export function ProtocolRiskMonitor() {
       setMarketRisk(market)
 
       // Load individual protocol risks
-      const protocolPromises = MOCK_PROTOCOLS_LIST.map(async (protocol: any) => {
+      const protocolPromises = MOCK_PROTOCOLS_LIST.map(async (protocol) => {
         try {
           const risk = await getProtocolRisk(protocol.address)
           
@@ -114,13 +117,13 @@ export function ProtocolRiskMonitor() {
       console.log('✅ Riscos de protocolos carregados:', results)
       console.log('📊 Risco de mercado:', market)
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('❌ Erro ao carregar riscos de protocolos:', err)
-      setError(err.message || 'Erro ao carregar dados de risco')
+      setError(err instanceof Error ? err.message : 'Erro ao carregar dados de risco')
     } finally {
       setLoading(false)
     }
-  }
+  }, [getProtocolRisk, getMarketRisk])
 
   const getRiskColor = (riskScore: number) => {
     if (riskScore < 30) return 'text-green-600'
@@ -176,7 +179,7 @@ export function ProtocolRiskMonitor() {
     if (isConnected) {
       loadProtocolRisks()
     }
-  }, [isConnected])
+  }, [isConnected, loadProtocolRisks])
 
   // Auto-refresh every 30 seconds
   useEffect(() => {
@@ -187,24 +190,27 @@ export function ProtocolRiskMonitor() {
     }, 30000) // 30 seconds
 
     return () => clearInterval(interval)
-  }, [isConnected])
+  }, [isConnected, loadProtocolRisks])
 
   if (!isConnected) {
     return (
-      <Card>
+      <Card className="bg-slate-800/50 border-slate-700">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5" />
+          <CardTitle className="text-white flex items-center gap-2">
+            <Activity className="h-5 w-5 text-green-400" />
             Monitor de Risco de Protocolos
           </CardTitle>
-          <CardDescription>
-            Conecte sua carteira para monitorar riscos de protocolos DeFi
+          <CardDescription className="text-slate-400">
+            Conecte sua carteira no topo da página para monitorar riscos de protocolos DeFi
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={initializeWeb3} className="w-full">
-            Conectar Carteira
-          </Button>
+          <Alert className="border-green-500/50 bg-green-500/10">
+            <Activity className="h-4 w-4 text-green-400" />
+            <AlertDescription className="text-green-400">
+              ⚠️ Carteira não conectada. Use o botão de conexão no header da página.
+            </AlertDescription>
+          </Alert>
         </CardContent>
       </Card>
     )

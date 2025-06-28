@@ -6,8 +6,8 @@
 
 "use client";
 
-import { useState } from 'react';
-import { useContracts } from '@/hooks/useContracts';
+import { useState } from "react";
+import useWeb3Contracts from "@/hooks/useWeb3Contracts";
 import {
   Dialog,
   DialogContent,
@@ -15,58 +15,63 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
-import { Shield, Loader2, DollarSign, AlertTriangle, CheckCircle } from 'lucide-react';
+} from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Shield,
+  Loader2,
+  DollarSign,
+  CheckCircle,
+} from "lucide-react";
 
 // Protocolos disponíveis para seguro
 const INSURANCE_PROTOCOLS = [
   {
-    name: 'Uniswap V3',
-    address: '0x1F98431c8aD98523631AE4a59f267346ea31F984',
-    description: 'Seguro contra impermanent loss',
-    riskLevel: 'Baixo',
-    premium: '2.5%'
+    name: "Uniswap V3",
+    address: "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+    description: "Seguro contra impermanent loss",
+    riskLevel: "Baixo",
+    premium: "2.5%",
   },
   {
-    name: 'Aave',
-    address: '0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2',
-    description: 'Seguro contra default de protocolo',
-    riskLevel: 'Médio',
-    premium: '4.0%'
+    name: "Aave",
+    address: "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+    description: "Seguro contra default de protocolo",
+    riskLevel: "Médio",
+    premium: "4.0%",
   },
   {
-    name: 'Compound',
-    address: '0xc3d688B66703497DAA19211EEdff47f25384cdc3',
-    description: 'Seguro contra liquidação forçada',
-    riskLevel: 'Médio',
-    premium: '3.5%'
+    name: "Compound",
+    address: "0xc3d688B66703497DAA19211EEdff47f25384cdc3",
+    description: "Seguro contra liquidação forçada",
+    riskLevel: "Médio",
+    premium: "3.5%",
   },
   {
-    name: 'Curve',
-    address: '0xD51a44d3FaE010294C616388b506AcdA1bfAAE46',
-    description: 'Seguro contra depeg de stablecoin',
-    riskLevel: 'Alto',
-    premium: '6.0%'
-  }
+    name: "Curve",
+    address: "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46",
+    description: "Seguro contra depeg de stablecoin",
+    riskLevel: "Alto",
+    premium: "6.0%",
+  },
 ];
 
 // Períodos de cobertura
 const COVERAGE_PERIODS = [
-  { label: '30 dias', value: '30', multiplier: 1 },
-  { label: '90 dias', value: '90', multiplier: 0.9 },
-  { label: '180 dias', value: '180', multiplier: 0.8 },
-  { label: '365 dias', value: '365', multiplier: 0.7 },
+  { label: "30 dias", value: "30", multiplier: 1 },
+  { label: "90 dias", value: "90", multiplier: 0.9 },
+  { label: "180 dias", value: "180", multiplier: 0.8 },
+  { label: "365 dias", value: "365", multiplier: 0.7 },
 ];
 
 interface CreateInsuranceModalProps {
@@ -74,16 +79,19 @@ interface CreateInsuranceModalProps {
   children?: React.ReactNode; // 🔧 FIX: Adicionado children
 }
 
-export function CreateInsuranceModal({ trigger, children }: CreateInsuranceModalProps) {
+export function CreateInsuranceModal({
+  trigger,
+  children,
+}: CreateInsuranceModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
-  // Form states
-  const [selectedProtocol, setSelectedProtocol] = useState<string>('');
-  const [coverageAmount, setCoverageAmount] = useState<string>('');
-  const [coveragePeriod, setCoveragePeriod] = useState<string>('');
 
-  const { createInsurance, isConnected } = useContracts();
+  // Form states
+  const [selectedProtocol, setSelectedProtocol] = useState<string>("");
+  const [coverageAmount, setCoverageAmount] = useState<string>("");
+  const [coveragePeriod, setCoveragePeriod] = useState<string>("");
+
+  const { createInsurancePolicy, isConnected } = useWeb3Contracts();
 
   const handleSubmit = async () => {
     if (!selectedProtocol || !coverageAmount) {
@@ -92,35 +100,42 @@ export function CreateInsuranceModal({ trigger, children }: CreateInsuranceModal
 
     try {
       setIsLoading(true);
-      
+
       // Converter coverage para wei (assumindo 18 decimais)
       const coverageWei = (parseFloat(coverageAmount) * 1e18).toString();
-      
-      await createInsurance(selectedProtocol, coverageWei);
-      
+
+      await createInsurancePolicy(selectedProtocol, coverageWei);
+
       // Reset form
-      setSelectedProtocol('');
-      setCoverageAmount('');
-      setCoveragePeriod('');
+      setSelectedProtocol("");
+      setCoverageAmount("");
+      setCoveragePeriod("");
       setIsOpen(false);
     } catch (error) {
-      console.error('Erro ao criar seguro:', error);
+      console.error("Erro ao criar seguro:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const selectedProtocolData = INSURANCE_PROTOCOLS.find(p => p.address === selectedProtocol);
-  const selectedPeriodData = COVERAGE_PERIODS.find(p => p.value === coveragePeriod);
-  
+  const selectedProtocolData = INSURANCE_PROTOCOLS.find(
+    (p) => p.address === selectedProtocol
+  );
+  const selectedPeriodData = COVERAGE_PERIODS.find(
+    (p) => p.value === coveragePeriod
+  );
+
   // Calcular premium
   const calculatePremium = () => {
-    if (!selectedProtocolData || !coverageAmount || !selectedPeriodData) return 0;
-    
+    if (!selectedProtocolData || !coverageAmount || !selectedPeriodData)
+      return 0;
+
     const baseAmount = parseFloat(coverageAmount);
-    const basePremium = baseAmount * (parseFloat(selectedProtocolData.premium.replace('%', '')) / 100);
+    const basePremium =
+      baseAmount *
+      (parseFloat(selectedProtocolData.premium.replace("%", "")) / 100);
     const finalPremium = basePremium * selectedPeriodData.multiplier;
-    
+
     return finalPremium;
   };
 
@@ -130,13 +145,16 @@ export function CreateInsuranceModal({ trigger, children }: CreateInsuranceModal
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         {children || trigger || (
-          <Button variant="outline" className="border-slate-600 text-slate-300 hover:bg-slate-700">
+          <Button
+            variant="outline"
+            className="border-slate-600 text-slate-300 hover:bg-slate-700"
+          >
             <Shield className="mr-2 h-4 w-4" />
             Criar Seguro
           </Button>
         )}
       </DialogTrigger>
-      
+
       <DialogContent className="sm:max-w-lg bg-slate-800 border-slate-700 text-white max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -164,23 +182,30 @@ export function CreateInsuranceModal({ trigger, children }: CreateInsuranceModal
             <Label htmlFor="protocol" className="text-sm font-medium">
               Protocolo para Segurar
             </Label>
-            <Select value={selectedProtocol} onValueChange={setSelectedProtocol}>
+            <Select
+              value={selectedProtocol}
+              onValueChange={setSelectedProtocol}
+            >
               <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                 <SelectValue placeholder="Selecione um protocolo" />
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700">
                 {INSURANCE_PROTOCOLS.map((protocol) => (
-                  <SelectItem 
-                    key={protocol.address} 
+                  <SelectItem
+                    key={protocol.address}
                     value={protocol.address}
                     className="text-white hover:bg-slate-700"
                   >
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center justify-between">
                         <span className="font-medium">{protocol.name}</span>
-                        <span className="text-xs text-blue-400">{protocol.premium}</span>
+                        <span className="text-xs text-blue-400">
+                          {protocol.premium}
+                        </span>
                       </div>
-                      <span className="text-xs text-slate-400">{protocol.description}</span>
+                      <span className="text-xs text-slate-400">
+                        {protocol.description}
+                      </span>
                     </div>
                   </SelectItem>
                 ))}
@@ -221,8 +246,8 @@ export function CreateInsuranceModal({ trigger, children }: CreateInsuranceModal
               </SelectTrigger>
               <SelectContent className="bg-slate-800 border-slate-700">
                 {COVERAGE_PERIODS.map((period) => (
-                  <SelectItem 
-                    key={period.value} 
+                  <SelectItem
+                    key={period.value}
                     value={period.value}
                     className="text-white hover:bg-slate-700"
                   >
@@ -248,11 +273,13 @@ export function CreateInsuranceModal({ trigger, children }: CreateInsuranceModal
                   <Shield className="h-4 w-4 text-blue-400" />
                   Preview da Apólice
                 </h4>
-                
+
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-slate-400">Protocolo:</span>
-                    <span className="text-white">{selectedProtocolData.name}</span>
+                    <span className="text-white">
+                      {selectedProtocolData.name}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Cobertura:</span>
@@ -264,13 +291,16 @@ export function CreateInsuranceModal({ trigger, children }: CreateInsuranceModal
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Taxa Base:</span>
-                    <span className="text-white">{selectedProtocolData.premium}</span>
+                    <span className="text-white">
+                      {selectedProtocolData.premium}
+                    </span>
                   </div>
                   {selectedPeriodData && selectedPeriodData.multiplier < 1 && (
                     <div className="flex justify-between">
                       <span className="text-slate-400">Desconto:</span>
                       <span className="text-green-400">
-                        -{Math.round((1 - selectedPeriodData.multiplier) * 100)}%
+                        -{Math.round((1 - selectedPeriodData.multiplier) * 100)}
+                        %
                       </span>
                     </div>
                   )}
@@ -278,7 +308,9 @@ export function CreateInsuranceModal({ trigger, children }: CreateInsuranceModal
 
                 <div className="border-t border-slate-600 pt-3 mt-3">
                   <div className="flex justify-between items-center">
-                    <span className="font-medium text-slate-300">Premium Total:</span>
+                    <span className="font-medium text-slate-300">
+                      Premium Total:
+                    </span>
                     <span className="font-bold text-white text-lg">
                       ${premium.toFixed(2)} USDC
                     </span>
@@ -287,12 +319,18 @@ export function CreateInsuranceModal({ trigger, children }: CreateInsuranceModal
 
                 {/* Risk Level Indicator */}
                 <div className="flex items-center gap-2 pt-2">
-                  <span className="text-slate-400 text-sm">Nível de Risco:</span>
-                  <span className={`text-xs px-2 py-1 rounded ${
-                    selectedProtocolData.riskLevel === 'Baixo' ? 'bg-green-500/20 text-green-400' :
-                    selectedProtocolData.riskLevel === 'Médio' ? 'bg-yellow-500/20 text-yellow-400' :
-                    'bg-red-500/20 text-red-400'
-                  }`}>
+                  <span className="text-slate-400 text-sm">
+                    Nível de Risco:
+                  </span>
+                  <span
+                    className={`text-xs px-2 py-1 rounded ${
+                      selectedProtocolData.riskLevel === "Baixo"
+                        ? "bg-green-500/20 text-green-400"
+                        : selectedProtocolData.riskLevel === "Médio"
+                        ? "bg-yellow-500/20 text-yellow-400"
+                        : "bg-red-500/20 text-red-400"
+                    }`}
+                  >
                     {selectedProtocolData.riskLevel}
                   </span>
                 </div>
@@ -310,8 +348,9 @@ export function CreateInsuranceModal({ trigger, children }: CreateInsuranceModal
                     Cobertura Automática
                   </p>
                   <p className="text-blue-300 text-xs">
-                    Seu seguro será ativado automaticamente após a confirmação da transação. 
-                    Em caso de sinistro, o pagamento será processado automaticamente via smart contract.
+                    Seu seguro será ativado automaticamente após a confirmação
+                    da transação. Em caso de sinistro, o pagamento será
+                    processado automaticamente via smart contract.
                   </p>
                 </div>
               </div>
@@ -321,7 +360,13 @@ export function CreateInsuranceModal({ trigger, children }: CreateInsuranceModal
           {/* Submit Button */}
           <Button
             onClick={handleSubmit}
-            disabled={!isConnected || !selectedProtocol || !coverageAmount || !coveragePeriod || isLoading}
+            disabled={
+              !isConnected ||
+              !selectedProtocol ||
+              !coverageAmount ||
+              !coveragePeriod ||
+              isLoading
+            }
             className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
           >
             {isLoading ? (

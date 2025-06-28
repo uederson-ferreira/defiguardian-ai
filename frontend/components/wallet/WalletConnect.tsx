@@ -24,7 +24,7 @@ interface WalletConnectProps {
 
 export function WalletConnect({ onConnect, onDisconnect }: WalletConnectProps) {
   const { address, isConnected, chain } = useAccount()
-  const { connect, connectors, isPending, error } = useConnect()
+  const { connect, connectors, isPending } = useConnect()
   const { disconnect } = useDisconnect()
   const [isConnecting, setIsConnecting] = useState(false)
 

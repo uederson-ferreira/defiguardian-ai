@@ -1,185 +1,151 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Bell, Plus, Loader2, AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
-import useWeb3Contracts from '@/hooks/useWeb3Contracts'
-import { toast } from 'sonner'
-
-interface RiskAlert {
-  id: number
-  type: number
-  threshold: number
-  isActive: boolean
-  createdAt?: string
-}
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Bell, Plus, Loader2, CheckCircle, XCircle } from "lucide-react";
+import { useAccount } from "wagmi";
+import { useContracts } from "@/hooks/useContracts";
+import { toast } from "sonner";
 
 const ALERT_TYPES = {
-  0: { label: 'Risco de Portfólio', description: 'Alerta quando o risco do portfólio exceder o limite' },
-  1: { label: 'Risco de Protocolo', description: 'Alerta quando um protocolo específico apresentar alto risco' },
-  2: { label: 'Risco de Mercado', description: 'Alerta quando o risco geral do mercado aumentar' },
-  3: { label: 'Liquidação', description: 'Alerta quando posições estiverem próximas da liquidação' },
-  4: { label: 'Volatilidade', description: 'Alerta quando a volatilidade exceder o limite' }
-}
+  0: {
+    label: "Risco de Portfólio",
+    description: "Alerta quando o risco do portfólio exceder o limite",
+  },
+  1: {
+    label: "Risco de Protocolo",
+    description: "Alerta quando um protocolo específico apresentar alto risco",
+  },
+  2: {
+    label: "Risco de Mercado",
+    description: "Alerta quando o risco geral do mercado aumentar",
+  },
+  3: {
+    label: "Liquidação",
+    description: "Alerta quando posições estiverem próximas da liquidação",
+  },
+  4: {
+    label: "Volatilidade",
+    description: "Alerta quando a volatilidade exceder o limite",
+  },
+};
 
 export function RiskAlerts() {
-  const {
-    createAlert,
-    getUserAlerts,
-    isConnected,
-    account,
-    loading: web3Loading,
-    error: web3Error,
-    initializeWeb3
-  } = useWeb3Contracts()
+  const { address, isConnected } = useAccount();
+  const { createAlert, isLoading, raw } = useContracts();
 
-  const [alerts, setAlerts] = useState<RiskAlert[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  // Usar dados reais do contrato ou mock para demonstração
+  const activeAlerts = raw?.activeAlerts || [];
+
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newAlert, setNewAlert] = useState({
-    type: '',
-    threshold: ''
-  })
-  const [creating, setCreating] = useState(false)
-
-  const loadUserAlerts = async () => {
-    if (!account) {
-      setError('Nenhuma conta conectada')
-      return
-    }
-
-    try {
-      setLoading(true)
-      setError(null)
-
-      console.log('🔄 Carregando alertas do usuário...')
-      
-      const userAlerts = await getUserAlerts()
-      
-      if (userAlerts) {
-        // Convert alert IDs to alert objects (mock data for demo)
-        const alertObjects: RiskAlert[] = userAlerts.map((alertId, index) => ({
-          id: alertId,
-          type: index % 5, // Distribute across alert types
-          threshold: 50 + (index * 10), // Mock thresholds
-          isActive: true,
-          createdAt: new Date(Date.now() - index * 24 * 60 * 60 * 1000).toISOString()
-        }))
-        
-        setAlerts(alertObjects)
-        console.log('✅ Alertas carregados:', alertObjects)
-      } else {
-        setAlerts([])
-      }
-
-    } catch (err: any) {
-      console.error('❌ Erro ao carregar alertas:', err)
-      setError(err.message || 'Erro ao carregar alertas')
-    } finally {
-      setLoading(false)
-    }
-  }
+    type: "",
+    threshold: "",
+  });
+  const [creating, setCreating] = useState(false);
 
   const handleCreateAlert = async () => {
     if (!newAlert.type || !newAlert.threshold) {
-      toast.error('Por favor, preencha todos os campos')
-      return
+      toast.error("Preencha todos os campos");
+      return;
     }
 
-    const threshold = parseFloat(newAlert.threshold)
-    if (isNaN(threshold) || threshold < 0 || threshold > 100) {
-      toast.error('O limite deve ser um número entre 0 e 100')
-      return
+    if (!address) {
+      toast.error("Conecte sua carteira primeiro");
+      return;
     }
 
     try {
-      setCreating(true)
-      
-      console.log('🔄 Criando novo alerta...', {
-        type: parseInt(newAlert.type),
-        threshold
-      })
-      
-      const txHash = await createAlert(parseInt(newAlert.type), threshold)
-      
-      if (txHash) {
-        toast.success('Alerta criado com sucesso!', {
-          description: `Transação: ${txHash.slice(0, 10)}...`
-        })
-        
-        // Reset form and close dialog
-        setNewAlert({ type: '', threshold: '' })
-        setIsCreateDialogOpen(false)
-        
-        // Reload alerts
-        await loadUserAlerts()
-      } else {
-        toast.error('Falha ao criar alerta')
-      }
+      setCreating(true);
 
-    } catch (err: any) {
-      console.error('❌ Erro ao criar alerta:', err)
-      toast.error(err.message || 'Erro ao criar alerta')
+      const alertType = parseInt(newAlert.type);
+      const threshold = parseFloat(newAlert.threshold);
+
+      console.log("🔄 Criando alerta...", {
+        type: alertType,
+        threshold,
+        address,
+      });
+
+      await createAlert(alertType, threshold);
+
+      toast.success("Alerta criado com sucesso!");
+
+      // Reset form
+      setNewAlert({ type: "", threshold: "" });
+      setIsCreateDialogOpen(false);
+    } catch (err: unknown) {
+      console.error("❌ Erro ao criar alerta:", err);
+      const errorMessage =
+        err instanceof Error ? err.message : "Erro ao criar alerta";
+      toast.error(errorMessage);
     } finally {
-      setCreating(false)
+      setCreating(false);
     }
-  }
+  };
 
   const getAlertTypeInfo = (type: number) => {
-    return ALERT_TYPES[type as keyof typeof ALERT_TYPES] || {
-      label: 'Tipo Desconhecido',
-      description: 'Tipo de alerta não reconhecido'
-    }
-  }
-
-  const getThresholdColor = (threshold: number) => {
-    if (threshold < 30) return 'text-green-600'
-    if (threshold < 70) return 'text-yellow-600'
-    return 'text-red-600'
-  }
-
-  const getBadgeVariant = (threshold: number): 'default' | 'secondary' | 'destructive' => {
-    if (threshold < 30) return 'default'
-    if (threshold < 70) return 'secondary'
-    return 'destructive'
-  }
-
-  useEffect(() => {
-    if (isConnected && account) {
-      loadUserAlerts()
-    }
-  }, [isConnected, account])
+    return (
+      ALERT_TYPES[type as keyof typeof ALERT_TYPES] || {
+        label: "Tipo Desconhecido",
+        description: "Tipo de alerta não reconhecido",
+      }
+    );
+  };
 
   if (!isConnected) {
     return (
-      <Card>
+      <Card className="bg-slate-800/50 border-slate-700">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="h-5 w-5" />
+          <CardTitle className="text-white flex items-center gap-2">
+            <Bell className="h-5 w-5 text-yellow-400" />
             Alertas de Risco
           </CardTitle>
-          <CardDescription>
-            Conecte sua carteira para gerenciar alertas de risco
+          <CardDescription className="text-slate-400">
+            Conecte sua carteira no topo da página para configurar alertas
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={initializeWeb3} className="w-full">
-            Conectar Carteira
-          </Button>
+          <Alert className="border-yellow-500/50 bg-yellow-500/10">
+            <Bell className="h-4 w-4 text-yellow-400" />
+            <AlertDescription className="text-yellow-400">
+              ⚠️ Carteira não conectada. Use o botão de conexão no header da
+              página.
+            </AlertDescription>
+          </Alert>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  if (web3Loading || loading) {
+  if (isLoading) {
     return (
       <Card>
         <CardHeader>
@@ -195,31 +161,7 @@ export function RiskAlerts() {
           </div>
         </CardContent>
       </Card>
-    )
-  }
-
-  if (error || web3Error) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="h-5 w-5" />
-            Alertas de Risco
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Alert>
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              {error || web3Error}
-            </AlertDescription>
-          </Alert>
-          <Button onClick={loadUserAlerts} className="w-full mt-4">
-            Tentar Novamente
-          </Button>
-        </CardContent>
-      </Card>
-    )
+    );
   }
 
   return (
@@ -235,8 +177,11 @@ export function RiskAlerts() {
               Gerencie seus alertas de risco personalizados
             </CardDescription>
           </div>
-          
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+
+          <Dialog
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button size="sm">
                 <Plus className="h-4 w-4 mr-2" />
@@ -247,14 +192,20 @@ export function RiskAlerts() {
               <DialogHeader>
                 <DialogTitle>Criar Novo Alerta</DialogTitle>
                 <DialogDescription>
-                  Configure um alerta personalizado para monitorar riscos específicos
+                  Configure um alerta personalizado para monitorar riscos
+                  específicos
                 </DialogDescription>
               </DialogHeader>
-              
+
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="alert-type">Tipo de Alerta</Label>
-                  <Select value={newAlert.type} onValueChange={(value) => setNewAlert(prev => ({ ...prev, type: value }))}>
+                  <Select
+                    value={newAlert.type}
+                    onValueChange={(value) =>
+                      setNewAlert((prev) => ({ ...prev, type: value }))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione o tipo de alerta" />
                     </SelectTrigger>
@@ -263,14 +214,16 @@ export function RiskAlerts() {
                         <SelectItem key={value} value={value}>
                           <div>
                             <div className="font-medium">{info.label}</div>
-                            <div className="text-sm text-muted-foreground">{info.description}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {info.description}
+                            </div>
                           </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="threshold">Limite (%)</Label>
                   <Input
@@ -281,20 +234,30 @@ export function RiskAlerts() {
                     step="0.1"
                     placeholder="Ex: 75"
                     value={newAlert.threshold}
-                    onChange={(e) => setNewAlert(prev => ({ ...prev, threshold: e.target.value }))}
+                    onChange={(e) =>
+                      setNewAlert((prev) => ({
+                        ...prev,
+                        threshold: e.target.value,
+                      }))
+                    }
                   />
                   <p className="text-sm text-muted-foreground">
                     O alerta será ativado quando o risco exceder este limite
                   </p>
                 </div>
               </div>
-              
+
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsCreateDialogOpen(false)}
+                >
                   Cancelar
                 </Button>
                 <Button onClick={handleCreateAlert} disabled={creating}>
-                  {creating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  {creating && (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  )}
                   Criar Alerta
                 </Button>
               </DialogFooter>
@@ -302,66 +265,72 @@ export function RiskAlerts() {
           </Dialog>
         </div>
       </CardHeader>
-      
+
       <CardContent>
-        {alerts.length === 0 ? (
+        {activeAlerts.length === 0 ? (
           <div className="text-center py-8">
             <Bell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground mb-4">Nenhum alerta configurado</p>
+            <p className="text-muted-foreground mb-4">
+              Nenhum alerta configurado
+            </p>
             <Button onClick={() => setIsCreateDialogOpen(true)}>
               Criar Primeiro Alerta
             </Button>
           </div>
         ) : (
           <div className="space-y-4">
-            {alerts.map((alert) => {
-              const typeInfo = getAlertTypeInfo(alert.type)
+            {activeAlerts.map((alertId, index) => {
+              const mockAlert = {
+                id: alertId,
+                type: index % 5,
+                threshold: 50 + index * 10,
+                isActive: true,
+                createdAt: new Date(
+                  Date.now() - index * 24 * 60 * 60 * 1000
+                ).toISOString(),
+              };
+              const typeInfo = getAlertTypeInfo(mockAlert.type);
               return (
-                <div key={alert.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-medium">{typeInfo.label}</h4>
-                      {alert.isActive ? (
-                        <Badge variant="default" className="flex items-center gap-1">
-                          <CheckCircle className="h-3 w-3" />
-                          Ativo
-                        </Badge>
+                <div
+                  key={String(mockAlert.id)}
+                  className="p-4 border rounded-lg"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant={mockAlert.isActive ? "default" : "secondary"}
+                      >
+                        {mockAlert.isActive ? "Ativo" : "Inativo"}
+                      </Badge>
+                      <span className="font-medium">{typeInfo.label}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {mockAlert.isActive ? (
+                        <CheckCircle className="h-4 w-4 text-green-500" />
                       ) : (
-                        <Badge variant="secondary" className="flex items-center gap-1">
-                          <XCircle className="h-3 w-3" />
-                          Inativo
-                        </Badge>
+                        <XCircle className="h-4 w-4 text-red-500" />
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {typeInfo.description}
-                    </p>
-                    {alert.createdAt && (
-                      <p className="text-xs text-muted-foreground">
-                        Criado em {new Date(alert.createdAt).toLocaleDateString('pt-BR')}
-                      </p>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    {typeInfo.description}
+                  </p>
+                  <div className="flex items-center justify-between text-sm">
+                    <span>Limite: {mockAlert.threshold}%</span>
+                    {mockAlert.createdAt && (
+                      <span className="text-muted-foreground">
+                        {new Date(mockAlert.createdAt).toLocaleDateString()}
+                      </span>
                     )}
                   </div>
-                  
-                  <div className="text-right">
-                    <Badge variant={getBadgeVariant(alert.threshold)}>
-                      Limite: {alert.threshold}%
-                    </Badge>
-                  </div>
                 </div>
-              )
+              );
             })}
-            
-            <div className="pt-4 border-t">
-              <Button onClick={loadUserAlerts} variant="outline" className="w-full">
-                Atualizar Alertas
-              </Button>
-            </div>
           </div>
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
 
-export default RiskAlerts
+export default RiskAlerts;

@@ -6,6 +6,13 @@
 
 "use client";
 
+// Global type declaration
+declare global {
+  interface Window {
+    refreshPortfolioData?: () => void;
+  }
+}
+
 import { useState } from "react";
 import { useContracts } from "@/hooks/useContracts";
 import {
@@ -109,6 +116,13 @@ export function AddPositionModal({ trigger, children }: AddPositionModalProps) {
       const amountWei = (parseFloat(amount) * 1e18).toString();
 
       await addPosition(selectedProtocol, selectedToken, amountWei);
+
+      // Atualizar dados do portfólio se a função estiver disponível
+      if (typeof window !== 'undefined' && window.refreshPortfolioData) {
+        setTimeout(() => {
+          window.refreshPortfolioData?.();
+        }, 1000);
+      }
 
       // Reset form
       setSelectedProtocol("");

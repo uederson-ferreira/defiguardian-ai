@@ -15,7 +15,18 @@ interface PortfolioChartProps {
 export function PortfolioChart({ data }: PortfolioChartProps) {
   const total = data.reduce((sum, item) => sum + item.value, 0)
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  interface TooltipProps {
+    active?: boolean
+    payload?: Array<{
+      payload: {
+        name: string
+        value: number
+        color: string
+      }
+    }>
+  }
+
+  const CustomTooltip = ({ active, payload }: TooltipProps) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload
       const percentage = ((data.value / total) * 100).toFixed(1)

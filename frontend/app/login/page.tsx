@@ -17,7 +17,7 @@ import { Chrome, Github, Loader2, Lock, Shield, UserPlus, AlertTriangle } from '
 import { toast } from 'sonner'
 
 export default function LoginPage() {
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const router = useRouter()
   
   const [isLoading, setIsLoading] = useState(false)
