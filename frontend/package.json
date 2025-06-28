@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "clean": "rm -rf .next node_modules pnpm-lock.yaml package-lock.json",
-    "install:clean": "pnpm install --shamefully-hoist",
-    "vercel-build": "pnpm run build"
+    "install:clean": "rm -rf node_modules package-lock.json && npm install --legacy-peer-deps --no-optional",
+    "vercel-build": "npm run build"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
