@@ -137,7 +137,7 @@ export function CreateInsuranceModal({ trigger, children }: CreateInsuranceModal
         )}
       </DialogTrigger>
       
-      <DialogContent className="sm:max-w-lg bg-slate-800 border-slate-700 text-white">
+      <DialogContent className="sm:max-w-lg bg-slate-800 border-slate-700 text-white max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-blue-400" />

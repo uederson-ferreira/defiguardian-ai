@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosInstance, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
 import toast from 'react-hot-toast';
 
 class ApiClient {
@@ -15,7 +15,7 @@ class ApiClient {
     });
 
     // Add token to requests
-    this.client.interceptors.request.use((config) => {
+    this.client.interceptors.request.use((config: InternalAxiosRequestConfig) => {
       if (this.token) {
         config.headers.Authorization = `Bearer ${this.token}`;
       }
@@ -24,8 +24,8 @@ class ApiClient {
 
     // Handle auth errors
     this.client.interceptors.response.use(
-      (response) => response,
-      (error) => {
+      (response: AxiosResponse) => response,
+      (error: AxiosError) => {
         if (error.response?.status === 401) {
           this.clearToken();
           toast.error('Session expired. Please login again.');

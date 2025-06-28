@@ -138,7 +138,7 @@ export function AddPositionModal({ trigger, children }: AddPositionModalProps) {
         )}
       </DialogTrigger>
 
-      <DialogContent className="sm:max-w-md bg-slate-800 border-slate-700 text-white">
+      <DialogContent className="sm:max-w-md bg-slate-800 border-slate-700 text-white max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-purple-400" />

@@ -2,7 +2,7 @@
 // ✅ HELPER PARA AUTENTICAÇÃO - RESOLVE TODOS OS IMPORTS
 
 import { getServerSession } from 'next-auth'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth-config'
 
 // Função helper para obter sessão do servidor
 export const getAuthSession = () => getServerSession(authOptions)

@@ -140,7 +140,7 @@ export function CreateAlertModal({ trigger, children }: CreateAlertModalProps) {
         )}
       </DialogTrigger>
       
-      <DialogContent className="sm:max-w-lg bg-slate-800 border-slate-700 text-white">
+      <DialogContent className="sm:max-w-lg bg-slate-800 border-slate-700 text-white max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Bell className="h-5 w-5 text-yellow-400" />

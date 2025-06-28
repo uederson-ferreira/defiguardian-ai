@@ -1,0 +1,235 @@
+import { type NextAuthOptions } from 'next-auth'
+import GoogleProvider from 'next-auth/providers/google'
+import GitHubProvider from 'next-auth/providers/github'
+import CredentialsProvider from 'next-auth/providers/credentials'
+import { createClient } from '@supabase/supabase-js'
+import bcrypt from 'bcryptjs'
+
+// Supabase client
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
+export const authOptions: NextAuthOptions = {
+  providers: [
+    // 1. Google OAuth
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+    
+    // 2. GitHub OAuth  
+    GitHubProvider({
+      clientId: process.env.GITHUB_CLIENT_ID!,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+    }),
+
+    // 3. ✅ Credentials COMPLETO (Cadastro + Login)
+    CredentialsProvider({
+      name: 'credentials',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Senha', type: 'password' },
+        action: { label: 'Action', type: 'text' },
+        name: { label: 'Nome', type: 'text' }
+      },
+      async authorize(credentials) {
+        console.log('🔑 Processando credenciais:', { 
+          email: credentials?.email, 
+          action: credentials?.action 
+        })
+
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Email e senha são obrigatórios')
+        }
+
+        const { email, password, action, name } = credentials
+
+        try {
+          if (action === 'signup') {
+            // ===== CADASTRO =====
+            console.log('📝 Criando novo usuário...')
+            
+            if (!name?.trim()) {
+              throw new Error('Nome é obrigatório para cadastro')
+            }
+
+            // Verificar se usuário já existe
+            const { data: existingUser } = await supabase
+              .from('users')
+              .select('id, email')
+              .eq('email', email)
+              .single()
+
+            if (existingUser) {
+              throw new Error('Email já cadastrado')
+            }
+
+            // Hash da senha
+            const hashedPassword = await bcrypt.hash(password, 12)
+
+            // Criar usuário
+            const { data: newUser, error: userError } = await supabase
+              .from('users')
+              .insert({
+                email,
+                name,
+                provider: 'credentials',
+                provider_id: email,
+              })
+              .select()
+              .single()
+
+            if (userError) {
+              console.error('❌ Erro ao criar usuário:', userError)
+              throw new Error('Erro ao criar usuário: ' + userError.message)
+            }
+
+            // Salvar senha na tabela separada
+            const { error: passwordError } = await supabase
+              .from('user_passwords')
+              .insert({
+                user_id: newUser.id,
+                password_hash: hashedPassword,
+              })
+
+            if (passwordError) {
+              console.error('❌ Erro ao salvar senha:', passwordError)
+              // Remover usuário se der erro na senha
+              await supabase
+                .from('users')
+                .delete()
+                .eq('id', newUser.id)
+              
+              throw new Error('Erro ao salvar senha')
+            }
+
+            console.log('✅ Usuário criado com sucesso:', newUser.email)
+
+            return {
+              id: newUser.id.toString(),
+              email: newUser.email,
+              name: newUser.name,
+              image: newUser.image,
+            }
+
+          } else {
+            // ===== LOGIN =====
+            console.log('🔓 Fazendo login via email...')
+            
+            // Buscar usuário
+            const { data: user, error: userError } = await supabase
+              .from('users')
+              .select('*')
+              .eq('email', email)
+              .eq('provider', 'credentials')
+              .single()
+
+            if (userError || !user) {
+              console.error('❌ Usuário não encontrado:', userError)
+              throw new Error('Email não encontrado. Verifique o email ou crie uma conta.')
+            }
+
+            // Buscar senha
+            const { data: passwordData, error: passwordError } = await supabase
+              .from('user_passwords')
+              .select('password_hash')
+              .eq('user_id', user.id)
+              .single()
+
+            if (passwordError || !passwordData) {
+              console.error('❌ Senha não encontrada:', passwordError)
+              throw new Error('Dados de login inválidos')
+            }
+
+            // Verificar senha
+            const isValidPassword = await bcrypt.compare(password, passwordData.password_hash)
+            if (!isValidPassword) {
+              console.error('❌ Senha incorreta')
+              throw new Error('Senha incorreta')
+            }
+
+            console.log('✅ Login realizado com sucesso:', user.email)
+
+            return {
+              id: user.id.toString(),
+              email: user.email,
+              name: user.name,
+              image: user.image,
+            }
+          }
+        } catch (error) {
+          console.error('❌ Erro na autenticação:', error)
+          throw error
+        }
+      }
+    })
+  ],
+
+  callbacks: {
+    async signIn({ user, account, profile }) {
+      try {
+        if (account?.provider === 'google' || account?.provider === 'github') {
+          // Verificar se usuário já existe
+          const { data: existingUser } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', user.email!)
+            .single()
+
+          if (!existingUser) {
+            // Criar novo usuário OAuth
+            const { error } = await supabase
+              .from('users')
+              .insert({
+                email: user.email!,
+                name: user.name || '',
+                avatar_url: user.image || '',
+                provider: account.provider,
+                provider_id: account.providerAccountId,
+                created_at: new Date().toISOString()
+              })
+
+            if (error) {
+              console.error('❌ Error creating OAuth user:', error)
+              return false
+            }
+          }
+        }
+        return true
+      } catch (error) {
+        console.error('❌ SignIn callback error:', error)
+        return false
+      }
+    },
+
+    async jwt({ token, user, account }) {
+      if (user) {
+        token.id = user.id
+      }
+      return token
+    },
+
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = token.id as string
+      }
+      return session
+    }
+  },
+
+  pages: {
+    signIn: '/auth/signin',
+    error: '/auth/error'
+  },
+
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+
+  secret: process.env.NEXTAUTH_SECRET,
+
+  debug: process.env.NODE_ENV === 'development'
+}
