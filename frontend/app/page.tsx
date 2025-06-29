@@ -2,7 +2,6 @@
 "use client";
 
 import { useState } from "react";
-import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,9 +23,10 @@ import {
   Users,
 } from "lucide-react";
 import { AIChat } from "@/components/ai-chat";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function HomePage() {
-  const { status } = useSession();
+  const { isAuthenticated, loading } = useAuth();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -40,14 +40,14 @@ export default function HomePage() {
 
   const handleStartSystem = () => {
     setIsLoading(true);
-    if (status === "authenticated") {
+    if (isAuthenticated) {
       router.push("/dashboard");
     } else {
       router.push("/login");
     }
   };
 
-  if (status === "loading") {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="flex items-center space-x-2">
@@ -195,8 +195,8 @@ export default function HomePage() {
                 Portfolio Analysis
               </CardTitle>
               <CardDescription className="text-gray-300 text-base">
-                Monitor your DeFi investments in real-time with advanced
-                metrics and AI insights
+                Monitor your DeFi investments in real-time with advanced metrics
+                and AI insights
               </CardDescription>
             </CardHeader>
           </Card>
@@ -206,9 +206,7 @@ export default function HomePage() {
               <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                 <AlertTriangle className="h-8 w-8 text-white" />
               </div>
-              <CardTitle className="text-white text-xl">
-                Smart Alerts
-              </CardTitle>
+              <CardTitle className="text-white text-xl">Smart Alerts</CardTitle>
               <CardDescription className="text-gray-300 text-base">
                 Receive instant notifications about risks, opportunities and
                 market changes
@@ -288,8 +286,8 @@ export default function HomePage() {
             Ready to Protect your DeFi?
           </h2>
           <p className="text-xl text-gray-300">
-            Join hundreds of investors who already protect their assets with
-            our AI
+            Join hundreds of investors who already protect their assets with our
+            AI
           </p>
           <Button
             onClick={handleStartSystem}
@@ -320,8 +318,7 @@ export default function HomePage() {
             </div>
             <div className="text-gray-400 text-center">
               <p>
-                &copy; 2025 DefiGuardian AI. Developed for Chromion
-                Hackathon.
+                &copy; 2025 DefiGuardian AI. Developed for Chromion Hackathon.
               </p>
               <p className="text-sm mt-1">
                 Protecting the future of decentralized finance

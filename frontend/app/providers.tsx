@@ -6,14 +6,13 @@
 
 "use client";
 
-import { SessionProvider } from "next-auth/react";
 import { WagmiProvider } from "wagmi";
 import { RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode, useMemo } from "react";
 import { getWagmiConfig } from "@/lib/web3-config";
 import { Toaster } from "sonner";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider } from "@/lib/auth/supabase-auth";
 
 import "@rainbow-me/rainbowkit/styles.css";
 
@@ -39,20 +38,18 @@ export function Providers({ children }: ProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SessionProvider>
+      <AuthProvider>
         <WagmiProvider config={getWagmiConfig()}>
           <RainbowKitProvider
             showRecentTransactions={true}
             coolMode={false}
             modalSize="compact"
           >
-            <AuthProvider>
-              {children}
-              <Toaster position="top-right" richColors closeButton />
-            </AuthProvider>
+            {children}
+            <Toaster position="top-right" richColors closeButton />
           </RainbowKitProvider>
         </WagmiProvider>
-      </SessionProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

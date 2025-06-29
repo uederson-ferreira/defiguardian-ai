@@ -4,123 +4,156 @@
  * DESCRIPTION: Simple login with email and social (Google/GitHub)
  */
 
-'use client'
+"use client";
 
-import { signIn, useSession } from 'next-auth/react'
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Chrome, Github, Loader2, Lock, UserPlus, AlertTriangle, ArrowLeft, Zap } from 'lucide-react'
-import { toast } from 'sonner'
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Chrome,
+  Github,
+  Loader2,
+  Lock,
+  UserPlus,
+  AlertTriangle,
+  ArrowLeft,
+  Zap,
+} from "lucide-react";
+import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
-  const { status } = useSession()
-  const router = useRouter()
-  
-  const [isLoading, setIsLoading] = useState(false)
-  const [mode, setMode] = useState<'login' | 'register'>('login')
-  const [error, setError] = useState<string | null>(null)
-  
+  const {
+    isAuthenticated,
+    loading,
+    loginWithOAuth,
+    loginWithEmail,
+    signUpWithEmail,
+  } = useAuth();
+  const router = useRouter();
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [mode, setMode] = useState<"login" | "register">("login");
+  const [error, setError] = useState<string | null>(null);
+
   // Form states
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [name, setName] = useState('')
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
 
   // Se já está logado, vai para o dashboard
   useEffect(() => {
-    if (status === 'authenticated') {
-      router.push('/dashboard')
+    if (isAuthenticated && !loading) {
+      router.push("/dashboard");
     }
-  }, [status, router])
+  }, [isAuthenticated, loading, router]);
 
-  const handleSocialLogin = async (provider: 'google' | 'github') => {
+  const handleSocialLogin = async (provider: "google" | "github") => {
     try {
-      setIsLoading(true)
-      setError(null)
-      
-      const result = await signIn(provider, {
-        callbackUrl: '/dashboard',
-        redirect: false,
-      })
+      setIsLoading(true);
+      setError(null);
 
-      if (result?.error) {
-        setError(`Login error: ${result.error}`)
-      } else if (result?.ok) {
-        toast.success('Login successful!')
-        router.push('/dashboard')
+      const success = await loginWithOAuth(provider);
+
+      if (!success) {
+        setError(`Erro no login com ${provider}`);
+      } else {
+        toast.success("Login realizado com sucesso!");
+        router.push("/dashboard");
       }
     } catch (error) {
-      setError('Unexpected login error')
-      console.error('Social login error:', error)
+      setError("Unexpected login error");
+      console.error("Social login error:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleEmailAuth = async () => {
     try {
-      setIsLoading(true)
-      setError(null)
+      setIsLoading(true);
+      setError(null);
 
       if (!email.trim() || !password.trim()) {
-        setError('Email and password are required')
-        return
+        setError("Email e senha são obrigatórios");
+        return;
       }
 
-      if (mode === 'register' && !name.trim()) {
-        setError('Name is required for registration')
-        return
+      if (mode === "register" && !name.trim()) {
+        setError("Nome é obrigatório para registro");
+        return;
       }
 
-      const result = await signIn('credentials', {
-        email: email.trim(),
-        password: password.trim(),
-        action: mode,
-        name: mode === 'register' ? name.trim() : undefined,
-        redirect: false,
-      })
-
-      if (result?.error) {
-        if (result.error.includes('CredentialsSignin')) {
-          setError('Incorrect email or password')
-        } else {
-          setError(result.error)
+      // Validação adicional para registro
+      if (mode === "register") {
+        if (password.length < 6) {
+          setError("A senha deve ter pelo menos 6 caracteres");
+          return;
         }
-      } else if (result?.ok) {
-        toast.success(mode === 'login' ? 'Login successful!' : 'Account created successfully!')
-        router.push('/dashboard')
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          setError("Por favor, insira um email válido");
+          return;
+        }
+      }
+
+      let success = false;
+      let errorMessage = "";
+
+      if (mode === "register") {
+        const result = await signUpWithEmail(
+          email.trim(),
+          password.trim(),
+          name.trim()
+        );
+        success = result.success;
+        errorMessage = result.error || "Erro ao criar conta";
+      } else {
+        const result = await loginWithEmail(email.trim(), password.trim());
+        success = result.success;
+        errorMessage = result.error || "Email ou senha incorretos";
+      }
+
+      if (!success) {
+        setError(errorMessage);
+      } else {
+        toast.success(
+          mode === "login"
+            ? "Login realizado com sucesso!"
+            : "Conta criada com sucesso!"
+        );
+        router.push("/dashboard");
       }
     } catch (error) {
-      setError('Unexpected authentication error')
-      console.error('Email login error:', error)
+      setError("Erro inesperado na autenticação");
+      console.error("Email login error:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
-  if (status === 'loading') {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <Loader2 className="h-8 w-8 animate-spin text-purple-400" />
       </div>
-    )
+    );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
       {/* Botão de voltar para home */}
       <Button
-        onClick={() => router.push('/')}
+        onClick={() => router.push("/")}
         variant="ghost"
         className="absolute top-6 left-6 text-white hover:bg-white/10 p-2"
       >
         <ArrowLeft className="h-5 w-5 mr-2" />
         Back
       </Button>
-      
+
       <Card className="w-full max-w-md bg-slate-800/50 border-slate-700 backdrop-blur-xl">
         <CardHeader className="text-center space-y-2">
           <div className="flex justify-center">
@@ -132,7 +165,9 @@ export default function LoginPage() {
             DefiGuardian AI
           </CardTitle>
           <p className="text-slate-400">
-            {mode === 'login' ? 'Sign in to your account' : 'Create your account'}
+            {mode === "login"
+              ? "Sign in to your account"
+              : "Create your account"}
           </p>
         </CardHeader>
 
@@ -150,24 +185,24 @@ export default function LoginPage() {
           {/* Mode Toggle */}
           <div className="flex bg-slate-700/50 rounded-lg p-1">
             <Button
-              onClick={() => setMode('login')}
-              variant={mode === 'login' ? 'default' : 'ghost'}
+              onClick={() => setMode("login")}
+              variant={mode === "login" ? "default" : "ghost"}
               className={`flex-1 h-10 ${
-                mode === 'login' 
-                  ? 'bg-purple-600 hover:bg-purple-700 text-white' 
-                  : 'text-slate-300 hover:text-white hover:bg-white/10'
+                mode === "login"
+                  ? "bg-purple-600 hover:bg-purple-700 text-white"
+                  : "text-slate-300 hover:text-white hover:bg-white/10"
               }`}
             >
               <Lock className="mr-2 h-4 w-4" />
               Sign In
             </Button>
             <Button
-              onClick={() => setMode('register')}
-              variant={mode === 'register' ? 'default' : 'ghost'}
+              onClick={() => setMode("register")}
+              variant={mode === "register" ? "default" : "ghost"}
               className={`flex-1 h-10 ${
-                mode === 'register' 
-                  ? 'bg-purple-600 hover:bg-purple-700 text-white' 
-                  : 'text-slate-300 hover:text-white hover:bg-white/10'
+                mode === "register"
+                  ? "bg-purple-600 hover:bg-purple-700 text-white"
+                  : "text-slate-300 hover:text-white hover:bg-white/10"
               }`}
             >
               <UserPlus className="mr-2 h-4 w-4" />
@@ -177,7 +212,7 @@ export default function LoginPage() {
 
           {/* Email Form */}
           <div className="space-y-4">
-            {mode === 'register' && (
+            {mode === "register" && (
               <Input
                 type="text"
                 placeholder="Full name"
@@ -187,7 +222,7 @@ export default function LoginPage() {
                 disabled={isLoading}
               />
             )}
-            
+
             <Input
               type="email"
               placeholder="Email"
@@ -196,17 +231,35 @@ export default function LoginPage() {
               className="h-12 bg-white/10 border-white/20 text-white placeholder:text-slate-400"
               disabled={isLoading}
             />
-            
-            <Input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="h-12 bg-white/10 border-white/20 text-white placeholder:text-slate-400"
-              disabled={isLoading}
-            />
-            
-            <Button 
+
+            <div className="space-y-2">
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-12 bg-white/10 border-white/20 text-white placeholder:text-slate-400"
+                disabled={isLoading}
+              />
+              {mode === "register" && password && (
+                <div className="text-xs space-y-1">
+                  <div
+                    className={`flex items-center space-x-2 ${
+                      password.length >= 6 ? "text-green-400" : "text-red-400"
+                    }`}
+                  >
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        password.length >= 6 ? "bg-green-400" : "bg-red-400"
+                      }`}
+                    />
+                    <span>Pelo menos 6 caracteres</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Button
               onClick={handleEmailAuth}
               disabled={isLoading}
               className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold"
@@ -214,10 +267,12 @@ export default function LoginPage() {
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {mode === 'login' ? 'Signing in...' : 'Creating account...'}
+                  {mode === "login" ? "Signing in..." : "Creating account..."}
                 </>
+              ) : mode === "login" ? (
+                "Sign In"
               ) : (
-                mode === 'login' ? 'Sign In' : 'Create Account'
+                "Create Account"
               )}
             </Button>
           </div>
@@ -228,14 +283,16 @@ export default function LoginPage() {
               <span className="w-full border-t border-slate-600" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-slate-800 px-2 text-slate-400">or continue with</span>
+              <span className="bg-slate-800 px-2 text-slate-400">
+                or continue with
+              </span>
             </div>
           </div>
 
           {/* Social Login */}
           <div className="space-y-3">
             <Button
-              onClick={() => handleSocialLogin('google')}
+              onClick={() => handleSocialLogin("google")}
               disabled={isLoading}
               variant="outline"
               className="w-full h-12 bg-white/10 border-white/20 text-white hover:bg-white/20"
@@ -245,7 +302,7 @@ export default function LoginPage() {
             </Button>
 
             <Button
-              onClick={() => handleSocialLogin('github')}
+              onClick={() => handleSocialLogin("github")}
               disabled={isLoading}
               variant="outline"
               className="w-full h-12 bg-white/10 border-white/20 text-white hover:bg-white/20"
@@ -257,5 +314,5 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

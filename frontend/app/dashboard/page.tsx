@@ -6,7 +6,6 @@
 
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
@@ -23,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "@/hooks/useAuth";
 import {
   LogOut,
   Shield,
@@ -41,7 +41,7 @@ import {
 } from "lucide-react";
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession();
+  const { user, isAuthenticated, loading, logout } = useAuth();
   const router = useRouter();
   const { address, isConnected } = useAccount(); // RainbowKit hook
   const [mounted, setMounted] = useState(false);
@@ -61,17 +61,18 @@ export default function DashboardPage() {
 
   // Redirect se não autenticado
   useEffect(() => {
-    if (mounted && status === "unauthenticated") {
+    if (mounted && !loading && !isAuthenticated) {
       router.push("/login");
     }
-  }, [mounted, status, router]);
+  }, [mounted, loading, isAuthenticated, router]);
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/login" });
+    await logout();
+    router.push("/login");
   };
 
   // Loading states
-  if (!mounted || status === "loading") {
+  if (!mounted || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-white text-center">
@@ -82,7 +83,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (status === "unauthenticated") {
+  if (!isAuthenticated) {
     return null; // Vai redirecionar
   }
 
@@ -143,16 +144,18 @@ export default function DashboardPage() {
             {/* User Info */}
             <div className="flex items-center gap-3">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={session?.user?.image || ""} />
+                <AvatarImage src={user?.user_metadata?.avatar_url || ""} />
                 <AvatarFallback className="bg-purple-600 text-white">
-                  {session?.user?.name?.charAt(0) || "U"}
+                  {user?.user_metadata?.full_name?.charAt(0) ||
+                    user?.email?.charAt(0) ||
+                    "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="hidden md:block">
                 <p className="text-sm font-medium text-white">
-                  {session?.user?.name}
+                  {user?.user_metadata?.full_name || user?.email}
                 </p>
-                <p className="text-xs text-slate-400">{session?.user?.email}</p>
+                <p className="text-xs text-slate-400">{user?.email}</p>
               </div>
             </div>
 
@@ -175,7 +178,10 @@ export default function DashboardPage() {
         {/* Welcome */}
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold text-white">
-            Welcome, {session?.user?.name?.split(" ")[0]}! 👋
+            Welcome,{" "}
+            {user?.user_metadata?.full_name?.split(" ")[0] ||
+              user?.email?.split("@")[0]}
+            ! 👋
           </h1>
           <p className="text-slate-400 text-lg">
             Manage your DeFi investments safely with artificial intelligence
@@ -188,8 +194,7 @@ export default function DashboardPage() {
           <Alert className="border-green-500/50 bg-green-500/10">
             <CheckCircle className="h-4 w-4 text-green-400" />
             <AlertDescription className="text-green-400">
-              ✅ System operational. Connect your wallet to start risk
-              analysis.
+              ✅ System operational. Connect your wallet to start risk analysis.
             </AlertDescription>
           </Alert>
 
@@ -242,9 +247,7 @@ export default function DashboardPage() {
 
                 <div className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg">
                   <div className="space-y-1">
-                    <p className="text-sm text-slate-400">
-                      Connected address:
-                    </p>
+                    <p className="text-sm text-slate-400">Connected address:</p>
                     <p className="text-white font-mono">
                       {address?.slice(0, 6)}...{address?.slice(-4)}
                     </p>
@@ -330,9 +333,7 @@ export default function DashboardPage() {
                       portfolioData.alertsCount
                     )}
                   </p>
-                  <p className="text-xs text-slate-400 mt-1">
-                    24/7 Monitoring
-                  </p>
+                  <p className="text-xs text-slate-400 mt-1">24/7 Monitoring</p>
                 </div>
                 <AlertTriangle className="h-8 w-8 text-yellow-400" />
               </div>
@@ -358,9 +359,7 @@ export default function DashboardPage() {
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-400">
-                    Diversification score:
-                  </span>
+                  <span className="text-slate-400">Diversification score:</span>
                   <span className="text-white font-medium">
                     {Math.round(portfolioData.diversificationScore * 100) / 100}
                     /100
@@ -406,9 +405,7 @@ export default function DashboardPage() {
                     <div className="flex items-center gap-3 p-3 bg-slate-700/30 rounded-lg">
                       <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                       <div className="flex-1">
-                        <p className="text-sm text-white">
-                          Portfolio analyzed
-                        </p>
+                        <p className="text-sm text-white">Portfolio analyzed</p>
                         <p className="text-xs text-slate-400">
                           A few minutes ago
                         </p>
@@ -534,7 +531,9 @@ export default function DashboardPage() {
                       <p className="text-sm text-slate-400">
                         {isConnected &&
                         (portfolioData.alertsCount > 0 || alertsConfigured)
-                          ? `✅ ${portfolioData.alertsCount || 0} active alert(s)`
+                          ? `✅ ${
+                              portfolioData.alertsCount || 0
+                            } active alert(s)`
                           : "Create intelligent risk alerts"}
                       </p>
                     </div>
