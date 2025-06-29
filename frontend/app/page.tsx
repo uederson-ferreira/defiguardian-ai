@@ -99,7 +99,7 @@ export default function HomePage() {
             <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-full">
               <Zap className="h-4 w-4 text-purple-400 mr-2" />
               <span className="text-purple-300 text-sm font-medium">
-                Powered by Chromia Blockchain
+                Powered by Avalanche Blockchain
               </span>
             </div>
 
@@ -249,7 +249,7 @@ export default function HomePage() {
                 <Globe className="h-6 w-6 text-white" />
               </div>
               <h3 className="text-white font-bold text-lg">
-                Chromia Blockchain
+                Avalanche Blockchain
               </h3>
               <p className="text-gray-300">
                 Decentralized storage of historical risk data
