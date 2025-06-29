@@ -215,28 +215,23 @@ export function useWeb3Contracts() {
 
         console.log(`🔍 Analyzing portfolio for: ${address}`);
 
-        const [riskScore, analysis] =
-          await state.contracts.portfolioAnalyzer.analyzePortfolio(address);
-        const positions = await state.contracts.portfolioAnalyzer.getPositions(
-          address
-        );
-        const totalValue =
-          await state.contracts.portfolioAnalyzer.getTotalValue(address);
-        const [assets, percentages] =
-          await state.contracts.portfolioAnalyzer.getAssetAllocation(address);
+        // Get portfolio analysis data
+        const analysis = await state.contracts.portfolioAnalyzer.getPortfolioAnalysis(address);
+        const positions = await state.contracts.portfolioAnalyzer.getUserPositions(address);
+        const riskScore = await state.contracts.portfolioAnalyzer.calculatePortfolioRisk(address);
 
         return {
           riskScore: Number(riskScore) / 100, // Convert to percentage
-          analysis,
-          positions: positions.map((pos: { protocol: string; token: string; amount: bigint }) => ({
+          analysis: `Risk Score: ${Number(riskScore) / 100}%, Diversification: ${Number(analysis.diversificationScore) / 100}%`,
+          positions: positions.map((pos: { protocol: string; token: string; amount: bigint; value: bigint }) => ({
             protocol: pos.protocol,
             token: pos.token,
             amount: ethers.formatEther(pos.amount),
           })),
-          totalValue: ethers.formatEther(totalValue),
+          totalValue: ethers.formatEther(analysis.totalValue),
           assetAllocation: {
-            assets,
-            percentages: percentages.map((p: bigint) => Number(p)),
+            assets: positions.map((pos: { protocol: string }) => pos.protocol),
+            percentages: positions.map((pos: { value: bigint }) => Number(pos.value)),
           },
         };
       } catch (err: unknown) {
@@ -362,6 +357,25 @@ export function useWeb3Contracts() {
     },
     [state.contracts.riskInsurance, state.account]
   );
+
+  // Auto-initialize Web3 when component mounts
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.ethereum) {
+      // Check if wallet is already connected
+      window.ethereum.request({ method: 'eth_accounts' })
+        .then((accounts: unknown) => {
+          if (Array.isArray(accounts) && accounts.every(acc => typeof acc === 'string')) {
+            if (accounts.length > 0) {
+              // Wallet is connected, initialize Web3
+              initializeWeb3();
+            }
+          }
+        })
+        .catch((error: unknown) => {
+          console.log('No wallet connected:', error);
+        });
+    }
+  }, [initializeWeb3]);
 
   // Listen for account and network changes
   useEffect(() => {

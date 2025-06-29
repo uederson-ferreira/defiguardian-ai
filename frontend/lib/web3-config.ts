@@ -49,9 +49,14 @@ export const MOCK_PROTOCOLS = {
 // Contract ABIs (simplified for key functions)
 export const CONTRACT_ABIS = {
   PORTFOLIO_ANALYZER: [
-    'function analyzePortfolio(address user) view returns (uint256 riskScore, string memory analysis)',
-    'function getUserPositions(address user) view returns (address[] memory protocols, uint256[] memory amounts)',
-    'function getTotalValue(address user) view returns (uint256 totalValue)'
+    "function calculatePortfolioRisk(address _user) view returns (uint256)",
+    "function getPortfolioAnalysis(address _user) view returns (tuple(uint256 totalValue, uint256 overallRisk, uint256 diversificationScore, uint256 timestamp, bool isValid))",
+    "function getUserPositions(address _user) view returns (tuple(address protocol, address token, uint256 amount, uint256 value)[])",
+    "function owner() view returns (address)",
+    "function contractRegistry() view returns (address)",
+    "function addPosition(address _protocol, address _token, uint256 _amount)",
+    "function removePosition(uint256 _positionId)",
+    "function setPriceFeed(address _token, address _priceFeed)",
   ],
   RISK_ORACLE: [
     'function getProtocolRisk(address protocol) view returns (uint256 riskScore)',
