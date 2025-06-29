@@ -8,14 +8,39 @@ const nextConfig = {
   // Configurações para Vercel
   output: 'standalone',
   
-  // Otimizações
-  swcMinify: true,
-  compress: true,
+  // Otimizações (desabilitando minificação temporariamente para resolver problema do worker)
+  swcMinify: false,
+  compress: false,
   
-  // Configurações experimentais
+  // Configurações expericlearmentais
   experimental: {
-    appDir: true,
     serverComponentsExternalPackages: ['@supabase/supabase-js'],
+  },
+
+  // Transpile packages que podem causar problemas
+  transpilePackages: ['@walletconnect/heartbeat'],
+
+  // Configuração do Webpack para resolver problemas com workers
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
+    
+    // Configuração para ignorar workers problemáticos no Terser
+    if (config.optimization && config.optimization.minimizer) {
+      config.optimization.minimizer.forEach((minimizer) => {
+        if (minimizer.constructor.name === 'TerserPlugin') {
+          minimizer.options.exclude = /HeartbeatWorker/;
+        }
+      });
+    }
+
+    return config;
   },
   
   // Headers de segurança

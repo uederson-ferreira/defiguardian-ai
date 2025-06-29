@@ -1,12 +1,21 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import dynamicImport from "next/dynamic"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Search, TrendingUp, TrendingDown, MoreHorizontal, PieChart } from "lucide-react"
-import { DashboardLayout } from "@/components/dashboard-layout"
+import { Search, Plus, TrendingUp, TrendingDown, MoreHorizontal, PieChart } from "lucide-react"
+
+// Força renderização dinâmica
+export const dynamic = 'force-dynamic'
+
+// Importa DashboardLayout dinamicamente apenas no cliente
+const DashboardLayout = dynamicImport(
+  () => import("@/components/dashboard-layout").then(mod => ({ default: mod.DashboardLayout })),
+  { ssr: false }
+)
 import { RiskIndicator } from "@/components/risk-indicator"
 import Link from "next/link"
 
